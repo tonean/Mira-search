@@ -84,9 +84,13 @@ function TypingGreeting() {
 export default function MainContent() {
   const [showGlow, setShowGlow] = useState(false);
   const [fadeGlow, setFadeGlow] = useState(false);
+  const [inputValue, setInputValue] = useState("");
   const typingTimeout = useRef();
   const fadeTimeout = useRef();
-  const handleInput = () => {
+  
+  const handleInput = (e) => {
+    const value = e.target.value;
+    setInputValue(value);
     setShowGlow(true);
     setFadeGlow(false);
     if (typingTimeout.current) clearTimeout(typingTimeout.current);
@@ -108,7 +112,8 @@ export default function MainContent() {
           <div className="input-box">
             <input
               type="text"
-              placeholder="Assign a task or ask anything"
+              placeholder="Search personalized for you..."
+              value={inputValue}
               style={{
                 border: "none",
                 outline: "none",
@@ -130,9 +135,23 @@ export default function MainContent() {
                 </svg>
               </button>
               <div style={{ flex: 1 }} />
-              <button className="input-action-btn" title="Go">
+              <button 
+                className={`input-action-btn ${inputValue.trim() ? 'input-action-btn-active' : ''}`} 
+                title="Go"
+                style={{
+                  backgroundColor: inputValue.trim() ? '#000' : '#fff',
+                  borderColor: inputValue.trim() ? '#000' : '#e0e0e0',
+                  transition: 'all 0.2s ease'
+                }}
+              >
                 <svg width="18" height="18" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
-                  <path d="M5 13l5-5 5 5" stroke="#888" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                  <path 
+                    d="M5 13l5-5 5 5" 
+                    stroke={inputValue.trim() ? '#fff' : '#888'} 
+                    strokeWidth="2" 
+                    strokeLinecap="round" 
+                    strokeLinejoin="round"
+                  />
                 </svg>
               </button>
             </div>
