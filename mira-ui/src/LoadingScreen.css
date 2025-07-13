@@ -1,0 +1,202 @@
+.loading-screen {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: #fafaf8;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.loading-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 48px;
+  max-width: 600px;
+  text-align: center;
+}
+
+/* Mira text styling */
+.mira-text {
+  font-family: 'Georgia', serif;
+  font-size: 3.5rem;
+  font-weight: 500;
+  color: #222;
+  opacity: 0;
+  transform: translateY(20px);
+  transition: all 0.8s ease;
+}
+
+.mira-text.fade-in {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* Subtitle container */
+.subtitle-container {
+  position: relative;
+  opacity: 0;
+  transform: translateY(20px);
+  transition: all 0.8s ease;
+}
+
+.subtitle-container.fade-in {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.subtitle-container.blur-in {
+  filter: blur(0px);
+  animation: blurFadeIn 1.2s ease forwards;
+}
+
+.subtitle-text {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  font-size: 2.5rem;
+  font-weight: 300;
+  color: #222;
+  line-height: 1.2;
+  letter-spacing: -0.02em;
+}
+
+/* Gradient text effect */
+.gradient-text {
+  color: #222;
+  transition: all 0.8s ease;
+}
+
+.gradient-text.active {
+  background: linear-gradient(45deg, #ff6b35, #f7931e, #4ecdc4, #45b7d1, #96ceb4, #feca57, #ff9ff3, #54a0ff);
+  background-size: 200% 100%;
+  background-clip: text;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: gradientWave 2s ease-in-out;
+  animation-delay: 0.3s;
+}
+
+.gradient-text.active.paused {
+  animation-play-state: paused;
+  background: none;
+  -webkit-text-fill-color: #222;
+  color: #222;
+  transition: all 0.8s ease;
+}
+
+/* When not paused, ensure animation runs */
+.gradient-text.active:not(.paused) {
+  animation: gradientWave 2s ease-in-out;
+  animation-delay: 0s;
+}
+
+@keyframes gradientWave {
+  0% {
+    background-position: -200% 0;
+  }
+  50% {
+    background-position: 0% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+@keyframes blurFadeIn {
+  0% {
+    filter: blur(8px);
+  }
+  100% {
+    filter: blur(0px);
+  }
+}
+
+/* CTA Container */
+.cta-container {
+  opacity: 0;
+  transform: translateY(20px);
+  transition: all 0.8s ease;
+}
+
+.cta-container.fade-in {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* CTA Pill */
+.cta-pill {
+  display: flex;
+  align-items: center;
+  background: #fff;
+  border-radius: 50px;
+  padding: 4px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+  border: 1px solid #e0e0e0;
+  overflow: hidden;
+}
+
+.demo-text {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  font-size: 0.95rem;
+  color: #666;
+  padding: 12px 20px;
+  font-weight: 400;
+}
+
+.open-mira-btn {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  background: #000;
+  color: #fff;
+  border: none;
+  border-radius: 50px;
+  padding: 12px 24px;
+  font-size: 0.95rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.open-mira-btn:hover {
+  background: #111;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.open-mira-btn:active {
+  transform: translateY(0);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+  .loading-content {
+    gap: 32px;
+    padding: 0 24px;
+  }
+  
+  .mira-text {
+    font-size: 2.8rem;
+  }
+  
+  .subtitle-text {
+    font-size: 2rem;
+  }
+  
+  .cta-pill {
+    flex-direction: column;
+    border-radius: 16px;
+  }
+  
+  .demo-text {
+    padding: 8px 16px;
+  }
+  
+  .open-mira-btn {
+    width: 100%;
+    border-radius: 12px;
+  }
+} 

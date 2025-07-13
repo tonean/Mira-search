@@ -16,7 +16,7 @@ const greetings = [
   "Привет,",  // Russian
 ];
 
-function TypingGreeting() {
+function TypingGreeting({ shouldAnimate = true }) {
   const [display, setDisplay] = useState("");
   const [greetIdx, setGreetIdx] = useState(0);
   const [charIdx, setCharIdx] = useState(0);
@@ -27,6 +27,24 @@ function TypingGreeting() {
   const timeoutRef = useRef();
 
   useEffect(() => {
+    if (!shouldAnimate) {
+      setDisplay("Hello,");
+      setStopped(true);
+      return;
+    }
+    
+    // If animation was stopped and shouldAnimate becomes true, restart immediately
+    if (stopped && shouldAnimate) {
+      setStopped(false);
+      setGreetIdx(0);
+      setCharIdx(5); // Start with "Hello," fully typed
+      setDeleting(true); // Start in deleting mode
+      setPause(false);
+      setCycleCount(0);
+      setDisplay("Hello,");
+      return;
+    }
+    
     if (stopped) {
       // After 15 seconds, restart animation
       timeoutRef.current = setTimeout(() => {
@@ -71,7 +89,7 @@ function TypingGreeting() {
       }, 500);
     }
     return () => clearTimeout(timeoutRef.current);
-  }, [charIdx, deleting, greetIdx, pause, stopped, cycleCount]);
+  }, [charIdx, deleting, greetIdx, pause, stopped, cycleCount, shouldAnimate]);
 
   return (
     <span>
@@ -81,18 +99,113 @@ function TypingGreeting() {
   );
 }
 
+// Model Dropdown Component
+function ModelDropdown({ isOpen, onToggle }) {
+  return (
+    <div className="model-dropdown-container">
+      <button 
+        className="model-selector-btn" 
+        onClick={onToggle}
+        style={{
+          display: 'flex',
+          alignItems: 'center',
+          gap: '6px',
+          background: 'transparent',
+          border: 'none',
+          cursor: 'pointer',
+          fontSize: '0.9rem',
+          color: '#666',
+          padding: '4px 8px',
+          borderRadius: '6px',
+          transition: 'background-color 0.2s ease'
+        }}
+        onMouseEnter={(e) => e.target.style.backgroundColor = '#f5f5f5'}
+        onMouseLeave={(e) => e.target.style.backgroundColor = 'transparent'}
+      >
+        <span>Gemini 1.5 Pro</span>
+        <svg 
+          width="12" 
+          height="12" 
+          viewBox="0 0 20 20" 
+          fill="none" 
+          xmlns="http://www.w3.org/2000/svg"
+          style={{
+            transform: isOpen ? 'rotate(180deg)' : 'rotate(0deg)',
+            transition: 'transform 0.2s ease'
+          }}
+        >
+          <path 
+            d="M5 7l5 5 5-5" 
+            stroke="#666" 
+            strokeWidth="2" 
+            strokeLinecap="round" 
+            strokeLinejoin="round"
+          />
+        </svg>
+      </button>
+      
+      {isOpen && (
+        <div className="model-dropdown-menu">
+          <div className="model-option selected">
+            <div className="model-info">
+              <div className="model-name">Gemini 1.5 Pro</div>
+              <div className="model-description">Smart, reasoning model for everyday</div>
+            </div>
+            <div className="model-checkmark">✓</div>
+          </div>
+          <div className="dropdown-divider"></div>
+          <div className="coming-soon-text">More models coming soon</div>
+        </div>
+      )}
+    </div>
+  );
+}
+
 export default function MainContent() {
   const [showGlow, setShowGlow] = useState(false);
   const [fadeGlow, setFadeGlow] = useState(false);
   const [inputValue, setInputValue] = useState("");
+  const [isMicActive, setIsMicActive] = useState(false);
+  const [isModelDropdownOpen, setIsModelDropdownOpen] = useState(false);
+  const [hasUserTyped, setHasUserTyped] = useState(false);
   const typingTimeout = useRef();
   const fadeTimeout = useRef();
+  const dropdownRef = useRef();
+  
+  // Handle clicking outside dropdown to close it and restart typing animation
+  useEffect(() => {
+    function handleClickOutside(event) {
+      // Check if click is outside dropdown
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+        setIsModelDropdownOpen(false);
+      }
+      
+      // Check if click is outside search area and restart typing animation
+      const searchArea = document.querySelector('.input-box');
+      if (searchArea && !searchArea.contains(event.target) && hasUserTyped) {
+        setHasUserTyped(false);
+      }
+    }
+
+    document.addEventListener('mousedown', handleClickOutside);
+
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [isModelDropdownOpen, hasUserTyped]);
   
   const handleInput = (e) => {
     const value = e.target.value;
     setInputValue(value);
+    setHasUserTyped(true);
     setShowGlow(true);
     setFadeGlow(false);
+    
+    // Auto-resize textarea
+    const textarea = e.target;
+    textarea.style.height = 'auto';
+    textarea.style.height = textarea.scrollHeight + 'px';
+    
     if (typingTimeout.current) clearTimeout(typingTimeout.current);
     if (fadeTimeout.current) clearTimeout(fadeTimeout.current);
     typingTimeout.current = setTimeout(() => {
@@ -101,47 +214,73 @@ export default function MainContent() {
     }, 1200);
   };
 
+  const handleMicClick = () => {
+    setIsMicActive(!isMicActive);
+  };
+
+  const handleModelDropdownToggle = () => {
+    setIsModelDropdownOpen(!isModelDropdownOpen);
+  };
+
   return (
     <div className="main-content-center" style={{ justifyContent: 'flex-start', marginTop: '48px' }}>
       <div>
         <div className="greeting">
-          <TypingGreeting /><br />
+          <TypingGreeting shouldAnimate={!hasUserTyped} /><br />
           <span style={{ fontWeight: 400, color: "#888" }}>How can I help today?</span>
         </div>
         <div className={showGlow ? `input-box-effect input-box-effect-glow${fadeGlow ? ' hide' : ''}` : undefined}>
-          <div className="input-box">
-            <input
-              type="text"
+          <div className="input-box" onClick={() => document.querySelector('.search-input').focus()} style={{ minWidth: "300px", width: "auto" }}>
+            <textarea
+              className="search-input"
               placeholder="Search personalized for you..."
               value={inputValue}
               style={{
                 border: "none",
                 outline: "none",
-                fontSize: "1rem",
+                fontSize: "1.1rem",
                 width: "100%",
-                background: "transparent"
+                minWidth: "300px",
+                background: "transparent",
+                resize: "none",
+                overflow: "hidden",
+                fontFamily: "inherit",
+                lineHeight: "1.4"
               }}
               onInput={handleInput}
+              rows="1"
             />
-            <div style={{ display: "flex", alignItems: "center", marginTop: 0, paddingTop: 12 }}>
+            <div style={{ display: "flex", alignItems: "center", marginTop: 0, paddingTop: 12, marginBottom: -16 }}>
               <button className="input-action-btn" title="Add">
                 <span style={{fontWeight: 400, fontSize: '1.05rem', color: '#888'}}>+</span>
               </button>
-              <button className="input-action-btn" title="Mic">
+              <button 
+                className={`input-action-btn ${isMicActive ? 'mic-button-active' : ''}`} 
+                title="Mic"
+                onClick={handleMicClick}
+              >
                 <svg width="18" height="18" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
-                  <rect x="7" y="4" width="6" height="10" rx="3" fill="#888"/>
-                  <rect x="9" y="15" width="2" height="3" rx="1" fill="#888"/>
-                  <path d="M5 10V11C5 14 9 14 9 14H11C11 14 15 14 15 11V10" stroke="#888" strokeWidth="1.2" strokeLinecap="round"/>
+                  <rect x="7" y="4" width="6" height="10" rx="3" fill={isMicActive ? "#fff" : "#888"}/>
+                  <rect x="9" y="15" width="2" height="3" rx="1" fill={isMicActive ? "#fff" : "#888"}/>
+                  <path d="M5 10V11C5 14 9 14 9 14H11C11 14 15 14 15 11V10" stroke={isMicActive ? "#fff" : "#888"} strokeWidth="1.2" strokeLinecap="round"/>
                 </svg>
               </button>
               <div style={{ flex: 1 }} />
+              <div ref={dropdownRef}>
+                <ModelDropdown 
+                  isOpen={isModelDropdownOpen} 
+                  onToggle={handleModelDropdownToggle} 
+                />
+              </div>
               <button 
                 className={`input-action-btn ${inputValue.trim() ? 'input-action-btn-active' : ''}`} 
                 title="Go"
+                disabled
                 style={{
                   backgroundColor: inputValue.trim() ? '#000' : '#fff',
                   borderColor: inputValue.trim() ? '#000' : '#e0e0e0',
-                  transition: 'all 0.2s ease'
+                  transition: 'all 0.2s ease',
+                  cursor: 'default'
                 }}
               >
                 <svg width="18" height="18" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -160,7 +299,7 @@ export default function MainContent() {
             </div>
           </div>
         </div>
-        <div className="suggestion-buttons" style={{ marginBottom: 0 }}>
+        <div className="suggestion-buttons" style={{ marginBottom: 40, marginTop: 40 }}>
           <button className="suggestion-btn selected">Recommend</button>
           <button className="suggestion-btn">Featured</button>
           <button className="suggestion-btn">Research</button>

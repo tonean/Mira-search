@@ -32,16 +32,16 @@ export default function Sidebar({ isCollapsed, onToggleCollapse }) {
         </div>
         {!isCollapsed && (
           <>
-            <button className="new-task-btn">+ Add Connection</button>
-            <div className="filters">
-              <button className="filter selected">All</button>
-              <button className="filter">Favorites</button>
-              <button className="filter">Scheduled</button>
-            </div>
-            <div className="create-task-hint">
-              <div className="dotted-box" />
-              <span>Create a new task to get started</span>
-            </div>
+        <button className="new-task-btn">+ Add Connection</button>
+        <div className="filters">
+          <button className="filter selected">All</button>
+          <button className="filter">Favorites</button>
+          <button className="filter">Scheduled</button>
+        </div>
+        <div className="create-task-hint">
+          <div className="dotted-box" />
+          <span>Create a new task to get started</span>
+        </div>
           </>
         )}
       </div>
@@ -56,11 +56,11 @@ export default function Sidebar({ isCollapsed, onToggleCollapse }) {
           </>
         ) : (
           <div className="collapsed-icons">
-            <span>🏠</span>
-            <span>❓</span>
-            <span>💡</span>
-            <span>⚗️</span>
-            <span>🔗</span>
+        <span>🏠</span>
+        <span>❓</span>
+        <span>💡</span>
+        <span>⚗️</span>
+        <span>🔗</span>
           </div>
         )}
       </div>
