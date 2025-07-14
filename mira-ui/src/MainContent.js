@@ -168,10 +168,68 @@ export default function MainContent() {
   const [isMicActive, setIsMicActive] = useState(false);
   const [isModelDropdownOpen, setIsModelDropdownOpen] = useState(false);
   const [hasUserTyped, setHasUserTyped] = useState(false);
+  const [showRecommendations, setShowRecommendations] = useState(false);
   const typingTimeout = useRef();
   const fadeTimeout = useRef();
   const dropdownRef = useRef();
   
+  const categorySuggestions = {
+    Recommend: [
+      'Recommend me interesting podcasts for my commute',
+      'Recommend me some good sci-fi books to read',
+      'Recommend me healthy snacks i can try',
+      'Recommend me a movie that blends comedy with adventure',
+    ],
+    Research: [
+      'Research the latest trends in AI',
+      'Research climate change impacts in my area',
+      'Research the history of the Silk Road',
+      'Research effective study techniques',
+    ],
+    Travel: [
+      'Travel destinations for solo adventurers',
+      'Travel tips for visiting Japan',
+      'Travel packing checklist for Europe',
+      'Travel safety advice for first-time flyers',
+    ],
+    Dining: [
+      'Dining options near me',
+      'Dining etiquette in France',
+      'Dining deals for students',
+      'Dining experiences for foodies',
+    ],
+    Product: [
+      'Product reviews for wireless earbuds',
+      'Productivity tools for remote teams',
+      'Product launch checklist',
+      'Product comparison: iPhone vs Android',
+    ],
+    Fashion: [
+      'Fashion trends for this summer',
+      'Fashion tips for business casual',
+      'Fashion brands that are sustainable',
+      'Fashion inspiration for weddings',
+    ],
+    People: [
+      'People who changed the world',
+      'People to follow in tech',
+      'People skills for leaders',
+      'People management best practices',
+    ],
+  };
+
+  const categoryPrefixes = {
+    Recommend: 'Recommend me ',
+    Research: 'Research ',
+    Travel: 'Travel ',
+    Dining: 'Dining ',
+    Product: 'Product ',
+    Fashion: 'Fashion ',
+    People: 'People ',
+  };
+
+  const [activeCategory, setActiveCategory] = useState(null);
+
   // Handle clicking outside dropdown to close it and restart typing animation
   useEffect(() => {
     function handleClickOutside(event) {
@@ -200,6 +258,10 @@ export default function MainContent() {
     setHasUserTyped(true);
     setShowGlow(true);
     setFadeGlow(false);
+    // Hide suggestions if input doesn't match the prefix for the active category
+    if (!activeCategory || value !== categoryPrefixes[activeCategory]) {
+      setActiveCategory(null);
+    }
     
     // Auto-resize textarea
     const textarea = e.target;
@@ -222,12 +284,38 @@ export default function MainContent() {
     setIsModelDropdownOpen(!isModelDropdownOpen);
   };
 
+  const handleCategoryClick = (category) => {
+    setInputValue(categoryPrefixes[category]);
+    setHasUserTyped(true);
+    setActiveCategory(category);
+    setTimeout(() => {
+      const textarea = document.querySelector('.search-input');
+      if (textarea) {
+        textarea.focus();
+        textarea.setSelectionRange(categoryPrefixes[category].length, categoryPrefixes[category].length);
+      }
+    }, 0);
+  };
+
+  const handleSuggestionClick = (text) => {
+    setInputValue(text);
+    setActiveCategory(null);
+    setHasUserTyped(true);
+    setTimeout(() => {
+      const textarea = document.querySelector('.search-input');
+      if (textarea) {
+        textarea.focus();
+        textarea.setSelectionRange(text.length, text.length);
+      }
+    }, 0);
+  };
+
   return (
     <div className="main-content-center" style={{ justifyContent: 'flex-start', marginTop: '48px' }}>
       <div>
         <div className="greeting">
           <TypingGreeting shouldAnimate={!hasUserTyped} /><br />
-          <span style={{ fontWeight: 400, color: "#888" }}>How can I help today?</span>
+          <span style={{ fontWeight: 400, color: "#aaa" }}>How can I help today?</span>
         </div>
         <div className={showGlow ? `input-box-effect input-box-effect-glow${fadeGlow ? ' hide' : ''}` : undefined}>
           <div className="input-box" onClick={() => document.querySelector('.search-input').focus()} style={{ minWidth: "300px", width: "auto" }}>
@@ -299,15 +387,28 @@ export default function MainContent() {
             </div>
           </div>
         </div>
-        <div className="suggestion-buttons" style={{ marginBottom: 40, marginTop: 40 }}>
-          <button className="suggestion-btn selected">Recommend</button>
-          <button className="suggestion-btn">Featured</button>
-          <button className="suggestion-btn">Research</button>
-          <button className="suggestion-btn">Data</button>
-          <button className="suggestion-btn">Edu</button>
-          <button className="suggestion-btn">Productivity</button>
-          <button className="suggestion-btn">Programming</button>
+        <div className={`suggestion-buttons${activeCategory ? ' transparent' : ''}`} style={{ marginBottom: 40, marginTop: 40, position: 'relative', zIndex: 2 }}>
+          <button className="suggestion-btn" onClick={() => handleCategoryClick('Recommend')}>Recommend</button>
+          <button className="suggestion-btn" onClick={() => handleCategoryClick('Research')}>Research</button>
+          <button className="suggestion-btn" onClick={() => handleCategoryClick('Travel')}>Travel</button>
+          <button className="suggestion-btn" onClick={() => handleCategoryClick('Dining')}>Dining</button>
+          <button className="suggestion-btn" onClick={() => handleCategoryClick('Product')}>Product</button>
+          <button className="suggestion-btn" onClick={() => handleCategoryClick('Fashion')}>Fashion</button>
+          <button className="suggestion-btn" onClick={() => handleCategoryClick('People')}>People</button>
         </div>
+        {activeCategory && (
+          <ul className="recommendation-list fade-in-down">
+            {categorySuggestions[activeCategory].map((suggestion, idx) => (
+              <React.Fragment key={suggestion}>
+                <li className="recommendation-item" onClick={() => handleSuggestionClick(suggestion)}>
+                  <span className="recommend-me-prefix">{categoryPrefixes[activeCategory]}</span>
+                  <span className="recommend-me-suffix">{suggestion.replace(categoryPrefixes[activeCategory], '')}</span>
+                </li>
+                {idx < categorySuggestions[activeCategory].length - 1 && <div className="recommendation-divider"></div>}
+              </React.Fragment>
+            ))}
+          </ul>
+        )}
       </div>
     </div>
   );

@@ -3,11 +3,13 @@ import Sidebar from "./Sidebar";
 import TopBar from "./TopBar";
 import MainContent from "./MainContent";
 import LoadingScreen from "./LoadingScreen";
+import SignInPanel from "./SignInPanel";
 import "./App.css";
 
 function App() {
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(true);
   const [showLoadingScreen, setShowLoadingScreen] = useState(true);
+  const [showSignIn, setShowSignIn] = useState(true);
 
   const handleToggleSidebar = () => {
     setIsSidebarCollapsed(!isSidebarCollapsed);
@@ -31,6 +33,7 @@ function App() {
         <TopBar />
         <MainContent />
       </div>
+      {showSignIn && <SignInPanel onClose={() => setShowSignIn(false)} />}
     </div>
   );
 }

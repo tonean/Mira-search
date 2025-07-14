@@ -91,7 +91,9 @@ body {
   font-size: 2rem;
   font-weight: 500;
   margin-top: 28px;
-  margin-left: 28px;
+  margin-left: 0;
+  text-align: center;
+  color: #444;
 }
 
 .input-box {
@@ -115,13 +117,65 @@ body {
   display: flex;
   gap: 14px;
   margin: 18px 28px;
+  transition: opacity 0.5s cubic-bezier(0.4,0,0.2,1);
+  opacity: 1;
+}
+.suggestion-buttons.transparent {
+  opacity: 0;
+  pointer-events: none;
+}
+.suggestion-buttons-fade.faded + .suggestion-buttons {
+  opacity: 0;
+  pointer-events: none;
+}
+.recommendation-list {
+  list-style: none;
+  padding-left: 0;
+  margin-top: -82px;
+  margin-left: 48px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.recommendation-list.fade-in-down {
+  opacity: 1;
+  transform: translateY(0);
+}
+.recommendation-list div {
+  font-size: 1.05rem;
+  color: #aaa;
+  font-weight: 400;
+  transition: color 0.2s;
+}
+.recommendation-list span {
+  transition: color 0.2s;
 }
 
+@keyframes fadeInDown {
+  0% {
+    opacity: 0;
+    transform: translateY(-24px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.recommendation-list.fade-in-down > li.recommendation-item {
+  opacity: 0;
+  animation: fadeInDown 0.7s forwards;
+}
+.recommendation-list.fade-in-down > li.recommendation-item:nth-child(1) { animation-delay: 0.05s; }
+.recommendation-list.fade-in-down > li.recommendation-item:nth-child(3) { animation-delay: 0.18s; }
+.recommendation-list.fade-in-down > li.recommendation-item:nth-child(5) { animation-delay: 0.31s; }
+.recommendation-list.fade-in-down > li.recommendation-item:nth-child(7) { animation-delay: 0.44s; }
+
 .suggestion-btn {
-  background: #f5f5f3;
-  border: none;
-  border-radius: 16px;
-  padding: 4px 12px;
+  background: transparent;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  padding: 6px 16px;
   font-size: 0.95rem;
   cursor: pointer;
 }
@@ -251,6 +305,7 @@ body {
   align-items: center;
   margin-bottom: 4px;
   margin-left: 8px;
+  justify-content: flex-end;
 }
 
 .sidebar-hamburger {
@@ -258,6 +313,7 @@ body {
   color: #888;
   cursor: pointer;
   user-select: none;
+  margin-right: 16px;
 }
 
 .input-action-btn {
@@ -417,4 +473,30 @@ body {
   font-size: 0.8rem;
   color: #888;
   font-style: italic;
+}
+
+.recommend-me-prefix {
+  color: #aaa;
+}
+.recommend-me-suffix {
+  color: #222;
+}
+
+.recommendation-divider {
+  height: 1px;
+  background: #e0e0e0;
+  width: 100%;
+  margin: 2px 0 2px 0;
+  border: none;
+}
+
+.recommendation-item {
+  transition: background 0.18s;
+  border-radius: 7px;
+  cursor: pointer;
+  padding-left: 16px;
+  padding-right: 16px;
+}
+.recommendation-item:hover {
+  background: #f5f5f5;
 }

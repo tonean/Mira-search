@@ -27,7 +27,10 @@ export default function Sidebar({ isCollapsed, onToggleCollapse }) {
             onClick={onToggleCollapse}
             style={{ cursor: 'pointer' }}
           >
-            &#9776;
+            <svg width="24" height="24" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <rect x="2" y="2" width="16" height="16" rx="3" stroke="#888" strokeWidth="1.5" fill="none"/>
+              <line x1="7" y1="2" x2="7" y2="18" stroke="#888" strokeWidth="1.5" strokeLinecap="round"/>
+            </svg>
           </span>
         </div>
         {!isCollapsed && (
