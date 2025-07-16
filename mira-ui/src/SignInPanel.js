@@ -13,14 +13,14 @@ export default function SignInPanel() {
           bottom: 32,
           right: 32,
           zIndex: 2000,
-          background: '#fff',
-          border: '1px solid #e0e0e0',
+          background: 'var(--card-bg)',
+          border: '1px solid var(--card-border)',
           borderRadius: 18,
           boxShadow: '0 4px 24px rgba(0,0,0,0.10)',
           padding: '10px 22px',
           fontWeight: 500,
           fontSize: '1rem',
-          color: '#234',
+          color: 'var(--text)',
           cursor: 'pointer',
         }}
         aria-label="Expand sign in panel"
@@ -36,7 +36,7 @@ export default function SignInPanel() {
       bottom: 32,
       right: 32,
       width: 340,
-      background: '#fff',
+      background: 'var(--card-bg)',
       borderRadius: 18,
       boxShadow: '0 4px 24px rgba(0,0,0,0.10)',
       padding: '28px 24px 20px 24px',
@@ -55,22 +55,22 @@ export default function SignInPanel() {
           background: 'none',
           border: 'none',
           fontSize: 22,
-          color: '#888',
+          color: 'var(--text-muted)',
           cursor: 'pointer',
         }}
         aria-label="Minimize sign in panel"
       >
         –
       </button>
-      <div style={{ marginBottom: 10, marginTop: 8, fontWeight: 600, fontSize: '1.15rem', color: '#234', textAlign: 'left' }}>
+      <div style={{ marginBottom: 10, marginTop: 8, fontWeight: 600, fontSize: '1.15rem', color: 'var(--text)', textAlign: 'left' }}>
       Connect an account to get started!
       </div>
-      <div style={{ color: '#888', fontSize: '0.98rem', marginBottom: 18 }}>
+      <div style={{ color: 'var(--text-muted)', fontSize: '0.98rem', marginBottom: 18 }}>
         Unlock Pro Search and History
       </div>
       <button style={{
         background: '#4E342E',
-        color: '#fff',
+        color: 'var(--primary-contrast)',
         border: 'none',
         borderRadius: 8,
         padding: '12px 0',
@@ -86,8 +86,8 @@ export default function SignInPanel() {
         <span style={{ fontSize: 18 }}>G</span> Continue with Google
       </button>
       <button style={{
-        background: '#f5f5f5',
-        color: '#222',
+        background: 'var(--input-bg)',
+        color: 'var(--primary)',
         border: 'none',
         borderRadius: 8,
         padding: '12px 0',
@@ -109,7 +109,7 @@ export default function SignInPanel() {
           value={email}
           onChange={e => setEmail(e.target.value)}
           style={{
-            border: '1px solid #e0e0e0',
+            border: '1px solid var(--input-border)',
             borderRadius: 8,
             padding: '10px 12px',
             fontSize: '1rem',
@@ -118,8 +118,8 @@ export default function SignInPanel() {
         />
         <button
           style={{
-            background: email ? '#222' : '#eee',
-            color: email ? '#fff' : '#aaa',
+            background: email ? 'var(--primary)' : 'var(--input-bg)',
+            color: email ? 'var(--primary-contrast)' : 'var(--text-muted)',
             border: 'none',
             borderRadius: 8,
             padding: '12px 0',
@@ -133,7 +133,7 @@ export default function SignInPanel() {
           Continue with email
         </button>
       </div>
-      <div style={{ color: '#888', fontSize: '0.92rem', textAlign: 'center', marginTop: 6 }}>
+      <div style={{ color: 'var(--text-muted)', fontSize: '0.92rem', textAlign: 'center', marginTop: 6 }}>
         Single sign-on (SSO)
       </div>
     </div>

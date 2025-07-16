@@ -1,5 +1,6 @@
 import React, { useEffect, useRef, useState } from "react";
 import "./App.css";
+import { useNavigate } from 'react-router-dom';
 
 // Typing animation component
 const greetings = [
@@ -172,6 +173,11 @@ export default function MainContent() {
   const typingTimeout = useRef();
   const fadeTimeout = useRef();
   const dropdownRef = useRef();
+  const navigate = useNavigate();
+  // Add file input ref for main search bar
+  const fileInputRef = useRef();
+  // State for selected files
+  const [selectedFiles, setSelectedFiles] = useState([]);
   
   const categorySuggestions = {
     Recommend: [
@@ -310,15 +316,106 @@ export default function MainContent() {
     }, 0);
   };
 
+  const handleKeyDown = (e) => {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      if (inputValue.trim()) {
+        navigate(`/search?q=${encodeURIComponent(inputValue.trim())}`);
+      }
+    }
+  };
+
+  // File input handler for main search bar
+  const handleFileInputClick = () => {
+    if (fileInputRef.current) {
+      fileInputRef.current.value = null; // reset so same file can be picked again
+      fileInputRef.current.click();
+    }
+  };
+  const handleFileChange = (e) => {
+    const files = Array.from(e.target.files);
+    if (files && files.length > 0) {
+      setSelectedFiles(files);
+    }
+  };
+  const handleRemoveFile = (index) => {
+    setSelectedFiles(prev => prev.filter((_, i) => i !== index));
+  };
+
   return (
     <div className="main-content-center" style={{ justifyContent: 'flex-start', marginTop: '48px' }}>
       <div>
         <div className="greeting">
           <TypingGreeting shouldAnimate={!hasUserTyped} /><br />
-          <span style={{ fontWeight: 400, color: "#aaa" }}>How can I help today?</span>
+          <span style={{ fontWeight: 400, color: "var(--text-muted)" }}>How can I help today?</span>
         </div>
         <div className={showGlow ? `input-box-effect input-box-effect-glow${fadeGlow ? ' hide' : ''}` : undefined}>
-          <div className="input-box" onClick={() => document.querySelector('.search-input').focus()} style={{ minWidth: "300px", width: "auto" }}>
+          <div className="input-box" onClick={() => document.querySelector('.search-input').focus()} style={{ minWidth: "300px", width: "auto", minHeight: selectedFiles.length > 0 ? 120 : undefined, paddingTop: selectedFiles.length > 0 ? 18 : undefined, background: 'var(--input-bg)', border: '1.5px solid var(--input-border)', boxShadow: '0 2px 8px var(--input-box-shadow)' }}>
+            {/* File preview inside search bar, above textarea */}
+            {selectedFiles.length > 0 && (
+              <div style={{
+                display: 'flex',
+                flexDirection: 'row',
+                alignItems: 'center',
+                gap: 12,
+                margin: '0 0 10px 0',
+                padding: '8px 16px 8px 8px',
+                background: 'var(--file-bg)',
+                borderRadius: 14,
+                boxShadow: '0 1px 4px var(--file-box-shadow)',
+                maxWidth: 300,
+                minWidth: 220,
+                position: 'relative',
+              }}>
+                <div style={{
+                  width: 38,
+                  height: 38,
+                  background: 'var(--file-bg)',
+                  borderRadius: 10,
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  marginRight: 8,
+                }}>
+                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none"><rect x="5" y="3" width="14" height="18" rx="3" fill="#2196f3"/><path d="M7 7h10M7 11h10M7 15h6" stroke="#fff" strokeWidth="1.5" strokeLinecap="round"/></svg>
+                </div>
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <div style={{ fontWeight: 500, fontSize: '1.05rem', color: 'var(--text)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', maxWidth: 120 }}>{selectedFiles[0].name}</div>
+                  <div style={{ color: 'var(--file-label)', fontSize: '0.95rem', marginTop: 2 }}>File</div>
+                </div>
+                <button
+                  onClick={() => handleRemoveFile(0)}
+                  style={{
+                    background: 'none',
+                    border: 'none',
+                    borderRadius: '50%',
+                    width: 24,
+                    height: 24,
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    cursor: 'pointer',
+                    position: 'absolute',
+                    top: 6,
+                    right: 6,
+                    fontSize: 16,
+                    color: 'var(--text)',
+                    zIndex: 2,
+                  }}
+                  title="Remove file"
+                >
+                  <svg width="16" height="16" viewBox="0 0 20 20" fill="none"><circle cx="10" cy="10" r="9" fill="#fff"/><path d="M6 6l8 8M14 6l-8 8" stroke="#111" strokeWidth="2.2" strokeLinecap="round"/></svg>
+                </button>
+              </div>
+            )}
+            {/* Hidden file input for main search bar */}
+            <input
+              type="file"
+              ref={fileInputRef}
+              style={{ display: 'none' }}
+              onChange={handleFileChange}
+              multiple
+            />
             <textarea
               className="search-input"
               placeholder="Search personalized for you..."
@@ -336,10 +433,11 @@ export default function MainContent() {
                 lineHeight: "1.4"
               }}
               onInput={handleInput}
+              onKeyDown={handleKeyDown}
               rows="1"
             />
             <div style={{ display: "flex", alignItems: "center", marginTop: 0, paddingTop: 12, marginBottom: -16 }}>
-              <button className="input-action-btn" title="Add">
+              <button className="input-action-btn" title="Add" onClick={handleFileInputClick}>
                 <span style={{fontWeight: 400, fontSize: '1.05rem', color: '#888'}}>+</span>
               </button>
               <button 
