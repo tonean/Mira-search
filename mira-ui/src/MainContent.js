@@ -162,7 +162,7 @@ function ModelDropdown({ isOpen, onToggle }) {
   );
 }
 
-export default function MainContent() {
+export default function MainContent({ darkMode }) {
   const [showGlow, setShowGlow] = useState(false);
   const [fadeGlow, setFadeGlow] = useState(false);
   const [inputValue, setInputValue] = useState("");
@@ -360,7 +360,7 @@ export default function MainContent() {
                 gap: 12,
                 margin: '0 0 10px 0',
                 padding: '8px 16px 8px 8px',
-                background: 'var(--file-bg)',
+                background: darkMode ? 'var(--file-bg)' : '#f5f5f3',
                 borderRadius: 14,
                 boxShadow: '0 1px 4px var(--file-box-shadow)',
                 maxWidth: 300,

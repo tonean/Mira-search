@@ -6,9 +6,9 @@ export default function TopBar({ darkMode, toggleDarkMode }) {
     <div className="top-bar">
       <button 
         style={{
-          backgroundColor: 'var(--primary)',
-          color: 'var(--primary-contrast)',
-          border: 'none',
+          backgroundColor: 'transparent',
+          color: 'var(--primary)',
+          border: '1px solid var(--border-dark)',
           borderRadius: '8px',
           padding: '8px 16px',
           fontSize: '0.9rem',
@@ -21,9 +21,9 @@ export default function TopBar({ darkMode, toggleDarkMode }) {
       </button>
       <button 
         style={{
-          backgroundColor: 'transparent',
-          color: 'var(--primary)',
-          border: '1px solid var(--border-dark)',
+          backgroundColor: 'var(--primary)',
+          color: darkMode ? 'var(--border-dark)' : '#fff',
+          border: 'none',
           borderRadius: '8px',
           padding: '8px 16px',
           fontSize: '0.9rem',

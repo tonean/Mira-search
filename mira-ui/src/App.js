@@ -8,7 +8,7 @@ import { BrowserRouter as Router, Routes, Route, useLocation, useNavigate } from
 import "./App.css";
 import ConnectionsPage from "./ConnectionsPage";
 
-function SearchResults() {
+function SearchResults({ darkMode }) {
   const location = useLocation();
   const params = new URLSearchParams(location.search);
   const query = params.get('q') || '';
@@ -185,12 +185,12 @@ function SearchResults() {
           </div>
           <div style={{ display: 'flex', gap: 10 }}>
             <button 
-              style={{ backgroundColor: 'var(--primary)', color: 'var(--primary-contrast)', border: 'none', borderRadius: '8px', padding: '8px 16px', fontSize: '0.9rem', fontWeight: '500', cursor: 'pointer', marginRight: '8px' }}
+              style={{ backgroundColor: 'transparent', color: 'var(--primary)', border: '1px solid var(--border-dark)', borderRadius: '8px', padding: '8px 16px', fontSize: '0.9rem', fontWeight: '500', cursor: 'pointer', marginRight: '8px' }}
             >
               Log in
             </button>
             <button 
-              style={{ backgroundColor: 'transparent', color: 'var(--primary)', border: '1px solid var(--border-dark)', borderRadius: '8px', padding: '8px 16px', fontSize: '0.9rem', fontWeight: '500', cursor: 'pointer' }}
+              style={{ backgroundColor: 'var(--primary)', color: darkMode ? 'var(--border-dark)' : '#fff', border: 'none', borderRadius: '8px', padding: '8px 16px', fontSize: '0.9rem', fontWeight: '500', cursor: 'pointer' }}
             >
               Sign up
             </button>
@@ -364,7 +364,7 @@ function SearchResults() {
               gap: 12,
               margin: '0 0 10px 0',
               padding: '8px 16px 8px 8px',
-              background: 'var(--file-bg)',
+              background: '#f5f5f3',
               borderRadius: 14,
               boxShadow: '0 1px 4px var(--file-box-shadow)',
               maxWidth: 300,
@@ -610,8 +610,8 @@ function AppWithRouter({ isSidebarCollapsed, onToggleSidebar, showSignIn, setSho
       <div className={`main-area ${isSidebarCollapsed ? 'main-area-expanded' : ''}`}>
         <TopBar darkMode={darkMode} toggleDarkMode={toggleDarkMode} />
         <Routes>
-          <Route path="/" element={<MainContent />} />
-          <Route path="/search" element={<SearchResultsWithHistory onAddChat={onAddChat} />} />
+          <Route path="/" element={<MainContent darkMode={darkMode} />} />
+          <Route path="/search" element={<SearchResultsWithHistory onAddChat={onAddChat} darkMode={darkMode} />} />
           <Route path="/connections" element={<ConnectionsPage isSidebarCollapsed={isSidebarCollapsed} />} />
         </Routes>
       </div>
@@ -621,14 +621,14 @@ function AppWithRouter({ isSidebarCollapsed, onToggleSidebar, showSignIn, setSho
 }
 
 // Wrap SearchResults to add to chat history
-function SearchResultsWithHistory({ onAddChat }) {
+function SearchResultsWithHistory({ onAddChat, darkMode }) {
   const location = useLocation();
   const params = new URLSearchParams(location.search);
   const query = params.get('q') || '';
   useEffect(() => {
     if (query) onAddChat(query);
   }, [query, onAddChat]);
-  return <SearchResults />;
+  return <SearchResults darkMode={darkMode} />;
 }
 
 export default App;

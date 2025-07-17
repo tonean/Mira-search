@@ -105,7 +105,7 @@ export default function Sidebar({ isCollapsed, onToggleCollapse, chatHistory = [
                 onMouseLeave={() => setHoveredIdx(null)}
                 title="New Chat"
               >
-                <span style={{ flex: 1, overflow: 'hidden', textOverflow: 'ellipsis' }}>New Chat</span>
+                <span style={{ flex: 1, overflow: 'hidden', textOverflow: 'ellipsis' }}>New Chat...</span>
                 {/* 3-dots button, only show on hover, but do not allow delete */}
                 {hoveredIdx === 'new' && (
                   <button
