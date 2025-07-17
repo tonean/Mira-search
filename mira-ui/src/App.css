@@ -321,18 +321,21 @@ body {
 .new-task-btn {
   width: 90%;
   margin: 0 auto 14px auto;
-  padding: 8px 0;
-  background: var(--input-bg);
+  padding: 8px 0 8px 20px;
+  background: transparent;
   border: none;
   border-radius: 8px;
-  font-size: 0.85rem;
+  font-size: 0.95rem;
   font-weight: 500;
-  box-shadow: 0 1px 4px var(--input-box-shadow);
   cursor: pointer;
   display: flex;
   align-items: center;
-  justify-content: center;
+  justify-content: flex-start;
   gap: 6px;
+}
+
+.new-task-btn:hover {
+  background: #e0e0e0;
 }
 
 .filters {
@@ -357,12 +360,12 @@ body {
 }
 
 .create-task-hint {
-  margin: 18px 0 0 12px;
+  margin: 35px 0 0 12px;
   color: var(--text-muted);
   font-size: 0.95rem;
   display: flex;
   align-items: center;
-  gap: 6px;
+  gap: 12px;
 }
 
 .dotted-box {
@@ -671,4 +674,23 @@ body {
 @keyframes fadeInText {
   from { opacity: 0; transform: translateY(16px); }
   to { opacity: 1; transform: translateY(0); }
+}
+
+.ai-trends-text {
+  font-size: 1.05rem;
+  line-height: 1.6;
+}
+
+.ai-divider {
+  border: none;
+  border-top: 1.5px solid #ececec;
+  margin: 32px auto 32px auto;
+  max-width: 700px;
+  width: 100%;
+  background: none;
+}
+
+.sidebar-chat-item:hover {
+  background: #ececec;
+  color: #222;
 }

@@ -6,12 +6,12 @@ import LoadingScreen from "./LoadingScreen";
 import SignInPanel from "./SignInPanel";
 import { BrowserRouter as Router, Routes, Route, useLocation, useNavigate } from 'react-router-dom';
 import "./App.css";
+import ConnectionsPage from "./ConnectionsPage";
 
 function SearchResults() {
   const location = useLocation();
   const params = new URLSearchParams(location.search);
-  const initialQuery = params.get('q') || '';
-  const [query, setQuery] = useState(initialQuery);
+  const query = params.get('q') || '';
   const [editing, setEditing] = useState(false);
   const [editValue, setEditValue] = useState(query);
   const [hovered, setHovered] = useState(false);
@@ -30,6 +30,7 @@ function SearchResults() {
   const [shareCopied, setShareCopied] = useState(false);
   const [showStickyBar, setShowStickyBar] = useState(false);
   const questionRef = useRef();
+  const hiddenDivRef = useRef();
 
   // Effect to show sticky bar when question is out of view
   useEffect(() => {
@@ -50,6 +51,21 @@ function SearchResults() {
     }
   }, [editing]);
 
+  // Keep editValue in sync with query when query changes (for sidebar switching)
+  useEffect(() => {
+    setEditValue(query);
+  }, [query]);
+
+  // Sync textarea height to hidden div
+  useEffect(() => {
+    if (editing && editTextRef.current && hiddenDivRef.current) {
+      const hiddenDiv = hiddenDivRef.current;
+      const textarea = editTextRef.current;
+      // Set textarea height to match hidden div
+      textarea.style.height = hiddenDiv.offsetHeight + 'px';
+    }
+  }, [editValue, editing]);
+
   const handleCopy = () => {
     navigator.clipboard.writeText(query);
     setCopied(true);
@@ -60,7 +76,7 @@ function SearchResults() {
     setEditing(true);
   };
   const handleEditConfirm = () => {
-    setQuery(editValue);
+    // If you want to update the URL/query, do it here (not implemented)
     setEditing(false);
   };
   const handleEditCancel = () => {
@@ -110,7 +126,6 @@ function SearchResults() {
   // Related click handler
   const handleRelatedClick = (text) => {
     navigate(`/search?q=${encodeURIComponent(text)}`);
-    setQuery(text);
     setEditValue(text);
     setFollowupValue("");
     setSelectedFiles([]);
@@ -118,7 +133,7 @@ function SearchResults() {
 
   // --- MOCKUP TEXT ---
   const mockupAnswer = (
-    <div className="fade-in-animated" style={{ fontFamily: 'Georgia, serif', color: '#222', fontSize: '1.13rem', lineHeight: 1.7, maxWidth: 700, margin: '0 auto', padding: '0 24px' }}>
+    <div className="ai-trends-text fade-in-animated" style={{ fontFamily: 'Georgia, serif', color: '#222', lineHeight: 1.7, maxWidth: 700, margin: '0 auto', padding: '0 24px' }}>
       <div style={{ marginBottom: 24 }}>
         The latest trends in <b>AI for 2025</b> center on several key shifts, impacting both technological development and real-world applications:
       </div>
@@ -191,6 +206,36 @@ function SearchResults() {
       >
         {editing ? (
           <div style={{ position: 'relative', width: '100%' }}>
+            {/* Hidden div for measuring height */}
+            <div
+              ref={hiddenDivRef}
+              style={{
+                position: 'absolute',
+                visibility: 'hidden',
+                zIndex: -1,
+                top: 0,
+                left: 0,
+                width: '100%',
+                fontSize: '1.7rem',
+                fontWeight: 500,
+                color: 'var(--text)',
+                fontFamily: 'inherit',
+                border: 'none',
+                borderRadius: 0,
+                padding: 0,
+                background: 'transparent',
+                outline: 'none',
+                marginRight: 0,
+                marginLeft: 150,
+                paddingRight: 120,
+                boxSizing: 'border-box',
+                lineHeight: 1.2,
+                whiteSpace: 'pre-line',
+                wordBreak: 'break-word',
+              }}
+            >
+              {editValue || '\u200b'}
+            </div>
             <textarea
               ref={el => {
                 editTextRef.current = el;
@@ -209,19 +254,23 @@ function SearchResults() {
                 background: 'transparent',
                 outline: 'none',
                 width: '100%',
-                height: '2.2em',
+                minHeight: '2.2em',
+                maxHeight: '8em',
                 marginRight: 0,
                 marginLeft: 150,
                 paddingRight: 120,
                 boxSizing: 'border-box',
                 lineHeight: 1.2,
-                overflow: 'hidden',
+                overflow: 'auto',
+                resize: 'none',
+                whiteSpace: 'pre-line',
               }}
               autoFocus
               onKeyDown={e => {
                 if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); handleEditConfirm(); }
                 if (e.key === 'Escape') handleEditCancel();
               }}
+              rows={1}
             />
             <div style={{ position: 'absolute', top: 0, right: 140, display: 'flex', alignItems: 'center', gap: 4 }}>
               <button
@@ -242,7 +291,7 @@ function SearchResults() {
           </div>
         ) : (
           <>
-            <h1 style={{ fontSize: '1.7rem', fontWeight: 500, color: 'var(--text)', margin: 0, paddingRight: 120, marginLeft: 150 }}>{query}</h1>
+            <h1 style={{ fontSize: '1.7rem', fontWeight: 500, color: 'var(--text)', margin: 0, paddingRight: 120, marginLeft: 150, whiteSpace: 'pre-line', wordBreak: 'break-word' }}>{query}</h1>
             {hovered && (
               <div style={{ position: 'absolute', top: 0, right: 140, display: 'flex', alignItems: 'center', gap: 4 }}>
                 <div style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
@@ -302,6 +351,7 @@ function SearchResults() {
           </>
         )}
       </div>
+      <hr className="ai-divider" />
       {/* Follow-up input fixed at the bottom, overlaying the answer text */}
       <div style={{ position: 'fixed', left: 80, right: 0, bottom: 40, display: 'flex', justifyContent: 'center', zIndex: 100 }}>
         <div className="input-box" style={{ minWidth: 300, maxWidth: 700, width: '100%', margin: 0, padding: 0, boxShadow: '0 2px 8px var(--input-box-shadow)', border: '1.5px solid var(--input-border)', borderRadius: 14, background: 'var(--input-bg)', display: 'flex', flexDirection: 'column', gap: 0, minHeight: selectedFiles.length > 0 ? 120 : undefined, paddingTop: selectedFiles.length > 0 ? 18 : undefined }}>
@@ -484,6 +534,7 @@ function App() {
   const [showLoadingScreen, setShowLoadingScreen] = useState(true);
   const [showSignIn, setShowSignIn] = useState(true);
   const [darkMode, setDarkMode] = useState(false);
+  const [chatHistory, setChatHistory] = useState([]); // Add chat history state
 
   useEffect(() => {
     document.body.classList.toggle('dark-mode', darkMode);
@@ -499,28 +550,85 @@ function App() {
 
   const toggleDarkMode = () => setDarkMode((d) => !d);
 
+  // Handler to add a chat/search to history
+  const handleAddChat = (query) => {
+    setChatHistory((prev) => {
+      if (!query.trim() || prev.includes(query)) return prev;
+      return [query, ...prev].slice(0, 20); // keep max 20
+    });
+  };
+
+  // Handler to delete a chat by index
+  const handleDeleteChat = (idx) => {
+    setChatHistory((prev) => prev.filter((_, i) => i !== idx));
+  };
+
   if (showLoadingScreen) {
     return <LoadingScreen onOpenMira={handleOpenMira} />;
   }
 
   return (
     <Router>
-      <div className="app-container">
-        <Sidebar 
-          isCollapsed={isSidebarCollapsed} 
-          onToggleCollapse={handleToggleSidebar}
-        />
-        <div className={`main-area ${isSidebarCollapsed ? 'main-area-expanded' : ''}`}>
-          <TopBar darkMode={darkMode} toggleDarkMode={toggleDarkMode} />
-          <Routes>
-            <Route path="/" element={<MainContent />} />
-            <Route path="/search" element={<SearchResults />} />
-          </Routes>
-        </div>
-        {showSignIn && <SignInPanel onClose={() => setShowSignIn(false)} />}
-      </div>
+      <Routes>
+        <Route path="*" element={<AppWithRouter
+          isSidebarCollapsed={isSidebarCollapsed}
+          onToggleSidebar={handleToggleSidebar}
+          showSignIn={showSignIn}
+          setShowSignIn={setShowSignIn}
+          darkMode={darkMode}
+          toggleDarkMode={toggleDarkMode}
+          chatHistory={chatHistory}
+          onAddChat={handleAddChat}
+          onDeleteChat={handleDeleteChat}
+        />} />
+      </Routes>
     </Router>
   );
+}
+
+// AppWithRouter is a wrapper to get useNavigate and pass it up
+function AppWithRouter({ isSidebarCollapsed, onToggleSidebar, showSignIn, setShowSignIn, darkMode, toggleDarkMode, chatHistory, onAddChat, onDeleteChat }) {
+  const navigate = useNavigate();
+
+  const handleNavigateChat = (query) => {
+    if (!query || !query.trim()) {
+      navigate("/");
+    } else {
+      navigate(`/search?q=${encodeURIComponent(query)}`);
+    }
+  };
+
+  return (
+    <div className="app-container">
+      <Sidebar 
+        isCollapsed={isSidebarCollapsed} 
+        onToggleCollapse={onToggleSidebar}
+        chatHistory={chatHistory}
+        onNavigateChat={handleNavigateChat}
+        onDeleteChat={onDeleteChat}
+      />
+      <div className={`main-area ${isSidebarCollapsed ? 'main-area-expanded' : ''}`}>
+        <TopBar darkMode={darkMode} toggleDarkMode={toggleDarkMode} />
+        <Routes>
+          <Route path="/" element={<MainContent />} />
+          <Route path="/search" element={<SearchResultsWithHistory onAddChat={onAddChat} />} />
+          <Route path="/connections" element={<ConnectionsPage isSidebarCollapsed={isSidebarCollapsed} />} />
+        </Routes>
+      </div>
+      {showSignIn && <SignInPanel onClose={() => setShowSignIn(false)} />}
+    </div>
+  );
+}
+
+// Wrap SearchResults to add to chat history
+function SearchResultsWithHistory({ onAddChat }) {
+  const location = useLocation();
+  const params = new URLSearchParams(location.search);
+  const query = params.get('q') || '';
+  useEffect(() => {
+    if (query) onAddChat(query);
+  }, [query, onAddChat]);
+  return <SearchResults />;
 }
 
 export default App;
