@@ -80,6 +80,11 @@ body {
 }
 
 .sidebar {
+  position: fixed; /* Make sidebar fixed */
+  top: 0;
+  left: 0;
+  height: 100vh;
+  z-index: 1001; /* Default: below sticky bar */
   width: 270px;
   background: var(--sidebar-bg);
   display: flex;
@@ -88,7 +93,12 @@ body {
   border-right: 1px solid var(--sidebar-border);
   padding: 24px 0;
   min-width: 220px;
-  transition: width 0.3s ease;
+  transition: width 0.3s ease, z-index 0.2s;
+}
+
+/* When sidebar is expanded, put it above the sticky bar */
+.sidebar.sidebar-expanded {
+  z-index: 3000;
 }
 
 .sidebar-collapsed {
@@ -125,6 +135,7 @@ body {
   transform: scale(1.1);
 }
 
+/* Offset main-area to the right of the fixed sidebar */
 .main-area {
   flex: 1;
   display: flex;
@@ -132,10 +143,11 @@ body {
   background: var(--main-bg);
   min-width: 0;
   transition: margin-left 0.3s ease;
+  margin-left: 270px; /* Default sidebar width */
 }
 
-.main-area-expanded {
-  margin-left: 0;
+.main-area.main-area-expanded {
+  margin-left: 60px; /* Collapsed sidebar width */
 }
 
 .main-content-center {
@@ -693,4 +705,9 @@ body {
 .sidebar-chat-item:hover {
   background: #ececec;
   color: #222;
+}
+
+/* Offset the follow-up bar when sidebar is expanded on search page */
+.followup-bar-sidebar-expanded {
+  left: 270px !important;
 }

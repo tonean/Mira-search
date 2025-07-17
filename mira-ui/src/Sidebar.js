@@ -25,7 +25,7 @@ export default function Sidebar({ isCollapsed, onToggleCollapse, chatHistory = [
 
   return (
     <div 
-      className={`sidebar ${isCollapsed ? 'sidebar-collapsed' : ''}`}
+      className={`sidebar ${isCollapsed ? 'sidebar-collapsed' : 'sidebar-expanded'}`}
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
     >

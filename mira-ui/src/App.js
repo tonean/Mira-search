@@ -8,7 +8,7 @@ import { BrowserRouter as Router, Routes, Route, useLocation, useNavigate } from
 import "./App.css";
 import ConnectionsPage from "./ConnectionsPage";
 
-function SearchResults({ darkMode }) {
+function SearchResults({ darkMode, isSidebarCollapsed }) {
   const location = useLocation();
   const params = new URLSearchParams(location.search);
   const query = params.get('q') || '';
@@ -353,7 +353,12 @@ function SearchResults({ darkMode }) {
       </div>
       <hr className="ai-divider" />
       {/* Follow-up input fixed at the bottom, overlaying the answer text */}
-      <div style={{ position: 'fixed', left: 80, right: 0, bottom: 40, display: 'flex', justifyContent: 'center', zIndex: 100 }}>
+      <div 
+        className={
+          !isSidebarCollapsed ? 'followup-bar-sidebar-expanded' : ''
+        }
+        style={{ position: 'fixed', left: 80, right: 0, bottom: 40, display: 'flex', justifyContent: 'center', zIndex: 100 }}
+      >
         <div className="input-box" style={{ minWidth: 300, maxWidth: 700, width: '100%', margin: 0, padding: 0, boxShadow: '0 2px 8px var(--input-box-shadow)', border: '1.5px solid var(--input-border)', borderRadius: 14, background: 'var(--input-bg)', display: 'flex', flexDirection: 'column', gap: 0, minHeight: selectedFiles.length > 0 ? 120 : undefined, paddingTop: selectedFiles.length > 0 ? 18 : undefined }}>
           {/* File preview inside follow-up search bar, above textarea */}
           {selectedFiles.length > 0 && (
@@ -611,7 +616,7 @@ function AppWithRouter({ isSidebarCollapsed, onToggleSidebar, showSignIn, setSho
         <TopBar darkMode={darkMode} toggleDarkMode={toggleDarkMode} />
         <Routes>
           <Route path="/" element={<MainContent darkMode={darkMode} />} />
-          <Route path="/search" element={<SearchResultsWithHistory onAddChat={onAddChat} darkMode={darkMode} />} />
+          <Route path="/search" element={<SearchResultsWithHistory onAddChat={onAddChat} darkMode={darkMode} isSidebarCollapsed={isSidebarCollapsed} />} />
           <Route path="/connections" element={<ConnectionsPage isSidebarCollapsed={isSidebarCollapsed} />} />
         </Routes>
       </div>
@@ -621,14 +626,14 @@ function AppWithRouter({ isSidebarCollapsed, onToggleSidebar, showSignIn, setSho
 }
 
 // Wrap SearchResults to add to chat history
-function SearchResultsWithHistory({ onAddChat, darkMode }) {
+function SearchResultsWithHistory({ onAddChat, darkMode, isSidebarCollapsed }) {
   const location = useLocation();
   const params = new URLSearchParams(location.search);
   const query = params.get('q') || '';
   useEffect(() => {
     if (query) onAddChat(query);
   }, [query, onAddChat]);
-  return <SearchResults darkMode={darkMode} />;
+  return <SearchResults darkMode={darkMode} isSidebarCollapsed={isSidebarCollapsed} />;
 }
 
 export default App;
