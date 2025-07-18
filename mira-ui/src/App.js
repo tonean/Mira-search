@@ -8,7 +8,7 @@ import { BrowserRouter as Router, Routes, Route, useLocation, useNavigate } from
 import "./App.css";
 import ConnectionsPage from "./ConnectionsPage";
 
-function SearchResults({ darkMode, isSidebarCollapsed }) {
+function SearchResults({ darkMode, isSidebarCollapsed, onSignUpClick }) {
   const location = useLocation();
   const params = new URLSearchParams(location.search);
   const query = params.get('q') || '';
@@ -190,6 +190,7 @@ function SearchResults({ darkMode, isSidebarCollapsed }) {
               Log in
             </button>
             <button 
+              onClick={onSignUpClick}
               style={{ backgroundColor: 'var(--primary)', color: darkMode ? 'var(--border-dark)' : '#fff', border: 'none', borderRadius: '8px', padding: '8px 16px', fontSize: '0.9rem', fontWeight: '500', cursor: 'pointer' }}
             >
               Sign up
@@ -197,6 +198,7 @@ function SearchResults({ darkMode, isSidebarCollapsed }) {
           </div>
         </div>
       )}
+      
       {/* Query row */}
       <div
         ref={questionRef}
@@ -594,6 +596,10 @@ function App() {
 // AppWithRouter is a wrapper to get useNavigate and pass it up
 function AppWithRouter({ isSidebarCollapsed, onToggleSidebar, showSignIn, setShowSignIn, darkMode, toggleDarkMode, chatHistory, onAddChat, onDeleteChat }) {
   const navigate = useNavigate();
+  const [showSignUpModal, setShowSignUpModal] = useState(false);
+  const [signUpEmail, setSignUpEmail] = useState("");
+  const [showLoginModal, setShowLoginModal] = useState(false);
+  const [loginEmail, setLoginEmail] = useState("");
 
   const handleNavigateChat = (query) => {
     if (!query || !query.trim()) {
@@ -601,6 +607,11 @@ function AppWithRouter({ isSidebarCollapsed, onToggleSidebar, showSignIn, setSho
     } else {
       navigate(`/search?q=${encodeURIComponent(query)}`);
     }
+  };
+
+  // Email validation function
+  const isValidEmail = (email) => {
+    return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
   };
 
   return (
@@ -613,27 +624,282 @@ function AppWithRouter({ isSidebarCollapsed, onToggleSidebar, showSignIn, setSho
         onDeleteChat={onDeleteChat}
       />
       <div className={`main-area ${isSidebarCollapsed ? 'main-area-expanded' : ''}`}>
-        <TopBar darkMode={darkMode} toggleDarkMode={toggleDarkMode} />
+        <TopBar darkMode={darkMode} toggleDarkMode={toggleDarkMode} onSignUpClick={() => setShowSignUpModal(true)} onLoginClick={() => setShowLoginModal(true)} />
         <Routes>
           <Route path="/" element={<MainContent darkMode={darkMode} />} />
-          <Route path="/search" element={<SearchResultsWithHistory onAddChat={onAddChat} darkMode={darkMode} isSidebarCollapsed={isSidebarCollapsed} />} />
+          <Route path="/search" element={<SearchResultsWithHistory onAddChat={onAddChat} darkMode={darkMode} isSidebarCollapsed={isSidebarCollapsed} onSignUpClick={() => setShowSignUpModal(true)} />} />
           <Route path="/connections" element={<ConnectionsPage isSidebarCollapsed={isSidebarCollapsed} />} />
         </Routes>
       </div>
       {showSignIn && <SignInPanel onClose={() => setShowSignIn(false)} />}
+      
+      {/* Sign Up Modal */}
+      {showSignUpModal && (
+        <div style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          backgroundColor: 'rgba(0, 0, 0, 0.5)',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          zIndex: 3000
+        }}>
+          <div style={{
+            backgroundColor: '#fff',
+            borderRadius: '12px',
+            padding: '24px',
+            maxWidth: '400px',
+            width: '90%',
+            position: 'relative',
+            boxShadow: '0 10px 25px rgba(0, 0, 0, 0.2)'
+          }}>
+            <button
+              onClick={() => { setShowSignUpModal(false); setSignUpEmail(""); }}
+              style={{
+                position: 'absolute',
+                top: '12px',
+                right: '12px',
+                background: 'none',
+                border: 'none',
+                fontSize: '20px',
+                cursor: 'pointer',
+                color: '#666',
+                width: '30px',
+                height: '30px',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                borderRadius: '50%',
+                transition: 'background-color 0.2s'
+              }}
+              onMouseEnter={(e) => e.target.style.backgroundColor = '#f0f0f0'}
+              onMouseLeave={(e) => e.target.style.backgroundColor = 'transparent'}
+            >
+              ×
+            </button>
+            <div style={{ marginTop: '8px' }}>
+              <h2 style={{ margin: '0 0 24px 0', fontSize: '1.5rem', fontWeight: '600', color: '#222', textAlign: 'center' }}>
+                Sign Up to Mira
+              </h2>
+              {/* Email Input Field */}
+              <input
+                type="email"
+                placeholder="Enter your email"
+                value={signUpEmail}
+                onChange={e => setSignUpEmail(e.target.value)}
+                style={{
+                  width: '100%',
+                  padding: '12px 16px',
+                  fontSize: '1rem',
+                  border: '1px solid #e0e0e0',
+                  borderRadius: '8px',
+                  backgroundColor: '#f8f8f8',
+                  color: '#333',
+                  marginBottom: '16px',
+                  boxSizing: 'border-box',
+                  outline: 'none'
+                }}
+              />
+              {/* Continue with email button */}
+              <button
+                disabled={!isValidEmail(signUpEmail)}
+                style={{
+                  width: '100%',
+                  padding: '12px 16px',
+                  fontSize: '1rem',
+                  fontWeight: '500',
+                  backgroundColor: isValidEmail(signUpEmail) ? '#111' : '#f0f0f0',
+                  color: isValidEmail(signUpEmail) ? '#fff' : '#555',
+                  border: 'none',
+                  borderRadius: '8px',
+                  cursor: isValidEmail(signUpEmail) ? 'pointer' : 'not-allowed',
+                  marginBottom: '16px',
+                  transition: 'background-color 0.2s, color 0.2s'
+                }}
+              >
+                Continue with email
+              </button>
+              {/* Or separator */}
+              <div style={{ textAlign: 'center', margin: '16px 0' }}>
+                <span style={{ color: '#666', fontSize: '0.9rem' }}>or</span>
+              </div>
+              {/* Sign up with Google button */}
+              <button
+                style={{
+                  width: '100%',
+                  padding: '12px 16px',
+                  fontSize: '1rem',
+                  fontWeight: '500',
+                  backgroundColor: '#fff',
+                  color: '#333',
+                  border: '1px solid #e0e0e0',
+                  borderRadius: '8px',
+                  cursor: 'pointer',
+                  marginBottom: '16px',
+                  transition: 'background-color 0.2s',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: '8px'
+                }}
+                onMouseEnter={(e) => e.target.style.backgroundColor = '#f8f8f8'}
+                onMouseLeave={(e) => e.target.style.backgroundColor = '#fff'}
+              >
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+                  <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
+                  <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
+                  <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/>
+                  <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
+                </svg>
+                Sign up with Google
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+      {/* Login Modal */}
+      {showLoginModal && (
+        <div style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          backgroundColor: 'rgba(0, 0, 0, 0.5)',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          zIndex: 3000
+        }}>
+          <div style={{
+            backgroundColor: '#fff',
+            borderRadius: '12px',
+            padding: '24px',
+            maxWidth: '400px',
+            width: '90%',
+            position: 'relative',
+            boxShadow: '0 10px 25px rgba(0, 0, 0, 0.2)'
+          }}>
+            <button
+              onClick={() => { setShowLoginModal(false); setLoginEmail(""); }}
+              style={{
+                position: 'absolute',
+                top: '12px',
+                right: '12px',
+                background: 'none',
+                border: 'none',
+                fontSize: '20px',
+                cursor: 'pointer',
+                color: '#666',
+                width: '30px',
+                height: '30px',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                borderRadius: '50%',
+                transition: 'background-color 0.2s'
+              }}
+              onMouseEnter={(e) => e.target.style.backgroundColor = '#f0f0f0'}
+              onMouseLeave={(e) => e.target.style.backgroundColor = 'transparent'}
+            >
+              ×
+            </button>
+            <div style={{ marginTop: '8px' }}>
+              <h2 style={{ margin: '0 0 24px 0', fontSize: '1.5rem', fontWeight: '600', color: '#222', textAlign: 'center' }}>
+                Log in to Mira
+              </h2>
+              {/* Email Input Field */}
+              <input
+                type="email"
+                placeholder="Enter your email"
+                value={loginEmail}
+                onChange={e => setLoginEmail(e.target.value)}
+                style={{
+                  width: '100%',
+                  padding: '12px 16px',
+                  fontSize: '1rem',
+                  border: '1px solid #e0e0e0',
+                  borderRadius: '8px',
+                  backgroundColor: '#f8f8f8',
+                  color: '#333',
+                  marginBottom: '16px',
+                  boxSizing: 'border-box',
+                  outline: 'none'
+                }}
+              />
+              {/* Continue with email button */}
+              <button
+                disabled={!isValidEmail(loginEmail)}
+                style={{
+                  width: '100%',
+                  padding: '12px 16px',
+                  fontSize: '1rem',
+                  fontWeight: '500',
+                  backgroundColor: isValidEmail(loginEmail) ? '#111' : '#f0f0f0',
+                  color: isValidEmail(loginEmail) ? '#fff' : '#555',
+                  border: 'none',
+                  borderRadius: '8px',
+                  cursor: isValidEmail(loginEmail) ? 'pointer' : 'not-allowed',
+                  marginBottom: '16px',
+                  transition: 'background-color 0.2s, color 0.2s'
+                }}
+              >
+                Continue with email
+              </button>
+              {/* Or separator */}
+              <div style={{ textAlign: 'center', margin: '16px 0' }}>
+                <span style={{ color: '#666', fontSize: '0.9rem' }}>or</span>
+              </div>
+              {/* Log in with Google button */}
+              <button
+                style={{
+                  width: '100%',
+                  padding: '12px 16px',
+                  fontSize: '1rem',
+                  fontWeight: '500',
+                  backgroundColor: '#fff',
+                  color: '#333',
+                  border: '1px solid #e0e0e0',
+                  borderRadius: '8px',
+                  cursor: 'pointer',
+                  marginBottom: '16px',
+                  transition: 'background-color 0.2s',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: '8px'
+                }}
+                onMouseEnter={(e) => e.target.style.backgroundColor = '#f8f8f8'}
+                onMouseLeave={(e) => e.target.style.backgroundColor = '#fff'}
+              >
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+                  <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
+                  <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
+                  <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/>
+                  <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
+                </svg>
+                Log in with Google
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
 
 // Wrap SearchResults to add to chat history
-function SearchResultsWithHistory({ onAddChat, darkMode, isSidebarCollapsed }) {
+function SearchResultsWithHistory({ onAddChat, darkMode, isSidebarCollapsed, onSignUpClick }) {
   const location = useLocation();
   const params = new URLSearchParams(location.search);
   const query = params.get('q') || '';
   useEffect(() => {
     if (query) onAddChat(query);
   }, [query, onAddChat]);
-  return <SearchResults darkMode={darkMode} isSidebarCollapsed={isSidebarCollapsed} />;
+  return <SearchResults darkMode={darkMode} isSidebarCollapsed={isSidebarCollapsed} onSignUpClick={onSignUpClick} />;
 }
 
 export default App;

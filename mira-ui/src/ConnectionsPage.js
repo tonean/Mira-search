@@ -57,32 +57,20 @@ function ConnectionToggle({ label }) {
 
 // Accept isSidebarCollapsed as a prop
 export default function ConnectionsPage({ isSidebarCollapsed = false }) {
-  const [contentStyle, setContentStyle] = useState({
-    maxWidth: 700,
-    margin: '0 auto',
-    padding: '0 24px',
-  });
-
-  useEffect(() => {
-    function handleResize() {
-      // If window is wide, use a larger maxWidth; if narrow, use more full width
-      if (window.innerWidth < 900) {
-        setContentStyle({ maxWidth: '98vw', margin: isSidebarCollapsed ? '8px 0 0 2vw' : '0 0', padding: '0 8px' });
-      } else if (window.innerWidth < 1200) {
-        setContentStyle({ maxWidth: 540, margin: isSidebarCollapsed ? '8px 0 0 4vw' : '0 auto', padding: '0 16px' });
-      } else {
-        setContentStyle({ maxWidth: 900, margin: isSidebarCollapsed ? '12px 0 0 6vw' : '0 auto', padding: '0 32px' });
-      }
-    }
-    handleResize();
-    window.addEventListener('resize', handleResize);
-    return () => window.removeEventListener('resize', handleResize);
-  }, [isSidebarCollapsed]);
-
-  // Move the whole page up if sidebar is collapsed
-  const pageStyle = isSidebarCollapsed
-    ? { background: 'var(--bg)', minHeight: '100vh', padding: '8px 0 0 0' }
-    : { background: 'var(--bg)', minHeight: '100vh', padding: '48px 0' };
+  // Make content span the full width of the main area, with some responsive padding
+  const pageStyle = {
+    background: 'var(--bg)',
+    minHeight: '100vh',
+    padding: isSidebarCollapsed ? '8px 0 0 0' : '48px 0 0 0',
+    width: '100%',
+    boxSizing: 'border-box',
+  };
+  const contentStyle = {
+    width: '100%',
+    padding: '0 32px',
+    boxSizing: 'border-box',
+    maxWidth: '100vw',
+  };
 
   return (
     <div style={pageStyle}>

@@ -1,10 +1,11 @@
 import React from "react";
 import "./App.css";
 
-export default function TopBar({ darkMode, toggleDarkMode }) {
+export default function TopBar({ darkMode, toggleDarkMode, onSignUpClick, onLoginClick }) {
   return (
     <div className="top-bar">
       <button 
+        onClick={onLoginClick}
         style={{
           backgroundColor: 'transparent',
           color: 'var(--primary)',
@@ -20,6 +21,7 @@ export default function TopBar({ darkMode, toggleDarkMode }) {
         Log in
       </button>
       <button 
+        onClick={onSignUpClick}
         style={{
           backgroundColor: 'var(--primary)',
           color: darkMode ? 'var(--border-dark)' : '#fff',
