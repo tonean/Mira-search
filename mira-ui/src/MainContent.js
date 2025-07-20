@@ -178,6 +178,7 @@ export default function MainContent({ darkMode }) {
   const fileInputRef = useRef();
   // State for selected files
   const [selectedFiles, setSelectedFiles] = useState([]);
+  const suggestionRef = useRef();
   
   const categorySuggestions = {
     Recommend: [
@@ -248,6 +249,13 @@ export default function MainContent({ darkMode }) {
       const searchArea = document.querySelector('.input-box');
       if (searchArea && !searchArea.contains(event.target) && hasUserTyped) {
         setHasUserTyped(false);
+      }
+      // Hide suggestions if click is outside suggestion buttons/options
+      if (
+        suggestionRef.current &&
+        !suggestionRef.current.contains(event.target)
+      ) {
+        setActiveCategory(null);
       }
     }
 
@@ -485,28 +493,51 @@ export default function MainContent({ darkMode }) {
             </div>
           </div>
         </div>
-        <div className={`suggestion-buttons${activeCategory ? ' transparent' : ''}`} style={{ marginBottom: 40, marginTop: 40, position: 'relative', zIndex: 2 }}>
-          <button className="suggestion-btn" onClick={() => handleCategoryClick('Recommend')}>Recommend</button>
-          <button className="suggestion-btn" onClick={() => handleCategoryClick('Research')}>Research</button>
-          <button className="suggestion-btn" onClick={() => handleCategoryClick('Travel')}>Travel</button>
-          <button className="suggestion-btn" onClick={() => handleCategoryClick('Dining')}>Dining</button>
-          <button className="suggestion-btn" onClick={() => handleCategoryClick('Product')}>Product</button>
-          <button className="suggestion-btn" onClick={() => handleCategoryClick('Fashion')}>Fashion</button>
-          <button className="suggestion-btn" onClick={() => handleCategoryClick('People')}>People</button>
+        <div ref={suggestionRef}>
+          <div className={`suggestion-buttons${activeCategory ? ' transparent' : ''}`} style={{ marginBottom: 40, marginTop: 40, position: 'relative', zIndex: 2 }}>
+            <button className="suggestion-btn" 
+              onMouseEnter={() => setActiveCategory('Recommend')}
+              onClick={() => handleCategoryClick('Recommend')}
+            >Recommend</button>
+            <button className="suggestion-btn" 
+              onMouseEnter={() => setActiveCategory('Research')}
+              onClick={() => handleCategoryClick('Research')}
+            >Research</button>
+            <button className="suggestion-btn" 
+              onMouseEnter={() => setActiveCategory('Travel')}
+              onClick={() => handleCategoryClick('Travel')}
+            >Travel</button>
+            <button className="suggestion-btn" 
+              onMouseEnter={() => setActiveCategory('Dining')}
+              onClick={() => handleCategoryClick('Dining')}
+            >Dining</button>
+            <button className="suggestion-btn" 
+              onMouseEnter={() => setActiveCategory('Product')}
+              onClick={() => handleCategoryClick('Product')}
+            >Product</button>
+            <button className="suggestion-btn" 
+              onMouseEnter={() => setActiveCategory('Fashion')}
+              onClick={() => handleCategoryClick('Fashion')}
+            >Fashion</button>
+            <button className="suggestion-btn" 
+              onMouseEnter={() => setActiveCategory('People')}
+              onClick={() => handleCategoryClick('People')}
+            >People</button>
+          </div>
+          {activeCategory && (
+            <ul className="recommendation-list fade-in-down">
+              {categorySuggestions[activeCategory].map((suggestion, idx) => (
+                <React.Fragment key={suggestion}>
+                  <li className="recommendation-item" onClick={() => handleSuggestionClick(suggestion)}>
+                    <span className="recommend-me-prefix">{categoryPrefixes[activeCategory]}</span>
+                    <span className="recommend-me-suffix">{suggestion.replace(categoryPrefixes[activeCategory], '')}</span>
+                  </li>
+                  {idx < categorySuggestions[activeCategory].length - 1 && <div className="recommendation-divider"></div>}
+                </React.Fragment>
+              ))}
+            </ul>
+          )}
         </div>
-        {activeCategory && (
-          <ul className="recommendation-list fade-in-down">
-            {categorySuggestions[activeCategory].map((suggestion, idx) => (
-              <React.Fragment key={suggestion}>
-                <li className="recommendation-item" onClick={() => handleSuggestionClick(suggestion)}>
-                  <span className="recommend-me-prefix">{categoryPrefixes[activeCategory]}</span>
-                  <span className="recommend-me-suffix">{suggestion.replace(categoryPrefixes[activeCategory], '')}</span>
-                </li>
-                {idx < categorySuggestions[activeCategory].length - 1 && <div className="recommendation-divider"></div>}
-              </React.Fragment>
-            ))}
-          </ul>
-        )}
       </div>
     </div>
   );

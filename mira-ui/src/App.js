@@ -7,8 +7,9 @@ import SignInPanel from "./SignInPanel";
 import { BrowserRouter as Router, Routes, Route, useLocation, useNavigate } from 'react-router-dom';
 import "./App.css";
 import ConnectionsPage from "./ConnectionsPage";
+import TypingParagraph from "./TypingParagraph";
 
-function SearchResults({ darkMode, isSidebarCollapsed, onSignUpClick }) {
+function SearchResults({ darkMode, isSidebarCollapsed, onSignUpClick, user, isAuthenticated }) {
   const location = useLocation();
   const params = new URLSearchParams(location.search);
   const query = params.get('q') || '';
@@ -132,47 +133,10 @@ function SearchResults({ darkMode, isSidebarCollapsed, onSignUpClick }) {
   };
 
   // --- MOCKUP TEXT ---
+  const aiTrendsText = `The latest trends in AI for 2025 center on several key shifts, impacting both technological development and real-world applications:\nAI Reasoning & Agentic AI: Large language models (LLMs) and frontier models are moving beyond mere text generation to advanced reasoning—enabling tools that can interpret, decide, and act on complex tasks. The concept of agentic AI is gaining momentum, with AI agents working autonomously to simplify work and personal life, signaling a shift from passive tools to active collaborators.\nCustom Silicon and Efficiency: As the demand for AI computational power rises, companies are turning to custom silicon—specialized processors designed for AI workloads—to optimize performance and manage energy use. AI is also becoming more resource-efficient, driven by innovations to manage costs and environmental concerns.\nMultimodal and Embodied AI: AI is rapidly expanding past text into multimodal models that combine language, images, video, and audio, as seen in tools like OpenAI’s Sora. This enables more dynamic and versatile AI systems. Additionally, embodied AI—where AI powers robots and interacts with the physical world—is progressing, signaling improvements in robotics and automated systems.\nBeyond Chatbots: The focus is shifting away from simple conversational interfaces. Instead, businesses are building software that leverages foundational AI models as back-end infrastructure, deploying generative AI for tasks such as summarizing, analyzing, or autonomously acting on unstructured data.\nAI in Scientific Discovery & Healthcare: AI-driven breakthroughs in science and medicine are accelerating, especially in fields like drug discovery, climate science, and materials engineering. AI-powered research is unlocking solutions to intricate challenges in biomedicine and sustainability.\nMainstream Adoption & Tangible Productivity Gains: Usage of AI in business is skyrocketing, with 78% of organizations adopting AI in 2024 compared to 55% in 2023. The technology is driving productivity gains, skill gap narrowing, and new business models across industries.\nMeasuring AI Efficacy and Responsible AI: With increased adoption comes a greater emphasis on evaluating AI performance and mitigating risks, including privacy, safety, and ethical concerns. Businesses and regulators are developing new benchmarks and metrics for AI effectiveness and trustworthiness.\nCloud Migrations and AI Workloads: Hyperscalers (cloud giants) are investing in infrastructure to accommodate surges in AI workloads, with a focus on secure, scalable cloud solutions integrated with advanced AI capabilities.\nOpen-Weight Models & Accessibility: Open-source and open-weight AI models are narrowing the gap with proprietary systems, making high-quality AI more accessible and affordable for wider use cases.\nDiversification and Benchmark Saturation: As LLMs and foundational models saturate traditional benchmarks, attention is turning toward new domain-specific models and diverse architectures to push the next stage of progress.\nThese trends reflect a broader movement from AI as hype to AI as practical, integrated technology—delivering measurable value, automating complex workflows, and reshaping economic and social systems.`;
+
   const mockupAnswer = (
-    <div className="ai-trends-text fade-in-animated" style={{ fontFamily: 'Georgia, serif', color: '#222', lineHeight: 1.7, maxWidth: 700, margin: '0 auto', padding: '0 24px' }}>
-      <div style={{ marginBottom: 24 }}>
-        The latest trends in <b>AI for 2025</b> center on several key shifts, impacting both technological development and real-world applications:
-      </div>
-      <ul style={{ paddingLeft: 24, marginBottom: 24 }}>
-        <li style={{ marginBottom: 14 }}>
-          <b>AI Reasoning &amp; Agentic AI:</b> Large language models (LLMs) and frontier models are moving beyond mere text generation to advanced reasoning—enabling tools that can interpret, decide, and act on complex tasks. The concept of <b>agentic AI</b> is gaining momentum, with AI agents working autonomously to simplify work and personal life, signaling a shift from passive tools to active collaborators.
-        </li>
-        <li style={{ marginBottom: 14 }}>
-          <b>Custom Silicon and Efficiency:</b> As the demand for AI computational power rises, companies are turning to <b>custom silicon</b>—specialized processors designed for AI workloads—to optimize performance and manage energy use. AI is also becoming more resource-efficient, driven by innovations to manage costs and environmental concerns.
-        </li>
-        <li style={{ marginBottom: 14 }}>
-          <b>Multimodal and Embodied AI:</b> AI is rapidly expanding past text into <b>multimodal models</b> that combine language, images, video, and audio, as seen in tools like OpenAI’s Sora. This enables more dynamic and versatile AI systems. Additionally, <b>embodied AI</b>—where AI powers robots and interacts with the physical world—is progressing, signaling improvements in robotics and automated systems.
-        </li>
-        <li style={{ marginBottom: 14 }}>
-          <b>Beyond Chatbots:</b> The focus is shifting away from simple conversational interfaces. Instead, businesses are building software that leverages foundational AI models as back-end infrastructure, deploying generative AI for tasks such as summarizing, analyzing, or autonomously acting on unstructured data.
-        </li>
-        <li style={{ marginBottom: 14 }}>
-          <b>AI in Scientific Discovery &amp; Healthcare:</b> AI-driven breakthroughs in science and medicine are accelerating, especially in fields like drug discovery, climate science, and materials engineering. AI-powered research is unlocking solutions to intricate challenges in biomedicine and sustainability.
-        </li>
-        <li style={{ marginBottom: 14 }}>
-          <b>Mainstream Adoption &amp; Tangible Productivity Gains:</b> Usage of AI in business is skyrocketing, with 78% of organizations adopting AI in 2024 compared to 55% in 2023. The technology is driving productivity gains, skill gap narrowing, and new business models across industries.
-        </li>
-        <li style={{ marginBottom: 14 }}>
-          <b>Measuring AI Efficacy and Responsible AI:</b> With increased adoption comes a greater emphasis on <b>evaluating AI performance</b> and mitigating risks, including privacy, safety, and ethical concerns. Businesses and regulators are developing new benchmarks and metrics for AI effectiveness and trustworthiness.
-        </li>
-        <li style={{ marginBottom: 14 }}>
-          <b>Cloud Migrations and AI Workloads:</b> Hyperscalers (cloud giants) are investing in infrastructure to accommodate surges in AI workloads, with a focus on secure, scalable cloud solutions integrated with advanced AI capabilities.
-        </li>
-        <li style={{ marginBottom: 14 }}>
-          <b>Open-Weight Models &amp; Accessibility:</b> Open-source and open-weight AI models are narrowing the gap with proprietary systems, making high-quality AI more accessible and affordable for wider use cases.
-        </li>
-        <li style={{ marginBottom: 14 }}>
-          <b>Diversification and Benchmark Saturation:</b> As LLMs and foundational models saturate traditional benchmarks, attention is turning toward new domain-specific models and diverse architectures to push the next stage of progress.
-        </li>
-      </ul>
-      <div style={{ marginBottom: 0 }}>
-        These trends reflect a broader movement from <b>AI as hype</b> to <b>AI as practical, integrated technology</b>—delivering measurable value, automating complex workflows, and reshaping economic and social systems.
-      </div>
-    </div>
+    <TypingParagraph text={aiTrendsText} />
   );
 
   return (
@@ -183,18 +147,58 @@ function SearchResults({ darkMode, isSidebarCollapsed, onSignUpClick }) {
           <div style={{ fontWeight: 500, fontSize: '1.3rem', color: 'var(--text)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', maxWidth: '60vw', marginLeft: 300 }}>
             Research the latest trends in AI
           </div>
-          <div style={{ display: 'flex', gap: 10 }}>
-            <button 
-              style={{ backgroundColor: 'transparent', color: 'var(--primary)', border: '1px solid var(--border-dark)', borderRadius: '8px', padding: '8px 16px', fontSize: '0.9rem', fontWeight: '500', cursor: 'pointer', marginRight: '8px' }}
-            >
-              Log in
-            </button>
-            <button 
-              onClick={onSignUpClick}
-              style={{ backgroundColor: 'var(--primary)', color: darkMode ? 'var(--border-dark)' : '#fff', border: 'none', borderRadius: '8px', padding: '8px 16px', fontSize: '0.9rem', fontWeight: '500', cursor: 'pointer' }}
-            >
-              Sign up
-            </button>
+          <div style={{ display: 'flex', gap: 10, alignItems: 'center' }}>
+            {!isAuthenticated ? (
+              <>
+                <button 
+                  style={{ backgroundColor: 'transparent', color: 'var(--primary)', border: '1px solid var(--border-dark)', borderRadius: '8px', padding: '8px 16px', fontSize: '0.9rem', fontWeight: '500', cursor: 'pointer', marginRight: '8px' }}
+                >
+                  Log in
+                </button>
+                <button 
+                  onClick={onSignUpClick}
+                  style={{ backgroundColor: 'var(--primary)', color: darkMode ? 'var(--border-dark)' : '#fff', border: 'none', borderRadius: '8px', padding: '8px 16px', fontSize: '0.9rem', fontWeight: '500', cursor: 'pointer' }}
+                >
+                  Sign up
+                </button>
+              </>
+            ) : (
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <span style={{ fontSize: '0.9rem', color: 'var(--text)', marginRight: '8px' }}>
+                  {user?.name}
+                </span>
+                <div style={{
+                  width: 32,
+                  height: 32,
+                  borderRadius: '50%',
+                  overflow: 'hidden',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  backgroundColor: 'var(--primary)',
+                  color: '#fff',
+                  fontSize: '12px',
+                  fontWeight: '500'
+                }}>
+                  <img 
+                    src={user?.picture} 
+                    alt={user?.name}
+                    style={{
+                      width: '100%',
+                      height: '100%',
+                      objectFit: 'cover'
+                    }}
+                    onError={(e) => {
+                      e.target.style.display = 'none';
+                      e.target.nextSibling.style.display = 'flex';
+                    }}
+                  />
+                  <span style={{ display: 'none' }}>
+                    {user?.name?.charAt(0)?.toUpperCase() || 'U'}
+                  </span>
+                </div>
+              </div>
+            )}
           </div>
         </div>
       )}
@@ -537,7 +541,7 @@ function SearchResults({ darkMode, isSidebarCollapsed, onSignUpClick }) {
 }
 
 function App() {
-  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(true);
+  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
   const [showLoadingScreen, setShowLoadingScreen] = useState(true);
   const [showSignIn, setShowSignIn] = useState(true);
   const [darkMode, setDarkMode] = useState(false);
@@ -600,6 +604,8 @@ function AppWithRouter({ isSidebarCollapsed, onToggleSidebar, showSignIn, setSho
   const [signUpEmail, setSignUpEmail] = useState("");
   const [showLoginModal, setShowLoginModal] = useState(false);
   const [loginEmail, setLoginEmail] = useState("");
+  const [user, setUser] = useState(null);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
 
   const handleNavigateChat = (query) => {
     if (!query || !query.trim()) {
@@ -614,6 +620,113 @@ function AppWithRouter({ isSidebarCollapsed, onToggleSidebar, showSignIn, setSho
     return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
   };
 
+  // Google Authentication - Redirect Flow
+  useEffect(() => {
+    // Check for Google OAuth response on page load
+    const urlParams = new URLSearchParams(window.location.search);
+    const code = urlParams.get('code');
+    const state = urlParams.get('state');
+    
+    if (code && state) {
+      // Handle the OAuth response
+      handleGoogleOAuthResponse(code, state);
+    }
+  }, []);
+
+  const handleGoogleOAuthResponse = (code, state) => {
+    console.log("Received Google OAuth response:", { code, state });
+    
+    // Parse the state to determine which modal was open
+    try {
+      const stateData = JSON.parse(decodeURIComponent(state));
+      const { modalType } = stateData;
+      
+      // Simulate getting user data from the authorization code
+      // In a real app, you'd send this code to your backend
+      const mockUserData = {
+        id: 'google_' + Math.random().toString(36).substr(2, 9),
+        email: 'user@example.com',
+        name: 'John Doe',
+        picture: 'https://lh3.googleusercontent.com/a/default-user',
+        provider: 'google'
+      };
+      
+      // Set user data and authentication state
+      setUser(mockUserData);
+      setIsAuthenticated(true);
+      
+      // Close the appropriate modal
+      if (modalType === 'signup') {
+        setShowSignUpModal(false);
+        setSignUpEmail("");
+      } else if (modalType === 'login') {
+        setShowLoginModal(false);
+        setLoginEmail("");
+      }
+      
+      console.log("Authentication successful for:", modalType);
+      console.log("User data:", mockUserData);
+      
+      // Clean up the URL
+      window.history.replaceState({}, document.title, window.location.pathname);
+      
+    } catch (error) {
+      console.error("Error parsing OAuth state:", error);
+    }
+  };
+
+  const handleGoogleSignUp = () => {
+    console.log("Redirecting to Google Sign Up...");
+    
+    // Create state parameter to track which modal was open
+    const state = encodeURIComponent(JSON.stringify({ modalType: 'signup' }));
+    
+    // Get the current origin for debugging
+    const redirectUri = window.location.origin;
+    console.log("Redirect URI:", redirectUri);
+    
+    // Construct Google OAuth URL
+    const googleAuthUrl = `https://accounts.google.com/o/oauth2/v2/auth?` +
+      `client_id=302037822597-jsac8r6ugd6um4igmfvmuu2bsaquttpq.apps.googleusercontent.com&` +
+      `redirect_uri=${encodeURIComponent(redirectUri)}&` +
+      `response_type=code&` +
+      `scope=openid email profile&` +
+      `state=${state}&` +
+      `access_type=offline&` +
+      `prompt=consent`;
+    
+    console.log("Full Google Auth URL:", googleAuthUrl);
+    
+    // Open in new window/tab
+    window.open(googleAuthUrl, '_blank', 'width=500,height=600');
+  };
+
+  const handleGoogleLogin = () => {
+    console.log("Redirecting to Google Login...");
+    
+    // Create state parameter to track which modal was open
+    const state = encodeURIComponent(JSON.stringify({ modalType: 'login' }));
+    
+    // Construct Google OAuth URL
+    const googleAuthUrl = `https://accounts.google.com/o/oauth2/v2/auth?` +
+      `client_id=302037822597-jsac8r6ugd6um4igmfvmuu2bsaquttpq.apps.googleusercontent.com&` +
+      `redirect_uri=${encodeURIComponent(window.location.origin)}&` +
+      `response_type=code&` +
+      `scope=openid email profile&` +
+      `state=${state}&` +
+      `access_type=offline&` +
+      `prompt=consent`;
+    
+    // Open in new window/tab
+    window.open(googleAuthUrl, '_blank', 'width=500,height=600');
+  };
+
+  const handleLogout = () => {
+    setUser(null);
+    setIsAuthenticated(false);
+    console.log("User logged out");
+  };
+
   return (
     <div className="app-container">
       <Sidebar 
@@ -624,10 +737,18 @@ function AppWithRouter({ isSidebarCollapsed, onToggleSidebar, showSignIn, setSho
         onDeleteChat={onDeleteChat}
       />
       <div className={`main-area ${isSidebarCollapsed ? 'main-area-expanded' : ''}`}>
-        <TopBar darkMode={darkMode} toggleDarkMode={toggleDarkMode} onSignUpClick={() => setShowSignUpModal(true)} onLoginClick={() => setShowLoginModal(true)} />
+        <TopBar 
+          darkMode={darkMode} 
+          toggleDarkMode={toggleDarkMode} 
+          onSignUpClick={() => setShowSignUpModal(true)} 
+          onLoginClick={() => setShowLoginModal(true)}
+          user={user}
+          isAuthenticated={isAuthenticated}
+          onLogout={handleLogout}
+        />
         <Routes>
           <Route path="/" element={<MainContent darkMode={darkMode} />} />
-          <Route path="/search" element={<SearchResultsWithHistory onAddChat={onAddChat} darkMode={darkMode} isSidebarCollapsed={isSidebarCollapsed} onSignUpClick={() => setShowSignUpModal(true)} />} />
+          <Route path="/search" element={<SearchResultsWithHistory onAddChat={onAddChat} darkMode={darkMode} isSidebarCollapsed={isSidebarCollapsed} onSignUpClick={() => setShowSignUpModal(true)} user={user} isAuthenticated={isAuthenticated} />} />
           <Route path="/connections" element={<ConnectionsPage isSidebarCollapsed={isSidebarCollapsed} />} />
         </Routes>
       </div>
@@ -728,6 +849,7 @@ function AppWithRouter({ isSidebarCollapsed, onToggleSidebar, showSignIn, setSho
               </div>
               {/* Sign up with Google button */}
               <button
+                onClick={handleGoogleSignUp}
                 style={{
                   width: '100%',
                   padding: '12px 16px',
@@ -855,6 +977,7 @@ function AppWithRouter({ isSidebarCollapsed, onToggleSidebar, showSignIn, setSho
               </div>
               {/* Log in with Google button */}
               <button
+                onClick={handleGoogleLogin}
                 style={{
                   width: '100%',
                   padding: '12px 16px',
@@ -892,14 +1015,14 @@ function AppWithRouter({ isSidebarCollapsed, onToggleSidebar, showSignIn, setSho
 }
 
 // Wrap SearchResults to add to chat history
-function SearchResultsWithHistory({ onAddChat, darkMode, isSidebarCollapsed, onSignUpClick }) {
+function SearchResultsWithHistory({ onAddChat, darkMode, isSidebarCollapsed, onSignUpClick, user, isAuthenticated }) {
   const location = useLocation();
   const params = new URLSearchParams(location.search);
   const query = params.get('q') || '';
   useEffect(() => {
     if (query) onAddChat(query);
   }, [query, onAddChat]);
-  return <SearchResults darkMode={darkMode} isSidebarCollapsed={isSidebarCollapsed} onSignUpClick={onSignUpClick} />;
+  return <SearchResults darkMode={darkMode} isSidebarCollapsed={isSidebarCollapsed} onSignUpClick={onSignUpClick} user={user} isAuthenticated={isAuthenticated} />;
 }
 
 export default App;

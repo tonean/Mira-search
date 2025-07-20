@@ -1,41 +1,97 @@
 import React from "react";
 import "./App.css";
 
-export default function TopBar({ darkMode, toggleDarkMode, onSignUpClick, onLoginClick }) {
+export default function TopBar({ darkMode, toggleDarkMode, onSignUpClick, onLoginClick, user, isAuthenticated, onLogout }) {
   return (
     <div className="top-bar">
-      <button 
-        onClick={onLoginClick}
-        style={{
-          backgroundColor: 'transparent',
-          color: 'var(--primary)',
-          border: '1px solid var(--border-dark)',
-          borderRadius: '8px',
-          padding: '8px 16px',
-          fontSize: '0.9rem',
-          fontWeight: '500',
-          cursor: 'pointer',
-          marginRight: '8px'
-        }}
-      >
-        Log in
-      </button>
-      <button 
-        onClick={onSignUpClick}
-        style={{
-          backgroundColor: 'var(--primary)',
-          color: darkMode ? 'var(--border-dark)' : '#fff',
-          border: 'none',
-          borderRadius: '8px',
-          padding: '8px 16px',
-          fontSize: '0.9rem',
-          fontWeight: '500',
-          cursor: 'pointer',
-          marginRight: '8px'
-        }}
-      >
-        Sign up
-      </button>
+      {!isAuthenticated ? (
+        <>
+          <button 
+            onClick={onLoginClick}
+            style={{
+              backgroundColor: 'transparent',
+              color: 'var(--primary)',
+              border: '1px solid var(--border-dark)',
+              borderRadius: '8px',
+              padding: '8px 16px',
+              fontSize: '0.9rem',
+              fontWeight: '500',
+              cursor: 'pointer',
+              marginRight: '8px'
+            }}
+          >
+            Log in
+          </button>
+          <button 
+            onClick={onSignUpClick}
+            style={{
+              backgroundColor: 'var(--primary)',
+              color: darkMode ? 'var(--border-dark)' : '#fff',
+              border: 'none',
+              borderRadius: '8px',
+              padding: '8px 16px',
+              fontSize: '0.9rem',
+              fontWeight: '500',
+              cursor: 'pointer',
+              marginRight: '8px'
+            }}
+          >
+            Sign up
+          </button>
+        </>
+      ) : (
+        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+          <span style={{ fontSize: '0.9rem', color: 'var(--text)', marginRight: '8px' }}>
+            {user?.name}
+          </span>
+          <button
+            onClick={onLogout}
+            style={{
+              background: 'none',
+              border: 'none',
+              borderRadius: '50%',
+              width: 36,
+              height: 36,
+              padding: 0,
+              cursor: 'pointer',
+              overflow: 'hidden',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center'
+            }}
+            title="Click to logout"
+          >
+            <img 
+              src={user?.picture} 
+              alt={user?.name}
+              style={{
+                width: '100%',
+                height: '100%',
+                borderRadius: '50%',
+                objectFit: 'cover'
+              }}
+              onError={(e) => {
+                e.target.style.display = 'none';
+                e.target.nextSibling.style.display = 'flex';
+              }}
+            />
+            <div style={{
+              display: 'none',
+              width: '100%',
+              height: '100%',
+              backgroundColor: 'var(--primary)',
+              color: '#fff',
+              borderRadius: '50%',
+              alignItems: 'center',
+              justifyContent: 'center',
+              fontSize: '14px',
+              fontWeight: '500'
+            }}>
+              {user?.name?.charAt(0)?.toUpperCase() || 'U'}
+            </div>
+          </button>
+        </div>
+      )}
       <button
         onClick={toggleDarkMode}
         style={{
