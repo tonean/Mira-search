@@ -375,7 +375,7 @@ function SearchResults({ darkMode, isSidebarCollapsed, onSignUpClick, user, isAu
               gap: 12,
               margin: '0 0 10px 0',
               padding: '8px 16px 8px 8px',
-              background: '#f5f5f3',
+              background: '#f8f8f8',
               borderRadius: 14,
               boxShadow: '0 1px 4px var(--file-box-shadow)',
               maxWidth: 300,
@@ -419,7 +419,7 @@ function SearchResults({ darkMode, isSidebarCollapsed, onSignUpClick, user, isAu
                 }}
                 title="Remove file"
               >
-                <svg width="16" height="16" viewBox="0 0 20 20" fill="none"><circle cx="10" cy="10" r="9" fill="#fff"/><path d="M6 6l8 8M14 6l-8 8" stroke="#111" strokeWidth="2.2" strokeLinecap="round"/></svg>
+                <svg width="16" height="16" viewBox="0 0 20 20" fill="none"><path d="M6 6l8 8M14 6l-8 8" stroke="var(--text)" strokeWidth="2.2" strokeLinecap="round"/></svg>
               </button>
             </div>
           )}
@@ -735,6 +735,7 @@ function AppWithRouter({ isSidebarCollapsed, onToggleSidebar, showSignIn, setSho
         chatHistory={chatHistory}
         onNavigateChat={handleNavigateChat}
         onDeleteChat={onDeleteChat}
+        darkMode={darkMode}
       />
       <div className={`main-area ${isSidebarCollapsed ? 'main-area-expanded' : ''}`}>
         <TopBar 
