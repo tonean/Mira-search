@@ -67,7 +67,7 @@ export default function ConnectionsPage({ isSidebarCollapsed = false }) {
   };
   const contentStyle = {
     width: '100%',
-    padding: '0 32px',
+    padding: isSidebarCollapsed ? '0 32px 0 80px' : '0 32px 0 120px',
     boxSizing: 'border-box',
     maxWidth: '100vw',
   };
