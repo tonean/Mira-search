@@ -486,7 +486,7 @@ function SearchResults({ darkMode, isSidebarCollapsed, onSignUpClick, user, isAu
                       <div style={{ fontSize: '0.92rem', color: '#888', marginTop: 7 }}>Duff Gardens Area</div>
                     </div>
                   </div>
-                  <div style={{ fontWeight: 600, fontSize: '1.01rem', marginBottom: 12, marginTop: 18 }}>Overview</div>
+                  <div style={{ fontWeight: 600, fontSize: '1.01rem', marginBottom: 12, marginTop: 32 }}>Overview</div>
                   <div style={{ fontSize: '0.97rem', color: darkMode ? '#d1d5db' : '#232427', marginBottom: 28, lineHeight: 1.5 }}>
                     Vinoth Ragunathan is a creative interface designer known for his work at Duff Gardens and insidesticker.com. He specializes in user-centric design and has contributed to several open source projects. Vinoth is passionate about creating intuitive digital experiences and is active in the design community.
                   </div>
@@ -769,6 +769,7 @@ function AppWithRouter({ isSidebarCollapsed, onToggleSidebar, showSignIn, setSho
   const [loginEmail, setLoginEmail] = useState("");
   const [user, setUser] = useState(null);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [connectedServices, setConnectedServices] = useState([]);
 
   const handleNavigateChat = (query) => {
     if (!query || !query.trim()) {
@@ -890,6 +891,16 @@ function AppWithRouter({ isSidebarCollapsed, onToggleSidebar, showSignIn, setSho
     console.log("User logged out");
   };
 
+  const handleConnectionUpdate = (service, connected) => {
+    setConnectedServices(prev => {
+      if (connected) {
+        return prev.includes(service) ? prev : [...prev, service];
+      } else {
+        return prev.filter(s => s !== service);
+      }
+    });
+  };
+
   return (
     <div className="app-container">
       <Sidebar 
@@ -899,6 +910,7 @@ function AppWithRouter({ isSidebarCollapsed, onToggleSidebar, showSignIn, setSho
         onNavigateChat={handleNavigateChat}
         onDeleteChat={onDeleteChat}
         darkMode={darkMode}
+        connectedServices={connectedServices}
       />
       <div className={`main-area ${isSidebarCollapsed ? 'main-area-expanded' : ''}`}>
         <TopBar 
@@ -913,7 +925,7 @@ function AppWithRouter({ isSidebarCollapsed, onToggleSidebar, showSignIn, setSho
         <Routes>
           <Route path="/" element={<MainContent darkMode={darkMode} />} />
           <Route path="/search" element={<SearchResultsWithHistory onAddChat={onAddChat} darkMode={darkMode} isSidebarCollapsed={isSidebarCollapsed} onSignUpClick={() => setShowSignUpModal(true)} user={user} isAuthenticated={isAuthenticated} />} />
-          <Route path="/connections" element={<ConnectionsPage isSidebarCollapsed={isSidebarCollapsed} />} />
+          <Route path="/connections" element={<ConnectionsPage isSidebarCollapsed={isSidebarCollapsed} onConnectionUpdate={handleConnectionUpdate} />} />
         </Routes>
       </div>
       {showSignIn && <SignInPanel onClose={() => setShowSignIn(false)} />}

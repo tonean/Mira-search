@@ -3,7 +3,7 @@ import ReactDOM from "react-dom";
 import { useNavigate } from 'react-router-dom';
 import "./App.css";
 
-export default function Sidebar({ isCollapsed, onToggleCollapse, chatHistory = [], onNavigateChat, onDeleteChat, darkMode = false }) {
+export default function Sidebar({ isCollapsed, onToggleCollapse, chatHistory = [], onNavigateChat, onDeleteChat, darkMode = false, connectedServices = [] }) {
   // --- State for chat logic (keep as before) ---
   const [hoveredIdx, setHoveredIdx] = useState(null);
   const [showDeleteIdx, setShowDeleteIdx] = useState(null);
@@ -178,23 +178,110 @@ export default function Sidebar({ isCollapsed, onToggleCollapse, chatHistory = [
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke={darkMode ? 'var(--text-muted)' : '#555'} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
             <span>Add Connection</span>
           </button>
-          <div className="create-task-hint" style={{ 
-            margin: '36px 0 22px 0', 
-            color: darkMode ? 'var(--text-muted)' : '#888', 
-            fontSize: '0.91rem', 
-            display: 'flex', 
-            alignItems: 'center', 
-            gap: 7 
-          }}>
-            <div className="dotted-box" style={{ 
-              width: 13, 
-              height: 13, 
-              border: `2px dashed ${darkMode ? 'var(--border-dark)' : '#bbb'}`, 
-              borderRadius: 3, 
-              display: 'inline-block' 
-            }} />
-            <span>Add a new connection to get started</span>
-          </div>
+          {/* Connected Services or Add Connection Hint */}
+          {connectedServices.length > 0 ? (
+            <div style={{ 
+              margin: '36px 0 22px 0'
+            }}>
+              {connectedServices.map((service) => {
+                const serviceConfig = {
+                  Gmail: {
+                    icon: (
+                      <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+                        <path d="M24 5.457v13.909c0 .904-.732 1.636-1.636 1.636h-3.819V11.73l-6.545 4.527-6.545-4.527v9.273H1.636C.732 21.002 0 20.27 0 19.366V5.457c0-.904.732-1.636 1.636-1.636h.818L12 10.09l9.546-6.269h.818c.904 0 1.636.732 1.636 1.636z" fill="#EA4335"/>
+                        <path d="M0 5.457c0-.904.732-1.636 1.636-1.636h.818L12 10.09 21.546 3.82h.818c.904 0 1.636.732 1.636 1.636l-10.909 7.633L2.182 5.457z" fill="#FBBC04"/>
+                        <path d="M0 5.457v13.909c0 .904.732 1.636 1.636 1.636h3.819V11.73z" fill="#EA4335"/>
+                        <path d="M18.545 11.73v9.273h3.819c.904 0 1.636-.732 1.636-1.636V5.457z" fill="#34A853"/>
+                      </svg>
+                    )
+                  },
+                  LinkedIn: {
+                    icon: (
+                      <svg width="20" height="20" viewBox="0 0 24 24" fill="#0077B5">
+                        <path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/>
+                      </svg>
+                    )
+                  },
+                  Twitter: {
+                    icon: (
+                      <svg width="20" height="20" viewBox="0 0 24 24" fill="#1DA1F2">
+                        <path d="M23.953 4.57a10 10 0 01-2.825.775 4.958 4.958 0 002.163-2.723c-.951.555-2.005.959-3.127 1.184a4.92 4.92 0 00-8.384 4.482C7.69 8.095 4.067 6.13 1.64 3.162a4.822 4.822 0 00-.666 2.475c0 1.71.87 3.213 2.188 4.096a4.904 4.904 0 01-2.228-.616v.06a4.923 4.923 0 003.946 4.827 4.996 4.996 0 01-2.212.085 4.936 4.936 0 004.604 3.417 9.867 9.867 0 01-6.102 2.105c-.39 0-.779-.023-1.17-.067a13.995 13.995 0 007.557 2.209c9.053 0 13.998-7.496 13.998-13.985 0-.21 0-.42-.015-.63A9.935 9.935 0 0024 4.59z"/>
+                      </svg>
+                    )
+                  }
+                };
+
+                const config = serviceConfig[service];
+                if (!config) return null;
+
+                return (
+                  <div key={service} style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '10px',
+                    marginBottom: '12px',
+                    padding: '8px',
+                    background: 'transparent',
+                    border: `1px solid #f0f0f0`,
+                    borderRadius: '8px',
+                    fontSize: '0.85rem'
+                  }}>
+                    {config.icon}
+                    <div style={{ flex: 1 }}>
+                      <div style={{ 
+                        display: 'flex', 
+                        alignItems: 'center', 
+                        gap: '6px',
+                        marginBottom: '2px'
+                      }}>
+                        <span style={{ 
+                          fontWeight: '600', 
+                          color: darkMode ? 'var(--text)' : '#222',
+                          fontSize: '0.9rem'
+                        }}>
+                          {service}
+                        </span>
+                        <span style={{
+                          color: '#4caf50',
+                          fontSize: '0.8rem',
+                          fontWeight: '500',
+                          background: '#e8f5e8',
+                          padding: '2px 6px',
+                          borderRadius: '4px'
+                        }}>
+                          Active
+                        </span>
+                      </div>
+                      <div style={{
+                        color: darkMode ? 'var(--text-muted)' : '#888',
+                        fontSize: '0.75rem'
+                      }}>
+                        Your {service} is connected.
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          ) : (
+            <div className="create-task-hint" style={{ 
+              margin: '36px 0 22px 0', 
+              color: darkMode ? 'var(--text-muted)' : '#888', 
+              fontSize: '0.91rem', 
+              display: 'flex', 
+              alignItems: 'center', 
+              gap: 7 
+            }}>
+              <div className="dotted-box" style={{ 
+                width: 13, 
+                height: 13, 
+                border: `2px dashed ${darkMode ? 'var(--border-dark)' : '#bbb'}`, 
+                borderRadius: 3, 
+                display: 'inline-block' 
+              }} />
+              <span>Add a new connection to get started</span>
+            </div>
+          )}
           {/* Chats section */}
           <div style={{ marginTop: 48 }}>
                       <div style={{ display: 'flex', alignItems: 'center', marginBottom: 6, marginLeft: 1 }}>
