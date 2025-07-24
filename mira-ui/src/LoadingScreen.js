@@ -71,7 +71,7 @@ const LoadingScreen = ({ onOpenMira }) => {
               key={gradientKey}
               className={`gradient-text ${gradientActive ? 'active' : ''} ${gradientPaused ? 'paused' : ''}`}
             >
-              Search designed for you
+              Turn your network from 0 to 1
             </span>
           </div>
         </div>

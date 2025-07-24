@@ -720,3 +720,33 @@ body {
 .followup-bar-sidebar-expanded {
   left: 270px !important;
 }
+
+/* Add shimmer effect for thinking text */
+.thinking-shimmer {
+  position: relative;
+  display: inline-block;
+  color: var(--text-muted);
+  font-style: italic;
+  font-weight: 500;
+  overflow: hidden;
+}
+.thinking-shimmer .shimmer-text {
+  position: relative;
+  z-index: 1;
+}
+.thinking-shimmer::after {
+  content: '';
+  position: absolute;
+  left: -60%;
+  top: 0;
+  width: 60%;
+  height: 100%;
+  background: linear-gradient(90deg, rgba(255,255,255,0.7) 0%, rgba(255,255,255,0.2) 60%, rgba(255,255,255,0) 100%);
+  z-index: 2;
+  pointer-events: none;
+  animation: shimmer-pass 1.2s cubic-bezier(.4,0,.2,1) 0.2s 1;
+}
+@keyframes shimmer-pass {
+  0% { left: -60%; }
+  100% { left: 110%; }
+}

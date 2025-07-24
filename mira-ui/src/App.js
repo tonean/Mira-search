@@ -82,7 +82,7 @@ function SearchResults({ darkMode, isSidebarCollapsed, onSignUpClick, user, isAu
       const timer = setTimeout(() => {
         setShowPeopleCards(true);
         clearInterval(dotsInterval);
-      }, 2000);
+      }, 3200);
       return () => {
         clearTimeout(timer);
         clearInterval(dotsInterval);
@@ -401,9 +401,7 @@ function SearchResults({ darkMode, isSidebarCollapsed, onSignUpClick, user, isAu
                   alignItems: 'center',
                   justifyContent: 'flex-start',
                 }}>
-                  <span style={{ fontStyle: 'italic', fontWeight: 500 }}>
-                    Finding engineers with recent open source activity{thinkingDots}
-                  </span>
+                  <span className="thinking-shimmer"><span className="shimmer-text">Finding engineers with recent open source activity{thinkingDots}</span></span>
                 </div>
               ) : null
             )}
