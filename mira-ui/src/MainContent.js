@@ -181,58 +181,58 @@ export default function MainContent({ darkMode }) {
   const suggestionRef = useRef();
   
   const categorySuggestions = {
-    Recommend: [
-      'Recommend me interesting podcasts for my commute',
-      'Recommend me some good sci-fi books to read',
-      'Recommend me healthy snacks i can try',
-      'Recommend me a movie that blends comedy with adventure',
+    Engineers: [
+      'have contributed to open source projects',
+      'specialize in AI and machine learning',
+      'have worked at top tech companies',
+      'are available for freelance work',
     ],
-    Research: [
-      'Research the latest trends in AI',
-      'Research climate change impacts in my area',
-      'Research the history of the Silk Road',
-      'Research effective study techniques',
+    Designers: [
+      'create stunning user interfaces',
+      'with experience in branding and identity',
+      'have won design awards',
+      'open to remote opportunities',
     ],
-    Travel: [
-      'Travel destinations for solo adventurers',
-      'Travel tips for visiting Japan',
-      'Travel packing checklist for Europe',
-      'Travel safety advice for first-time flyers',
+    Creators: [
+      'produce educational content',
+      'with a large following on YouTube',
+      'focus on technology topics',
+      'collaborate with brands',
     ],
-    Dining: [
-      'Dining options near me',
-      'Dining etiquette in France',
-      'Dining deals for students',
-      'Dining experiences for foodies',
+    Founders: [
+      'of successful startups',
+      'have raised venture capital',
+      'with experience in SaaS businesses',
+      'looking for co-founders',
     ],
-    Product: [
-      'Product reviews for wireless earbuds',
-      'Productivity tools for remote teams',
-      'Product launch checklist',
-      'Product comparison: iPhone vs Android',
+    Academia: [
+      'research artificial intelligence',
+      'with published papers in top journals',
+      'open to industry collaboration',
+      'who teach at leading universities',
     ],
-    Fashion: [
-      'Fashion trends for this summer',
-      'Fashion tips for business casual',
-      'Fashion brands that are sustainable',
-      'Fashion inspiration for weddings',
+    Investors: [
+      'interested in early-stage startups',
+      'focus on climate tech',
+      'with a background in engineering',
+      'mentor founders',
     ],
     People: [
-      'People who changed the world',
-      'People to follow in tech',
-      'People skills for leaders',
-      'People management best practices',
+      'are thought leaders in their field',
+      'speak at international conferences',
+      'with interdisciplinary backgrounds',
+      'are active in online communities',
     ],
   };
 
   const categoryPrefixes = {
-    Recommend: 'Recommend me ',
-    Research: 'Research ',
-    Travel: 'Travel ',
-    Dining: 'Dining ',
-    Product: 'Product ',
-    Fashion: 'Fashion ',
-    People: 'People ',
+    Engineers: 'Engineers who ',
+    Designers: 'Designers who ',
+    Creators: 'Creators who ',
+    Founders: 'Founders who ',
+    Academia: 'Academics who ',
+    Investors: 'Investors who ',
+    People: 'People who ',
   };
 
   const [activeCategory, setActiveCategory] = useState(null);
@@ -312,14 +312,14 @@ export default function MainContent({ darkMode }) {
   };
 
   const handleSuggestionClick = (text) => {
-    setInputValue(text);
+    setInputValue(categoryPrefixes[activeCategory] + text);
     setActiveCategory(null);
     setHasUserTyped(true);
     setTimeout(() => {
       const textarea = document.querySelector('.search-input');
       if (textarea) {
         textarea.focus();
-        textarea.setSelectionRange(text.length, text.length);
+        textarea.setSelectionRange((categoryPrefixes[activeCategory] + text).length, (categoryPrefixes[activeCategory] + text).length);
       }
     }, 0);
   };
@@ -355,7 +355,7 @@ export default function MainContent({ darkMode }) {
       <div>
         <div className="greeting">
           <TypingGreeting shouldAnimate={!hasUserTyped} /><br />
-          <span style={{ fontWeight: 400, color: "var(--text-muted)" }}>How can I help today?</span>
+          <span style={{ fontWeight: 400, color: "var(--text-muted)" }}>Who are you looking for today?</span>
         </div>
         <div className={showGlow ? `input-box-effect input-box-effect-glow${fadeGlow ? ' hide' : ''}` : undefined}>
           <div className="input-box" onClick={() => document.querySelector('.search-input').focus()} style={{ minWidth: "300px", width: "auto", minHeight: selectedFiles.length > 0 ? 120 : undefined, paddingTop: selectedFiles.length > 0 ? 18 : undefined, background: 'var(--input-bg)', border: '1.5px solid var(--input-border)', boxShadow: '0 2px 8px var(--input-box-shadow)' }}>
@@ -426,7 +426,7 @@ export default function MainContent({ darkMode }) {
             />
             <textarea
               className="search-input"
-              placeholder="Search personalized for you..."
+              placeholder="Describe who you're looking for..."
               value={inputValue}
               style={{
                 border: "none",
@@ -496,31 +496,24 @@ export default function MainContent({ darkMode }) {
         <div ref={suggestionRef}>
           <div className={`suggestion-buttons${activeCategory ? ' transparent' : ''}`} style={{ marginBottom: 40, marginTop: 40, position: 'relative', zIndex: 2 }}>
             <button className="suggestion-btn" 
-              onMouseEnter={() => setActiveCategory('Recommend')}
-              onClick={() => handleCategoryClick('Recommend')}
-            >Recommend</button>
+              onClick={() => handleCategoryClick('Engineers')}
+            >Engineers</button>
             <button className="suggestion-btn" 
-              onMouseEnter={() => setActiveCategory('Research')}
-              onClick={() => handleCategoryClick('Research')}
-            >Research</button>
+              onClick={() => handleCategoryClick('Designers')}
+            >Designers</button>
             <button className="suggestion-btn" 
-              onMouseEnter={() => setActiveCategory('Travel')}
-              onClick={() => handleCategoryClick('Travel')}
-            >Travel</button>
+              onClick={() => handleCategoryClick('Creators')}
+            >Creators</button>
             <button className="suggestion-btn" 
-              onMouseEnter={() => setActiveCategory('Dining')}
-              onClick={() => handleCategoryClick('Dining')}
-            >Dining</button>
+              onClick={() => handleCategoryClick('Founders')}
+            >Founders</button>
             <button className="suggestion-btn" 
-              onMouseEnter={() => setActiveCategory('Product')}
-              onClick={() => handleCategoryClick('Product')}
-            >Product</button>
+              onClick={() => handleCategoryClick('Academia')}
+            >Academia</button>
             <button className="suggestion-btn" 
-              onMouseEnter={() => setActiveCategory('Fashion')}
-              onClick={() => handleCategoryClick('Fashion')}
-            >Fashion</button>
+              onClick={() => handleCategoryClick('Investors')}
+            >Investors</button>
             <button className="suggestion-btn" 
-              onMouseEnter={() => setActiveCategory('People')}
               onClick={() => handleCategoryClick('People')}
             >People</button>
           </div>
@@ -530,7 +523,7 @@ export default function MainContent({ darkMode }) {
                 <React.Fragment key={suggestion}>
                   <li className="recommendation-item" onClick={() => handleSuggestionClick(suggestion)}>
                     <span className="recommend-me-prefix">{categoryPrefixes[activeCategory]}</span>
-                    <span className="recommend-me-suffix">{suggestion.replace(categoryPrefixes[activeCategory], '')}</span>
+                    <span className="recommend-me-suffix">{suggestion}</span>
                   </li>
                   {idx < categorySuggestions[activeCategory].length - 1 && <div className="recommendation-divider"></div>}
                 </React.Fragment>

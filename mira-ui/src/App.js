@@ -32,6 +32,8 @@ function SearchResults({ darkMode, isSidebarCollapsed, onSignUpClick, user, isAu
   const [showStickyBar, setShowStickyBar] = useState(false);
   const questionRef = useRef();
   const hiddenDivRef = useRef();
+  const [showPeopleCards, setShowPeopleCards] = useState(false);
+  const [thinkingDots, setThinkingDots] = useState('');
 
   // Effect to show sticky bar when question is out of view
   useEffect(() => {
@@ -66,6 +68,30 @@ function SearchResults({ darkMode, isSidebarCollapsed, onSignUpClick, user, isAu
       textarea.style.height = hiddenDiv.offsetHeight + 'px';
     }
   }, [editValue, editing]);
+
+  // Show people cards after 2 seconds if query matches
+  useEffect(() => {
+    if (query.trim() === 'Engineers who have contributed to open source projects') {
+      setShowPeopleCards(false);
+      setThinkingDots('');
+      let dotCount = 0;
+      const dotsInterval = setInterval(() => {
+        dotCount = (dotCount + 1) % 4;
+        setThinkingDots('.'.repeat(dotCount));
+      }, 400);
+      const timer = setTimeout(() => {
+        setShowPeopleCards(true);
+        clearInterval(dotsInterval);
+      }, 2000);
+      return () => {
+        clearTimeout(timer);
+        clearInterval(dotsInterval);
+      };
+    } else {
+      setShowPeopleCards(false);
+      setThinkingDots('');
+    }
+  }, [query]);
 
   const handleCopy = () => {
     navigator.clipboard.writeText(query);
@@ -207,8 +233,6 @@ function SearchResults({ darkMode, isSidebarCollapsed, onSignUpClick, user, isAu
       <div
         ref={questionRef}
         style={{ position: 'relative', marginTop: -20, marginBottom: 38, maxWidth: 1000, marginLeft: 'auto', marginRight: 'auto' }}
-        onMouseEnter={() => setHovered(true)}
-        onMouseLeave={() => setHovered(false)}
       >
         {editing ? (
           <div style={{ position: 'relative', width: '100%' }}>
@@ -297,67 +321,152 @@ function SearchResults({ darkMode, isSidebarCollapsed, onSignUpClick, user, isAu
           </div>
         ) : (
           <>
-            <h1 style={{ fontSize: '1.7rem', fontWeight: 500, color: 'var(--text)', margin: 0, paddingRight: 120, marginLeft: 150, whiteSpace: 'pre-line', wordBreak: 'break-word' }}>{query}</h1>
-            {hovered && (
-              <div style={{ position: 'absolute', top: 0, right: 140, display: 'flex', alignItems: 'center', gap: 4 }}>
-                <div style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
-                  <button
-                    onClick={handleEdit}
-                    style={{ background: 'var(--primary)', color: 'var(--primary-contrast)', border: 'none', borderRadius: 6, padding: 6, cursor: 'pointer', fontSize: '0.98rem', display: 'flex', alignItems: 'center', flexShrink: 0 }}
-                    title="Edit Query"
-                  >
-                    <svg width="16" height="16" viewBox="0 0 20 20" fill="none"><path d="M4 13.5V16h2.5l7.1-7.1-2.5-2.5L4 13.5zM15.7 6.04a1 1 0 0 0 0-1.41l-1.3-1.3a1 1 0 0 0-1.41 0l-1.13 1.13 2.5 2.5 1.13-1.13z" fill="#fff"/></svg>
-                    <span style={{
-                      marginLeft: 6,
-                      fontSize: '0.98rem',
-                      display: 'none',
-                      background: 'var(--primary)',
-                      color: 'var(--primary-contrast)',
-                      borderRadius: 4,
-                      padding: '2px 8px',
-                      position: 'absolute',
-                      left: '110%',
-                      top: '50%',
-                      transform: 'translateY(-50%)',
-                      whiteSpace: 'nowrap',
-                      zIndex: 10,
-                    }}
-                    className="edit-tooltip"
-                    >Edit Query</span>
-                  </button>
+            <div style={{ position: 'relative' }}>
+              <h1 
+                style={{ fontSize: '1.7rem', fontWeight: 500, color: 'var(--text)', margin: 0, paddingRight: 120, marginLeft: 150, whiteSpace: 'pre-line', wordBreak: 'break-word', display: 'inline-block' }}
+                onMouseEnter={() => setHovered(true)}
+                onMouseLeave={() => setHovered(false)}
+              >
+                {query}
+              </h1>
+              {hovered && (
+                <div style={{ position: 'absolute', top: 0, right: 0, display: 'flex', alignItems: 'center', gap: 4 }}>
+                  <div style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
+                    <button
+                      onClick={handleEdit}
+                      style={{ background: 'var(--primary)', color: 'var(--primary-contrast)', border: 'none', borderRadius: 6, padding: 6, cursor: 'pointer', fontSize: '0.98rem', display: 'flex', alignItems: 'center', flexShrink: 0 }}
+                      title="Edit Query"
+                    >
+                      <svg width="16" height="16" viewBox="0 0 20 20" fill="none"><path d="M4 13.5V16h2.5l7.1-7.1-2.5-2.5L4 13.5zM15.7 6.04a1 1 0 0 0 0-1.41l-1.3-1.3a1 1 0 0 0-1.41 0l-1.13 1.13 2.5 2.5 1.13-1.13z" fill="#fff"/></svg>
+                      <span style={{
+                        marginLeft: 6,
+                        fontSize: '0.98rem',
+                        display: 'none',
+                        background: 'var(--primary)',
+                        color: 'var(--primary-contrast)',
+                        borderRadius: 4,
+                        padding: '2px 8px',
+                        position: 'absolute',
+                        left: '110%',
+                        top: '50%',
+                        transform: 'translateY(-50%)',
+                        whiteSpace: 'nowrap',
+                        zIndex: 10,
+                      }}
+                      className="edit-tooltip"
+                      >Edit Query</span>
+                    </button>
+                  </div>
+                  <div style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
+                    <button
+                      onClick={handleCopy}
+                      style={{ background: 'var(--primary)', color: 'var(--primary-contrast)', border: 'none', borderRadius: 6, padding: 6, cursor: 'pointer', fontSize: '0.98rem', display: 'flex', alignItems: 'center', flexShrink: 0 }}
+                      title="Copy Query"
+                    >
+                      <svg width="16" height="16" viewBox="0 0 20 20" fill="none"><rect x="7" y="7" width="9" height="9" rx="2" stroke="#fff" strokeWidth="1.5"/><rect x="4" y="4" width="9" height="9" rx="2" fill="none" stroke="#fff" strokeWidth="1.5"/></svg>
+                      <span style={{
+                        marginLeft: 6,
+                        fontSize: '0.98rem',
+                        display: 'none',
+                        background: 'var(--primary)',
+                        color: 'var(--primary-contrast)',
+                        borderRadius: 4,
+                        padding: '2px 8px',
+                        position: 'absolute',
+                        left: '110%',
+                        top: '50%',
+                        transform: 'translateY(-50%)',
+                        whiteSpace: 'nowrap',
+                        zIndex: 10,
+                      }}
+                      className="copy-tooltip"
+                      >{copied ? 'Copied!' : 'Copy'}</span>
+                    </button>
+                  </div>
                 </div>
-                <div style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
-                  <button
-                    onClick={handleCopy}
-                    style={{ background: 'var(--primary)', color: 'var(--primary-contrast)', border: 'none', borderRadius: 6, padding: 6, cursor: 'pointer', fontSize: '0.98rem', display: 'flex', alignItems: 'center', flexShrink: 0 }}
-                    title="Copy Query"
-                  >
-                    <svg width="16" height="16" viewBox="0 0 20 20" fill="none"><rect x="7" y="7" width="9" height="9" rx="2" stroke="#fff" strokeWidth="1.5"/><rect x="4" y="4" width="9" height="9" rx="2" fill="none" stroke="#fff" strokeWidth="1.5"/></svg>
-                    <span style={{
-                      marginLeft: 6,
-                      fontSize: '0.98rem',
-                      display: 'none',
-                      background: 'var(--primary)',
-                      color: 'var(--primary-contrast)',
-                      borderRadius: 4,
-                      padding: '2px 8px',
-                      position: 'absolute',
-                      left: '110%',
-                      top: '50%',
-                      transform: 'translateY(-50%)',
-                      whiteSpace: 'nowrap',
-                      zIndex: 10,
-                    }}
-                    className="copy-tooltip"
-                    >{copied ? 'Copied!' : 'Copy'}</span>
-                  </button>
+              )}
+            </div>
+            <hr className="ai-divider" />
+            {query.trim() === 'Engineers who have contributed to open source projects' && (
+              !showPeopleCards ? (
+                <div style={{
+                  maxWidth: 700,
+                  margin: '0 auto 24px auto',
+                  color: 'var(--text-muted)',
+                  fontSize: '1.08rem',
+                  textAlign: 'left',
+                  lineHeight: 1.6,
+                  minHeight: 60,
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'flex-start',
+                }}>
+                  <span style={{ fontStyle: 'italic', fontWeight: 500 }}>
+                    Finding engineers with recent open source activity{thinkingDots}
+                  </span>
                 </div>
-              </div>
+              ) : null
+            )}
+            {/* People card mockup below */}
+            {query.trim() === 'Engineers who have contributed to open source projects' && showPeopleCards && (
+              <PeopleCardList people={[
+                {
+                  name: '-` Vinoth Ragunathan `-',
+                  followers: '13.7K',
+                  meta: ['🏡 duff gardens', '🎲 insidesticker.com', 'helvetiica'],
+                  description: 'interface designer',
+                  avatarBg: 'linear-gradient(135deg, #3a8dde 0%, #b388ff 100%)',
+                },
+                {
+                  name: 'michael shillingburg',
+                  followers: '8.2K',
+                  meta: ['🌐 shilly.co', 'shillingburger'],
+                  description: '3D artist and interface designer ✨ designing @ https://t.co/hJOniBW62E photo editor: https://t.co/EKiGRBrUZ6 drawing site: https://t.co/uv3jbaB0q1 👋 michael@shilly.co',
+                  avatarBg: '#7c3aed',
+                  avatarIcon: (
+                    <svg width="48" height="48" viewBox="0 0 48 48" fill="none"><circle cx="24" cy="24" r="24" fill="#7c3aed"/><path d="M32 32c0-4.418-3.582-8-8-8s-8 3.582-8 8" stroke="#fff" strokeWidth="2" strokeLinecap="round"/><circle cx="24" cy="20" r="4" fill="#fff"/></svg>
+                  ),
+                },
+                {
+                  name: 'Alex Kim',
+                  followers: '5.1K',
+                  meta: ['📍 San Francisco', 'alexkim.com'],
+                  description: 'Full-stack engineer and open source contributor',
+                  avatarBg: 'linear-gradient(135deg, #ffb347 0%, #ffcc33 100%)',
+                },
+                {
+                  name: 'Priya Patel',
+                  followers: '12.4K',
+                  meta: ['🎨 Behance', 'priyapatel.art'],
+                  description: 'Product designer passionate about accessibility',
+                  avatarBg: 'linear-gradient(135deg, #ff6a88 0%, #ff99ac 100%)',
+                },
+                {
+                  name: 'Jordan Lee',
+                  followers: '9.8K',
+                  meta: ['🧑‍💻 github.com/jordanlee', 'Medium'],
+                  description: 'AI researcher and technical writer',
+                  avatarBg: 'linear-gradient(135deg, #43cea2 0%, #185a9d 100%)',
+                },
+                {
+                  name: 'Sofia Garcia',
+                  followers: '7.3K',
+                  meta: ['🌎 Remote', 'sofiagarcia.dev'],
+                  description: 'Frontend developer and mentor',
+                  avatarBg: 'linear-gradient(135deg, #f7971e 0%, #ffd200 100%)',
+                },
+                {
+                  name: 'Chris Wang',
+                  followers: '10.2K',
+                  meta: ['📚 Academia.edu', 'Stanford'],
+                  description: 'Professor in computer science and ML',
+                  avatarBg: 'linear-gradient(135deg, #00c6ff 0%, #0072ff 100%)',
+                },
+              ]} darkMode={darkMode} />
             )}
           </>
         )}
       </div>
-      <hr className="ai-divider" />
       {/* Follow-up input fixed at the bottom, overlaying the answer text */}
       <div 
         className={
@@ -365,7 +474,7 @@ function SearchResults({ darkMode, isSidebarCollapsed, onSignUpClick, user, isAu
         }
         style={{ position: 'fixed', left: 80, right: 0, bottom: 40, display: 'flex', justifyContent: 'center', zIndex: 100 }}
       >
-        <div className="input-box" style={{ minWidth: 300, maxWidth: 700, width: '100%', margin: 0, padding: 0, boxShadow: '0 2px 8px var(--input-box-shadow)', border: '1.5px solid var(--input-border)', borderRadius: 14, background: 'var(--input-bg)', display: 'flex', flexDirection: 'column', gap: 0, minHeight: selectedFiles.length > 0 ? 120 : undefined, paddingTop: selectedFiles.length > 0 ? 18 : undefined }}>
+        <div className="input-box" style={{ minWidth: 300, maxWidth: 700, width: '100%', margin: 0, padding: 0, boxShadow: '0 2px 8px var(--input-box-shadow)', border: '1.5px solid var(--input-border)', borderRadius: 14, background: 'var(--input-bg)', display: 'flex', flexDirection: 'column', gap: 0, minHeight: selectedFiles.length > 0 ? 120 : 38, paddingTop: selectedFiles.length > 0 ? 18 : 0 }}>
           {/* File preview inside follow-up search bar, above textarea */}
           {selectedFiles.length > 0 && (
             <div style={{
@@ -447,9 +556,9 @@ function SearchResults({ darkMode, isSidebarCollapsed, onSignUpClick, user, isAu
               overflow: 'hidden',
               fontFamily: 'inherit',
               lineHeight: '1.5',
-              padding: '22px 20px 22px 20px',
+              padding: '10px 14px 10px 14px',
               borderRadius: 14,
-              minHeight: 56,
+              minHeight: 38,
               boxSizing: 'border-box',
               color: '#222',
             }}
@@ -1024,6 +1133,131 @@ function SearchResultsWithHistory({ onAddChat, darkMode, isSidebarCollapsed, onS
     if (query) onAddChat(query);
   }, [query, onAddChat]);
   return <SearchResults darkMode={darkMode} isSidebarCollapsed={isSidebarCollapsed} onSignUpClick={onSignUpClick} user={user} isAuthenticated={isAuthenticated} />;
+}
+
+function PeopleCard({ person, index, visible, flip, darkMode }) {
+  return (
+    <div
+      className={flip ? 'flip-animate' : ''}
+      style={{
+        background: darkMode ? 'none' : '#fff',
+        borderRadius: 16,
+        padding: '20px 20px 14px 20px',
+        color: darkMode ? '#fff' : '#232427',
+        boxShadow: 'none',
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'flex-start',
+        width: 270,
+        height: 180,
+        border: darkMode ? '1.2px solid #444' : '1.2px solid #ececec',
+        opacity: visible ? 1 : 0,
+        transform: visible ? 'translateY(0)' : 'translateY(40px)',
+        transition: `opacity 0.7s cubic-bezier(.4,0,.2,1) ${index * 0.18}s, transform 0.7s cubic-bezier(.4,0,.2,1) ${index * 0.18}s`,
+        margin: 0,
+        boxSizing: 'border-box',
+      }}
+    >
+      <div style={{ fontWeight: 600, fontSize: '1.08rem', color: darkMode ? '#fff' : '#232427', marginBottom: 6, lineHeight: 1.25 }}>{person.name}</div>
+      <div style={{ color: darkMode ? '#d1d5db' : '#444', fontSize: '0.97rem', marginBottom: 10, lineHeight: 1.4, overflow: 'hidden', textOverflow: 'ellipsis', display: '-webkit-box', WebkitLineClamp: 3, WebkitBoxOrient: 'vertical' }}>{person.description}</div>
+      <div style={{ color: darkMode ? '#bbb' : '#888', fontSize: '0.91rem', marginTop: 'auto', display: 'flex', alignItems: 'center', gap: 10 }}>
+        {person.meta.map((m, i) => <span key={i}>{m}</span>)}
+      </div>
+    </div>
+  );
+}
+
+function PeopleCardList({ people, darkMode }) {
+  const [visibleCards, setVisibleCards] = React.useState(Array(people.length).fill(false));
+  const [flipIndex, setFlipIndex] = React.useState(null);
+  const cardRefs = React.useRef([]);
+  React.useEffect(() => {
+    const observers = [];
+    people.forEach((_, i) => {
+      if (!cardRefs.current[i]) return;
+      observers[i] = new window.IntersectionObserver(
+        ([entry]) => {
+          if (entry.isIntersecting) {
+            setTimeout(() => {
+              setVisibleCards((prev) => {
+                if (prev[i]) return prev;
+                const next = [...prev];
+                next[i] = true;
+                return next;
+              });
+            }, i * 120);
+            observers[i].disconnect();
+          }
+        },
+        { threshold: 0.2 }
+      );
+      observers[i].observe(cardRefs.current[i]);
+    });
+    return () => observers.forEach(obs => obs && obs.disconnect());
+  }, [people.length]);
+
+  // Flip animation logic (auto, random, fast)
+  React.useEffect(() => {
+    // Only start flip animation after all cards have faded in
+    if (!visibleCards.every(Boolean)) return;
+    let timeout;
+    function triggerFlip() {
+      const visibleIdxs = visibleCards.map((v, i) => v ? i : null).filter(i => i !== null);
+      if (visibleIdxs.length === 0) return;
+      const randomIdx = visibleIdxs[Math.floor(Math.random() * visibleIdxs.length)];
+      setFlipIndex(randomIdx);
+      timeout = setTimeout(() => {
+        setFlipIndex(null);
+        timeout = setTimeout(triggerFlip, 1200);
+      }, 500); // match animation duration
+    }
+    triggerFlip();
+    return () => clearTimeout(timeout);
+  }, [visibleCards]);
+
+  React.useEffect(() => { injectFlipAnimStyle(darkMode); }, [darkMode]);
+
+  return (
+    <div style={{
+      maxWidth: 900,
+      margin: '32px 48px 0 48px',
+      display: 'grid',
+      gridTemplateColumns: 'repeat(auto-fit, minmax(270px, 1fr))',
+      gridRowGap: 60,
+      gridColumnGap: 27,
+      alignItems: 'stretch',
+      paddingBottom: 220,
+    }}>
+      {people.map((person, i) => (
+        <div key={i} ref={el => cardRefs.current[i] = el}>
+          <PeopleCard person={person} index={i} visible={visibleCards[i]} flip={flipIndex === i} darkMode={darkMode} />
+        </div>
+      ))}
+    </div>
+  );
+}
+
+// Add flip animation CSS to the file (inject into <style> for demo)
+function injectFlipAnimStyle(darkMode) {
+  if (typeof document === 'undefined') return;
+  let style = document.getElementById('flip-anim-style');
+  if (style) style.remove();
+  style = document.createElement('style');
+  style.id = 'flip-anim-style';
+  style.innerHTML = `
+    @keyframes flipY {
+      0% { transform: rotateY(0deg); background: ${darkMode ? '#222' : '#fff'}; }
+      40% { transform: rotateY(180deg); background: ${darkMode ? '#222' : '#e0e7ff'}; }
+      60% { transform: rotateY(180deg); background: ${darkMode ? '#222' : '#e0e7ff'}; }
+      100% { transform: rotateY(360deg); background: ${darkMode ? '#222' : '#fff'}; }
+    }
+    .flip-animate {
+      animation: flipY 0.5s cubic-bezier(.4,0,.2,1);
+      backface-visibility: hidden;
+      perspective: 800px;
+    }
+  `;
+  document.head.appendChild(style);
 }
 
 export default App;

@@ -702,6 +702,10 @@ body {
   background: none;
 }
 
+.dark-mode .ai-divider {
+  border-top: 1.5px solid #444;
+}
+
 .sidebar-chat-item:hover {
   background: #ececec;
   color: #222;
