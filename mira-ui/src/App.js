@@ -34,6 +34,7 @@ function SearchResults({ darkMode, isSidebarCollapsed, onSignUpClick, user, isAu
   const hiddenDivRef = useRef();
   const [showPeopleCards, setShowPeopleCards] = useState(false);
   const [thinkingDots, setThinkingDots] = useState('');
+  const [selectedPerson, setSelectedPerson] = useState(null);
 
   // Effect to show sticky bar when question is out of view
   useEffect(() => {
@@ -406,61 +407,116 @@ function SearchResults({ darkMode, isSidebarCollapsed, onSignUpClick, user, isAu
               ) : null
             )}
             {/* People card mockup below */}
-            {query.trim() === 'Engineers who have contributed to open source projects' && showPeopleCards && (
-              <PeopleCardList people={[
-                {
-                  name: '-` Vinoth Ragunathan `-',
-                  followers: '13.7K',
-                  meta: ['🏡 duff gardens', '🎲 insidesticker.com', 'helvetiica'],
-                  description: 'interface designer',
-                  avatarBg: 'linear-gradient(135deg, #3a8dde 0%, #b388ff 100%)',
-                },
-                {
-                  name: 'michael shillingburg',
-                  followers: '8.2K',
-                  meta: ['🌐 shilly.co', 'shillingburger'],
-                  description: '3D artist and interface designer ✨ designing @ https://t.co/hJOniBW62E photo editor: https://t.co/EKiGRBrUZ6 drawing site: https://t.co/uv3jbaB0q1 👋 michael@shilly.co',
-                  avatarBg: '#7c3aed',
-                  avatarIcon: (
-                    <svg width="48" height="48" viewBox="0 0 48 48" fill="none"><circle cx="24" cy="24" r="24" fill="#7c3aed"/><path d="M32 32c0-4.418-3.582-8-8-8s-8 3.582-8 8" stroke="#fff" strokeWidth="2" strokeLinecap="round"/><circle cx="24" cy="20" r="4" fill="#fff"/></svg>
-                  ),
-                },
-                {
-                  name: 'Alex Kim',
-                  followers: '5.1K',
-                  meta: ['📍 San Francisco', 'alexkim.com'],
-                  description: 'Full-stack engineer and open source contributor',
-                  avatarBg: 'linear-gradient(135deg, #ffb347 0%, #ffcc33 100%)',
-                },
-                {
-                  name: 'Priya Patel',
-                  followers: '12.4K',
-                  meta: ['🎨 Behance', 'priyapatel.art'],
-                  description: 'Product designer passionate about accessibility',
-                  avatarBg: 'linear-gradient(135deg, #ff6a88 0%, #ff99ac 100%)',
-                },
-                {
-                  name: 'Jordan Lee',
-                  followers: '9.8K',
-                  meta: ['🧑‍💻 github.com/jordanlee', 'Medium'],
-                  description: 'AI researcher and technical writer',
-                  avatarBg: 'linear-gradient(135deg, #43cea2 0%, #185a9d 100%)',
-                },
-                {
-                  name: 'Sofia Garcia',
-                  followers: '7.3K',
-                  meta: ['🌎 Remote', 'sofiagarcia.dev'],
-                  description: 'Frontend developer and mentor',
-                  avatarBg: 'linear-gradient(135deg, #f7971e 0%, #ffd200 100%)',
-                },
-                {
-                  name: 'Chris Wang',
-                  followers: '10.2K',
-                  meta: ['📚 Academia.edu', 'Stanford'],
-                  description: 'Professor in computer science and ML',
-                  avatarBg: 'linear-gradient(135deg, #00c6ff 0%, #0072ff 100%)',
-                },
-              ]} darkMode={darkMode} />
+            {query.trim() === 'Engineers who have contributed to open source projects' && showPeopleCards && !selectedPerson && (
+              <PeopleCardList 
+                people={[
+                  {
+                    name: 'Vinoth Ragunathan',
+                    followers: '13.7K',
+                    meta: ['🏡 duff gardens', '🎲 insidesticker.com', 'helvetiica'],
+                    description: 'interface designer',
+                    avatarBg: 'linear-gradient(135deg, #3a8dde 0%, #b388ff 100%)',
+                  },
+                  {
+                    name: 'michael shillingburg',
+                    followers: '8.2K',
+                    meta: ['🌐 shilly.co', 'shillingburger'],
+                    description: '3D artist and interface designer ✨ designing @ https://t.co/hJOniBW62E photo editor: https://t.co/EKiGRBrUZ6 drawing site: https://t.co/uv3jbaB0q1 👋 michael@shilly.co',
+                    avatarBg: '#7c3aed',
+                    avatarIcon: (
+                      <svg width="48" height="48" viewBox="0 0 48 48" fill="none"><circle cx="24" cy="24" r="24" fill="#7c3aed"/><path d="M32 32c0-4.418-3.582-8-8-8s-8 3.582-8 8" stroke="#fff" strokeWidth="2" strokeLinecap="round"/><circle cx="24" cy="20" r="4" fill="#fff"/></svg>
+                    ),
+                  },
+                  {
+                    name: 'Alex Kim',
+                    followers: '5.1K',
+                    meta: ['📍 San Francisco', 'alexkim.com'],
+                    description: 'Full-stack engineer and open source contributor',
+                    avatarBg: 'linear-gradient(135deg, #ffb347 0%, #ffcc33 100%)',
+                  },
+                  {
+                    name: 'Priya Patel',
+                    followers: '12.4K',
+                    meta: ['🎨 Behance', 'priyapatel.art'],
+                    description: 'Product designer passionate about accessibility',
+                    avatarBg: 'linear-gradient(135deg, #ff6a88 0%, #ff99ac 100%)',
+                  },
+                  {
+                    name: 'Jordan Lee',
+                    followers: '9.8K',
+                    meta: ['🧑‍💻 github.com/jordanlee', 'Medium'],
+                    description: 'AI researcher and technical writer',
+                    avatarBg: 'linear-gradient(135deg, #43cea2 0%, #185a9d 100%)',
+                  },
+                  {
+                    name: 'Sofia Garcia',
+                    followers: '7.3K',
+                    meta: ['🌎 Remote', 'sofiagarcia.dev'],
+                    description: 'Frontend developer and mentor',
+                    avatarBg: 'linear-gradient(135deg, #f7971e 0%, #ffd200 100%)',
+                  },
+                  {
+                    name: 'Chris Wang',
+                    followers: '10.2K',
+                    meta: ['📚 Academia.edu', 'Stanford'],
+                    description: 'Professor in computer science and ML',
+                    avatarBg: 'linear-gradient(135deg, #00c6ff 0%, #0072ff 100%)',
+                  },
+                ]}
+                darkMode={darkMode}
+                onCardClick={person => {
+                  if (person.name === 'Vinoth Ragunathan') setSelectedPerson(person);
+                }}
+              />
+            )}
+            {selectedPerson && (
+              <div style={{ position: 'relative', minHeight: 60 }}>
+                <button onClick={() => setSelectedPerson(null)} style={{ position: 'absolute', left: 32, top: -150, background: 'none', border: 'none', color: darkMode ? '#fff' : '#222', fontWeight: 500, fontSize: '0.98rem', cursor: 'pointer', padding: 0, display: 'flex', alignItems: 'center', gap: 6, zIndex: 10 }}>
+                  <svg width="17" height="17" viewBox="0 0 20 20" fill="none"><path d="M13 16l-5-6 5-6" stroke={darkMode ? '#fff' : '#222'} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>
+                  Back
+                </button>
+                <div style={{ maxWidth: 700, margin: '56px auto 0 auto', color: darkMode ? '#fff' : '#232427', padding: '0 8px', paddingBottom: 220 }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 28, marginTop: 0, marginBottom: 26 }}>
+                    <div style={{ width: 60, height: 60, borderRadius: '50%', overflow: 'hidden', background: selectedPerson.avatarBg, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 26, color: '#fff', fontWeight: 700 }}>
+                      <span style={{ fontSize: 26 }}>{selectedPerson.name[0]}</span>
+                    </div>
+                    <div>
+                      <div style={{ fontSize: '1.15rem', fontWeight: 600 }}>{selectedPerson.name}</div>
+                      <div style={{ fontSize: '0.98rem', color: darkMode ? '#bbb' : '#444', fontWeight: 500, marginTop: 4 }}>Interface Designer</div>
+                      <div style={{ fontSize: '0.92rem', color: '#888', marginTop: 7 }}>Duff Gardens Area</div>
+                    </div>
+                  </div>
+                  <div style={{ fontWeight: 600, fontSize: '1.01rem', marginBottom: 12, marginTop: 18 }}>Overview</div>
+                  <div style={{ fontSize: '0.97rem', color: darkMode ? '#d1d5db' : '#232427', marginBottom: 28, lineHeight: 1.5 }}>
+                    Vinoth Ragunathan is a creative interface designer known for his work at Duff Gardens and insidesticker.com. He specializes in user-centric design and has contributed to several open source projects. Vinoth is passionate about creating intuitive digital experiences and is active in the design community.
+                  </div>
+                  <div style={{ fontWeight: 600, fontSize: '1.01rem', marginBottom: 12, marginTop: 18 }}>Work Experience</div>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 18, marginBottom: 10 }}>
+                    <div style={{ width: 32, height: 32, borderRadius: 8, background: '#3a8dde', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff', fontWeight: 700, fontSize: 15 }}>VR</div>
+                    <div>
+                      <div style={{ fontWeight: 600, fontSize: '0.97rem' }}>Duff Gardens</div>
+                      <div style={{ fontSize: '0.91rem', color: '#888', fontWeight: 500, marginTop: 2 }}>Lead Designer</div>
+                      <div style={{ fontSize: '0.89rem', color: '#888', marginTop: 2 }}>2018 - Current</div>
+                    </div>
+                  </div>
+                  <div style={{ fontSize: '0.93rem', color: darkMode ? '#bbb' : '#444', marginBottom: 18, marginLeft: 42 }}>
+                    Duff Gardens is a creative studio focused on playful, innovative digital products and experiences.
+                  </div>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 18, marginBottom: 10 }}>
+                    <div style={{ width: 32, height: 32, borderRadius: 8, background: '#b388ff', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff', fontWeight: 700, fontSize: 15 }}>IS</div>
+                    <div>
+                      <div style={{ fontWeight: 600, fontSize: '0.97rem' }}>insidesticker.com</div>
+                      <div style={{ fontSize: '0.91rem', color: '#888', fontWeight: 500, marginTop: 2 }}>Founder & Designer</div>
+                      <div style={{ fontSize: '0.89rem', color: '#888', marginTop: 2 }}>2016 - 2018</div>
+                    </div>
+                  </div>
+                  <div style={{ fontSize: '0.93rem', color: darkMode ? '#bbb' : '#444', marginBottom: 18, marginLeft: 42 }}>
+                    insidesticker.com is a platform for custom, creative stickers and design resources.
+                  </div>
+                  <div style={{ fontWeight: 600, fontSize: '1.01rem', marginBottom: 12, marginTop: 18 }}>Contact</div>
+                  <div style={{ fontSize: '0.93rem', color: darkMode ? '#bbb' : '#444' }}>vinoth@duffgardens.com</div>
+                </div>
+              </div>
             )}
           </>
         )}
@@ -1134,11 +1190,12 @@ function SearchResultsWithHistory({ onAddChat, darkMode, isSidebarCollapsed, onS
 }
 
 function PeopleCard({ person, index, visible, flip, darkMode }) {
+  const [isHovered, setIsHovered] = React.useState(false);
   return (
     <div
       className={flip ? 'flip-animate' : ''}
       style={{
-        background: darkMode ? 'none' : '#fff',
+        background: darkMode ? 'none' : (isHovered ? '#f5f5f5' : '#fff'),
         borderRadius: 16,
         padding: '20px 20px 14px 20px',
         color: darkMode ? '#fff' : '#232427',
@@ -1151,10 +1208,13 @@ function PeopleCard({ person, index, visible, flip, darkMode }) {
         border: darkMode ? '1.2px solid #444' : '1.2px solid #ececec',
         opacity: visible ? 1 : 0,
         transform: visible ? 'translateY(0)' : 'translateY(40px)',
-        transition: `opacity 0.7s cubic-bezier(.4,0,.2,1) ${index * 0.18}s, transform 0.7s cubic-bezier(.4,0,.2,1) ${index * 0.18}s`,
+        transition: `background 0.18s, opacity 0.7s cubic-bezier(.4,0,.2,1) ${index * 0.18}s, transform 0.7s cubic-bezier(.4,0,.2,1) ${index * 0.18}s`,
         margin: 0,
         boxSizing: 'border-box',
+        cursor: 'pointer',
       }}
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
     >
       <div style={{ fontWeight: 600, fontSize: '1.08rem', color: darkMode ? '#fff' : '#232427', marginBottom: 6, lineHeight: 1.25 }}>{person.name}</div>
       <div style={{ color: darkMode ? '#d1d5db' : '#444', fontSize: '0.97rem', marginBottom: 10, lineHeight: 1.4, overflow: 'hidden', textOverflow: 'ellipsis', display: '-webkit-box', WebkitLineClamp: 3, WebkitBoxOrient: 'vertical' }}>{person.description}</div>
@@ -1165,7 +1225,7 @@ function PeopleCard({ person, index, visible, flip, darkMode }) {
   );
 }
 
-function PeopleCardList({ people, darkMode }) {
+function PeopleCardList({ people, darkMode, onCardClick }) {
   const [visibleCards, setVisibleCards] = React.useState(Array(people.length).fill(false));
   const [flipIndex, setFlipIndex] = React.useState(null);
   const cardRefs = React.useRef([]);
@@ -1199,19 +1259,24 @@ function PeopleCardList({ people, darkMode }) {
     // Only start flip animation after all cards have faded in
     if (!visibleCards.every(Boolean)) return;
     let timeout;
-    function triggerFlip() {
-      const visibleIdxs = visibleCards.map((v, i) => v ? i : null).filter(i => i !== null);
-      if (visibleIdxs.length === 0) return;
-      const randomIdx = visibleIdxs[Math.floor(Math.random() * visibleIdxs.length)];
-      setFlipIndex(randomIdx);
-      timeout = setTimeout(() => {
-        setFlipIndex(null);
-        timeout = setTimeout(triggerFlip, 1200);
-      }, 500); // match animation duration
-    }
-    triggerFlip();
+    // Wait for the last card's fade-in to finish before starting flips
+    const fadeInDuration = 700; // ms, matches CSS
+    const lastDelay = (people.length - 1) * 120; // ms
+    timeout = setTimeout(() => {
+      function triggerFlip() {
+        const visibleIdxs = visibleCards.map((v, i) => v ? i : null).filter(i => i !== null);
+        if (visibleIdxs.length === 0) return;
+        const randomIdx = visibleIdxs[Math.floor(Math.random() * visibleIdxs.length)];
+        setFlipIndex(randomIdx);
+        timeout = setTimeout(() => {
+          setFlipIndex(null);
+          timeout = setTimeout(triggerFlip, 1200);
+        }, 500); // match animation duration
+      }
+      triggerFlip();
+    }, fadeInDuration + lastDelay);
     return () => clearTimeout(timeout);
-  }, [visibleCards]);
+  }, [visibleCards, people.length]);
 
   React.useEffect(() => { injectFlipAnimStyle(darkMode); }, [darkMode]);
 
@@ -1228,7 +1293,9 @@ function PeopleCardList({ people, darkMode }) {
     }}>
       {people.map((person, i) => (
         <div key={i} ref={el => cardRefs.current[i] = el}>
-          <PeopleCard person={person} index={i} visible={visibleCards[i]} flip={flipIndex === i} darkMode={darkMode} />
+          <div onClick={() => onCardClick && onCardClick(person)}>
+            <PeopleCard person={person} index={i} visible={visibleCards[i]} flip={flipIndex === i} darkMode={darkMode} />
+          </div>
         </div>
       ))}
     </div>
