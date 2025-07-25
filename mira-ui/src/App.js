@@ -36,6 +36,14 @@ function SearchResults({ darkMode, isSidebarCollapsed, onSignUpClick, user, isAu
   const [showAIResponse, setShowAIResponse] = useState(false);
   const [thinkingDots, setThinkingDots] = useState('');
   const [selectedPerson, setSelectedPerson] = useState(null);
+  const [showConnectDropdown, setShowConnectDropdown] = useState(false);
+  const [animationsCompleted, setAnimationsCompleted] = useState(false);
+  const [profileAnimated, setProfileAnimated] = useState({
+    header: false,
+    overview: false,
+    workExperience: false,
+    contact: false
+  });
 
   // Effect to show sticky bar when question is out of view
   useEffect(() => {
@@ -74,6 +82,14 @@ function SearchResults({ darkMode, isSidebarCollapsed, onSignUpClick, user, isAu
   // Show AI response and people cards with proper timing
   useEffect(() => {
     if (query.trim() === 'Engineers who have contributed to open source projects') {
+      // If animations were already completed, show content immediately
+      if (animationsCompleted) {
+        setShowAIResponse(true);
+        setShowPeopleCards(true);
+        setThinkingDots('');
+        return;
+      }
+      
       setShowAIResponse(false);
       setShowPeopleCards(false);
       setThinkingDots('');
@@ -92,6 +108,7 @@ function SearchResults({ darkMode, isSidebarCollapsed, onSignUpClick, user, isAu
       // Show people cards after typing animation completes (3.2s thinking + ~3.25s typing + 0.4s buffer)
       const cardsTimer = setTimeout(() => {
         setShowPeopleCards(true);
+        setAnimationsCompleted(true); // Mark animations as completed
       }, 6850);
       
       return () => {
@@ -103,8 +120,58 @@ function SearchResults({ darkMode, isSidebarCollapsed, onSignUpClick, user, isAu
       setShowAIResponse(false);
       setShowPeopleCards(false);
       setThinkingDots('');
+      setAnimationsCompleted(false); // Reset for other queries
     }
-  }, [query]);
+  }, [query, animationsCompleted]);
+
+  // When returning from profile view, show content immediately
+  useEffect(() => {
+    if (selectedPerson === null && query.trim() === 'Engineers who have contributed to open source projects') {
+      setAnimationsCompleted(true);
+    }
+  }, [selectedPerson, query]);
+
+  // Trigger profile fade-down animation with staggered timing
+  useEffect(() => {
+    if (selectedPerson) {
+      // Reset all sections
+      setProfileAnimated({
+        header: false,
+        overview: false,
+        workExperience: false,
+        contact: false
+      });
+      
+      // Stagger each section with delays
+      const timers = [
+        setTimeout(() => setProfileAnimated(prev => ({ ...prev, header: true })), 100),
+        setTimeout(() => setProfileAnimated(prev => ({ ...prev, overview: true })), 300),
+        setTimeout(() => setProfileAnimated(prev => ({ ...prev, workExperience: true })), 500),
+        setTimeout(() => setProfileAnimated(prev => ({ ...prev, contact: true })), 700)
+      ];
+      
+      return () => timers.forEach(timer => clearTimeout(timer));
+    } else {
+      setProfileAnimated({
+        header: false,
+        overview: false,
+        workExperience: false,
+        contact: false
+      });
+    }
+  }, [selectedPerson]);
+
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (showConnectDropdown && !event.target.closest('.connect-dropdown-container')) {
+        setShowConnectDropdown(false);
+      }
+    };
+    
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, [showConnectDropdown]);
 
   const handleCopy = () => {
     navigator.clipboard.writeText(query);
@@ -486,7 +553,7 @@ function SearchResults({ darkMode, isSidebarCollapsed, onSignUpClick, user, isAu
                   lineHeight: 1.6,
                   marginTop: '4px'
                 }}>
-                  <TypingParagraph text="There are countless engineers who have made significant contributions to open-source projects. Here are a few notable examples:" speed={25} />
+                                        <TypingParagraph text="There are countless engineers who have made significant contributions to open-source projects. Here are a few notable examples:" speed={25} instant={animationsCompleted} />
                 </div>
               </div>
             )}
@@ -535,55 +602,306 @@ function SearchResults({ darkMode, isSidebarCollapsed, onSignUpClick, user, isAu
             )}
             {selectedPerson && (
               <div style={{ position: 'relative', minHeight: 60 }}>
-                <button onClick={() => setSelectedPerson(null)} style={{ position: 'absolute', left: 32, top: -150, background: 'none', border: 'none', color: darkMode ? '#fff' : '#222', fontWeight: 500, fontSize: '0.98rem', cursor: 'pointer', padding: 0, display: 'flex', alignItems: 'center', gap: 6, zIndex: 10 }}>
+                <button onClick={() => setSelectedPerson(null)} style={{ position: 'absolute', left: 80, top: -40, background: 'none', border: 'none', color: darkMode ? '#fff' : '#222', fontWeight: 500, fontSize: '0.98rem', cursor: 'pointer', padding: 0, display: 'flex', alignItems: 'center', gap: 6, zIndex: 10 }}>
                   <svg width="17" height="17" viewBox="0 0 20 20" fill="none"><path d="M13 16l-5-6 5-6" stroke={darkMode ? '#fff' : '#222'} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>
                   Back
                 </button>
-                <div style={{ maxWidth: 700, margin: '56px auto 0 auto', color: darkMode ? '#fff' : '#232427', padding: '0 8px', paddingBottom: 220 }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 28, marginTop: 0, marginBottom: 26 }}>
-                    <div style={{ width: 60, height: 60, borderRadius: '50%', overflow: 'hidden', background: selectedPerson.avatarBg, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 26, color: '#fff', fontWeight: 700 }}>
-                      <span style={{ fontSize: 26 }}>{selectedPerson.name[0]}</span>
+                <div style={{ 
+                  maxWidth: 700, 
+                  margin: '0 auto 0 auto', 
+                  color: darkMode ? '#fff' : '#232427', 
+                  padding: '0 8px', 
+                  paddingBottom: 220
+                }}>
+                  <div style={{ 
+                    display: 'flex', 
+                    alignItems: 'center', 
+                    justifyContent: 'space-between', 
+                    marginTop: 0, 
+                    marginBottom: 26,
+                    opacity: profileAnimated.header ? 1 : 0,
+                    transform: profileAnimated.header ? 'translateY(0)' : 'translateY(-20px)',
+                    transition: 'opacity 0.5s ease-out, transform 0.5s ease-out'
+                  }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 28 }}>
+                      <div style={{ width: 60, height: 60, borderRadius: '50%', overflow: 'hidden', background: selectedPerson.avatarBg, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 26, color: '#fff', fontWeight: 700 }}>
+                        <span style={{ fontSize: 26 }}>{selectedPerson.name[0]}</span>
+                      </div>
+                      <div>
+                        <div style={{ fontSize: '1.4rem', fontWeight: 500, fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif', letterSpacing: '-0.02em' }}>{selectedPerson.name}</div>
+                        <div style={{ fontSize: '1rem', color: darkMode ? '#bbb' : '#666', fontWeight: 400, marginTop: 6, fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif' }}>Interface Designer</div>
+                        <div style={{ fontSize: '0.9rem', color: '#999', marginTop: 4, fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif' }}>Duff Gardens Area</div>
+                      </div>
                     </div>
-                    <div>
-                      <div style={{ fontSize: '1.15rem', fontWeight: 600 }}>{selectedPerson.name}</div>
-                      <div style={{ fontSize: '0.98rem', color: darkMode ? '#bbb' : '#444', fontWeight: 500, marginTop: 4 }}>Interface Designer</div>
-                      <div style={{ fontSize: '0.92rem', color: '#888', marginTop: 7 }}>Duff Gardens Area</div>
+                    <div style={{ position: 'relative' }} className="connect-dropdown-container">
+                      <button 
+                        onClick={() => setShowConnectDropdown(!showConnectDropdown)}
+                        style={{
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: 8,
+                          padding: '8px 16px',
+                          backgroundColor: '#fff',
+                          border: '1px solid #e0e0e0',
+                          borderRadius: 20,
+                          fontSize: '0.9rem',
+                          fontWeight: 500,
+                          color: '#333',
+                          cursor: 'pointer',
+                          fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif',
+                          transition: 'all 0.2s ease',
+                          boxShadow: '0 1px 3px rgba(0,0,0,0.1)'
+                        }}
+                        onMouseEnter={(e) => {
+                          e.target.style.backgroundColor = '#f0f0f0';
+                          e.target.style.transform = 'translateY(-1px)';
+                        }}
+                        onMouseLeave={(e) => {
+                          e.target.style.backgroundColor = '#fff';
+                          e.target.style.transform = 'translateY(0)';
+                        }}
+                      >
+                        Connect
+                        <svg width="12" height="12" viewBox="0 0 12 12" fill="none" style={{ marginLeft: 2 }}>
+                          <path d="M3 4.5L6 7.5L9 4.5" stroke="#666" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                        </svg>
+                      </button>
+                      
+                      {/* Connect Dropdown */}
+                      {showConnectDropdown && (
+                        <div style={{
+                          position: 'absolute',
+                          top: '100%',
+                          right: 0,
+                          marginTop: 8,
+                          backgroundColor: '#ffffff',
+                          border: '1px solid #e0e0e0',
+                          borderRadius: 12,
+                          boxShadow: '0 4px 20px rgba(0,0,0,0.15)',
+                          padding: '8px 0',
+                          minWidth: 200,
+                          zIndex: 1000,
+                          opacity: 1
+                        }}>
+                          <div style={{ padding: '8px 16px', fontSize: '0.85rem', fontWeight: 500, color: '#666', fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif' }}>
+                            Connect via:
+                          </div>
+                          
+                          {/* Website */}
+                          <a href="#" style={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: 12,
+                            padding: '10px 16px',
+                            textDecoration: 'none',
+                            color: '#333',
+                            fontSize: '0.9rem',
+                            fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif',
+                            transition: 'background-color 0.2s'
+                          }}
+                          onMouseEnter={(e) => e.target.style.backgroundColor = '#f8f9fa'}
+                          onMouseLeave={(e) => e.target.style.backgroundColor = 'transparent'}
+                          >
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+                              <circle cx="12" cy="12" r="10" stroke="#666" strokeWidth="1.5"/>
+                              <path d="M8 12h8M12 8c2.5 0 4 1.5 4 4s-1.5 4-4 4M12 16c-2.5 0-4-1.5-4-4s1.5-4 4-4" stroke="#666" strokeWidth="1.5"/>
+                            </svg>
+                            vinothragunathan.com
+                          </a>
+                          
+                          {/* LinkedIn */}
+                          <a href="#" style={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: 12,
+                            padding: '10px 16px',
+                            textDecoration: 'none',
+                            color: '#333',
+                            fontSize: '0.9rem',
+                            fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif',
+                            transition: 'background-color 0.2s'
+                          }}
+                          onMouseEnter={(e) => e.target.style.backgroundColor = '#f8f9fa'}
+                          onMouseLeave={(e) => e.target.style.backgroundColor = 'transparent'}
+                          >
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="#0077B5">
+                              <path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a2.062 2.062 0 01-2.063-2.065 2.064 2.064 0 112.063 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/>
+                            </svg>
+                            LinkedIn
+                          </a>
+                          
+                          {/* Twitter */}
+                          <a href="#" style={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: 12,
+                            padding: '10px 16px',
+                            textDecoration: 'none',
+                            color: '#333',
+                            fontSize: '0.9rem',
+                            fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif',
+                            transition: 'background-color 0.2s'
+                          }}
+                          onMouseEnter={(e) => e.target.style.backgroundColor = '#f8f9fa'}
+                          onMouseLeave={(e) => e.target.style.backgroundColor = 'transparent'}
+                          >
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="#000">
+                              <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
+                            </svg>
+                            Twitter
+                          </a>
+                          
+                          {/* AngelList */}
+                          <a href="#" style={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: 12,
+                            padding: '10px 16px',
+                            textDecoration: 'none',
+                            color: '#333',
+                            fontSize: '0.9rem',
+                            fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif',
+                            transition: 'background-color 0.2s'
+                          }}
+                          onMouseEnter={(e) => e.target.style.backgroundColor = '#f8f9fa'}
+                          onMouseLeave={(e) => e.target.style.backgroundColor = 'transparent'}
+                          >
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="#000">
+                              <path d="M8.5 21L12 3l3.5 18L12 18z"/>
+                              <circle cx="6" cy="8" r="2" fill="#000"/>
+                              <circle cx="18" cy="8" r="2" fill="#000"/>
+                            </svg>
+                            AngelList
+                          </a>
+                          
+                          {/* Crunchbase */}
+                          <a href="#" style={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: 12,
+                            padding: '10px 16px',
+                            textDecoration: 'none',
+                            color: '#333',
+                            fontSize: '0.9rem',
+                            fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif',
+                            transition: 'background-color 0.2s'
+                          }}
+                          onMouseEnter={(e) => e.target.style.backgroundColor = '#f8f9fa'}
+                          onMouseLeave={(e) => e.target.style.backgroundColor = 'transparent'}
+                          >
+                            <div style={{
+                              width: 16,
+                              height: 16,
+                              backgroundColor: '#0288d1',
+                              borderRadius: 2,
+                              display: 'flex',
+                              alignItems: 'center',
+                              justifyContent: 'center',
+                              fontSize: '10px',
+                              fontWeight: 'bold',
+                              color: '#fff'
+                            }}>
+                              cb
+                            </div>
+                            Crunchbase
+                          </a>
+                          
+                          {/* Medium */}
+                          <a href="#" style={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: 12,
+                            padding: '10px 16px',
+                            textDecoration: 'none',
+                            color: '#333',
+                            fontSize: '0.9rem',
+                            fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif',
+                            transition: 'background-color 0.2s'
+                          }}
+                          onMouseEnter={(e) => e.target.style.backgroundColor = '#f8f9fa'}
+                          onMouseLeave={(e) => e.target.style.backgroundColor = 'transparent'}
+                          >
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="#000">
+                              <circle cx="7" cy="12" r="5"/>
+                              <circle cx="18" cy="12" r="3"/>
+                            </svg>
+                            Medium
+                          </a>
+                          
+                          {/* Substack */}
+                          <a href="#" style={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: 12,
+                            padding: '10px 16px',
+                            textDecoration: 'none',
+                            color: '#333',
+                            fontSize: '0.9rem',
+                            fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif',
+                            transition: 'background-color 0.2s'
+                          }}
+                          onMouseEnter={(e) => e.target.style.backgroundColor = '#f8f9fa'}
+                          onMouseLeave={(e) => e.target.style.backgroundColor = 'transparent'}
+                          >
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="#FF6719">
+                              <path d="M22.539 8.242H1.46V5.406h21.08v2.836zM1.46 10.812V24L12 18.11 22.54 24V10.812H1.46zM22.54 0H1.46v2.836h21.08V0z"/>
+                            </svg>
+                            Substack
+                          </a>
+                        </div>
+                      )}
                     </div>
                   </div>
-                  <div style={{ fontWeight: 600, fontSize: '1.01rem', marginBottom: 12, marginTop: 32 }}>Overview</div>
-                  <div style={{ fontSize: '0.97rem', color: darkMode ? '#d1d5db' : '#232427', marginBottom: 28, lineHeight: 1.5 }}>
-                    Vinoth Ragunathan is a creative interface designer known for his work at Duff Gardens and insidesticker.com. He specializes in user-centric design and has contributed to several open source projects. Vinoth is passionate about creating intuitive digital experiences and is active in the design community.
-                  </div>
-                  <div style={{ fontWeight: 600, fontSize: '1.01rem', marginBottom: 12, marginTop: 18 }}>Work Experience</div>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 18, marginBottom: 10 }}>
-                    <div style={{ width: 32, height: 32, borderRadius: 8, background: '#3a8dde', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff', fontWeight: 700, fontSize: 15 }}>VR</div>
-                    <div>
-                      <div style={{ fontWeight: 600, fontSize: '0.97rem' }}>Duff Gardens</div>
-                      <div style={{ fontSize: '0.91rem', color: '#888', fontWeight: 500, marginTop: 2 }}>Lead Designer</div>
-                      <div style={{ fontSize: '0.89rem', color: '#888', marginTop: 2 }}>2018 - Current</div>
+                  <div style={{ 
+                    opacity: profileAnimated.overview ? 1 : 0,
+                    transform: profileAnimated.overview ? 'translateY(0)' : 'translateY(-20px)',
+                    transition: 'opacity 0.5s ease-out, transform 0.5s ease-out'
+                  }}>
+                    <div style={{ fontWeight: 500, fontSize: '1.1rem', marginBottom: 16, marginTop: 32, fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif', letterSpacing: '-0.01em', color: darkMode ? '#fff' : '#111' }}>Overview</div>
+                    <div style={{ fontSize: '0.95rem', color: darkMode ? '#d1d5db' : '#555', marginBottom: 28, lineHeight: 1.6, fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif', fontWeight: 400 }}>
+                      Vinoth Ragunathan is a creative interface designer known for his work at Duff Gardens and insidesticker.com. He specializes in user-centric design and has contributed to several open source projects. Vinoth is passionate about creating intuitive digital experiences and is active in the design community.
                     </div>
                   </div>
-                  <div style={{ fontSize: '0.93rem', color: darkMode ? '#bbb' : '#444', marginBottom: 18, marginLeft: 42 }}>
-                    Duff Gardens is a creative studio focused on playful, innovative digital products and experiences.
-                  </div>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 18, marginBottom: 10 }}>
-                    <div style={{ width: 32, height: 32, borderRadius: 8, background: '#b388ff', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff', fontWeight: 700, fontSize: 15 }}>IS</div>
-                    <div>
-                      <div style={{ fontWeight: 600, fontSize: '0.97rem' }}>insidesticker.com</div>
-                      <div style={{ fontSize: '0.91rem', color: '#888', fontWeight: 500, marginTop: 2 }}>Founder & Designer</div>
-                      <div style={{ fontSize: '0.89rem', color: '#888', marginTop: 2 }}>2016 - 2018</div>
+                  <div style={{ 
+                    opacity: profileAnimated.workExperience ? 1 : 0,
+                    transform: profileAnimated.workExperience ? 'translateY(0)' : 'translateY(-20px)',
+                    transition: 'opacity 0.5s ease-out, transform 0.5s ease-out'
+                  }}>
+                    <div style={{ fontWeight: 500, fontSize: '1.1rem', marginBottom: 16, marginTop: 24, fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif', letterSpacing: '-0.01em', color: darkMode ? '#fff' : '#111' }}>Work Experience</div>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 18, marginBottom: 12 }}>
+                      <div style={{ width: 32, height: 32, borderRadius: 8, background: '#3a8dde', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff', fontWeight: 600, fontSize: 14 }}>VR</div>
+                      <div>
+                        <div style={{ fontWeight: 500, fontSize: '1rem', fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif', color: darkMode ? '#fff' : '#222' }}>Duff Gardens</div>
+                        <div style={{ fontSize: '0.9rem', color: '#888', fontWeight: 400, marginTop: 2, fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif' }}>Lead Designer</div>
+                        <div style={{ fontSize: '0.85rem', color: '#aaa', marginTop: 2, fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif' }}>2018 - Current</div>
+                      </div>
+                    </div>
+                    <div style={{ fontSize: '0.9rem', color: darkMode ? '#bbb' : '#666', marginBottom: 20, marginLeft: 50, lineHeight: 1.5, fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif', fontWeight: 400 }}>
+                      Duff Gardens is a creative studio focused on playful, innovative digital products and experiences.
+                    </div>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 18, marginBottom: 12 }}>
+                      <div style={{ width: 32, height: 32, borderRadius: 8, background: '#b388ff', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff', fontWeight: 600, fontSize: 14 }}>IS</div>
+                      <div>
+                        <div style={{ fontWeight: 500, fontSize: '1rem', fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif', color: darkMode ? '#fff' : '#222' }}>insidesticker.com</div>
+                        <div style={{ fontSize: '0.9rem', color: '#888', fontWeight: 400, marginTop: 2, fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif' }}>Founder & Designer</div>
+                        <div style={{ fontSize: '0.85rem', color: '#aaa', marginTop: 2, fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif' }}>2016 - 2018</div>
+                      </div>
+                    </div>
+                    <div style={{ fontSize: '0.9rem', color: darkMode ? '#bbb' : '#666', marginBottom: 24, marginLeft: 50, lineHeight: 1.5, fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif', fontWeight: 400 }}>
+                      insidesticker.com is a platform for custom, creative stickers and design resources.
                     </div>
                   </div>
-                  <div style={{ fontSize: '0.93rem', color: darkMode ? '#bbb' : '#444', marginBottom: 18, marginLeft: 42 }}>
-                    insidesticker.com is a platform for custom, creative stickers and design resources.
+                  <div style={{ 
+                    opacity: profileAnimated.contact ? 1 : 0,
+                    transform: profileAnimated.contact ? 'translateY(0)' : 'translateY(-20px)',
+                    transition: 'opacity 0.5s ease-out, transform 0.5s ease-out'
+                  }}>
+                    <div style={{ fontWeight: 500, fontSize: '1.1rem', marginBottom: 12, marginTop: 20, fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif', letterSpacing: '-0.01em', color: darkMode ? '#fff' : '#111' }}>Contact</div>
+                    <div style={{ fontSize: '0.95rem', color: darkMode ? '#bbb' : '#666', fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif', fontWeight: 400 }}>vinoth@duffgardens.com</div>
                   </div>
-                  <div style={{ fontWeight: 600, fontSize: '1.01rem', marginBottom: 12, marginTop: 18 }}>Contact</div>
-                  <div style={{ fontSize: '0.93rem', color: darkMode ? '#bbb' : '#444' }}>vinoth@duffgardens.com</div>
                 </div>
               </div>
             )}
-        </div>
-      </div>
       {/* Follow-up input fixed at the bottom, overlaying the answer text */}
       <div 
         className={

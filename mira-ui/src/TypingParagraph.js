@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from "react";
 
-export default function TypingParagraph({ text, speed = 1 }) {
+export default function TypingParagraph({ text, speed = 1, instant = false }) {
   const [displayed, setDisplayed] = useState("");
   const [done, setDone] = useState(false);
   const [paragraphs, setParagraphs] = useState([]);
@@ -14,12 +14,18 @@ export default function TypingParagraph({ text, speed = 1 }) {
     setParagraphs(paras);
     setCurrentPara(0);
     setCurrentChar(0);
-    setDisplayed("");
-    setDone(false);
-  }, [text]);
+    
+    if (instant) {
+      setDisplayed(text);
+      setDone(true);
+    } else {
+      setDisplayed("");
+      setDone(false);
+    }
+  }, [text, instant]);
 
   useEffect(() => {
-    if (!paragraphs.length || done) return;
+    if (!paragraphs.length || done || instant) return;
     if (currentPara >= paragraphs.length) {
       setDone(true);
       return;
@@ -41,7 +47,7 @@ export default function TypingParagraph({ text, speed = 1 }) {
       }, 120); // shorter pause between paragraphs
     }
     return () => clearTimeout(typingRef.current);
-  }, [currentChar, currentPara, paragraphs, done]);
+  }, [currentChar, currentPara, paragraphs, done, instant]);
 
   // Render as single span without paragraph formatting
   return (
