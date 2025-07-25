@@ -1,4 +1,5 @@
 import React, { useState, useRef, useEffect } from "react";
+import ReactDOM from "react-dom";
 import Sidebar from "./Sidebar";
 import TopBar from "./TopBar";
 import MainContent from "./MainContent";
@@ -44,6 +45,8 @@ function SearchResults({ darkMode, isSidebarCollapsed, onSignUpClick, user, isAu
     workExperience: false,
     contact: false
   });
+  const [connectButtonRef, setConnectButtonRef] = useState(null);
+  const [dropdownPosition, setDropdownPosition] = useState({ top: 0, right: 0 });
 
   // Effect to show sticky bar when question is out of view
   useEffect(() => {
@@ -82,17 +85,17 @@ function SearchResults({ darkMode, isSidebarCollapsed, onSignUpClick, user, isAu
   // Show AI response and people cards with proper timing
   useEffect(() => {
     if (query.trim() === 'Engineers who have contributed to open source projects') {
-      // If animations were already completed, show content immediately
-      if (animationsCompleted) {
-        setShowAIResponse(true);
-        setShowPeopleCards(true);
-        setThinkingDots('');
+      // Don't start animations if we're currently viewing a profile
+      if (selectedPerson !== null) {
         return;
       }
       
+      // Start fresh animations every time (except when coming back from profile)
       setShowAIResponse(false);
       setShowPeopleCards(false);
       setThinkingDots('');
+      setAnimationsCompleted(false);
+      
       let dotCount = 0;
       const dotsInterval = setInterval(() => {
         dotCount = (dotCount + 1) % 4;
@@ -122,14 +125,16 @@ function SearchResults({ darkMode, isSidebarCollapsed, onSignUpClick, user, isAu
       setThinkingDots('');
       setAnimationsCompleted(false); // Reset for other queries
     }
-  }, [query, animationsCompleted]);
+  }, [query, selectedPerson]);
 
   // When returning from profile view, show content immediately
   useEffect(() => {
-    if (selectedPerson === null && query.trim() === 'Engineers who have contributed to open source projects') {
-      setAnimationsCompleted(true);
+    if (selectedPerson === null && query.trim() === 'Engineers who have contributed to open source projects' && animationsCompleted) {
+      setShowAIResponse(true);
+      setShowPeopleCards(true);
+      setThinkingDots('');
     }
-  }, [selectedPerson, query]);
+  }, [selectedPerson, query, animationsCompleted]);
 
   // Trigger profile fade-down animation with staggered timing
   useEffect(() => {
@@ -478,7 +483,7 @@ function SearchResults({ darkMode, isSidebarCollapsed, onSignUpClick, user, isAu
           </>
         )}
       </div>
-      {query.trim() === 'Engineers who have contributed to open source projects' && (
+            {query.trim() === 'Engineers who have contributed to open source projects' && (
               !showAIResponse ? (
                 <div style={{
                   maxWidth: 700,
@@ -495,8 +500,8 @@ function SearchResults({ darkMode, isSidebarCollapsed, onSignUpClick, user, isAu
                     borderRadius: '8px',
                     background: darkMode ? 'var(--card-bg)' : '#fff',
                     border: `1.5px solid #f0f0f0`,
-                    display: 'flex',
-                    alignItems: 'center',
+                  display: 'flex',
+                  alignItems: 'center',
                     justifyContent: 'center',
                     flexShrink: 0,
                     marginTop: '2px'
@@ -512,8 +517,8 @@ function SearchResults({ darkMode, isSidebarCollapsed, onSignUpClick, user, isAu
                     fontSize: '1.05rem',
                     lineHeight: 1.6,
                     marginTop: '12px'
-                  }}>
-                    <span className="thinking-shimmer"><span className="shimmer-text">Finding engineers with recent open source activity{thinkingDots}</span></span>
+                }}>
+                  <span className="thinking-shimmer"><span className="shimmer-text">Finding engineers with recent open source activity{thinkingDots}</span></span>
                   </div>
                 </div>
               ) : null
@@ -560,8 +565,8 @@ function SearchResults({ darkMode, isSidebarCollapsed, onSignUpClick, user, isAu
 
             {/* People Cards */}
             {query.trim() === 'Engineers who have contributed to open source projects' && showPeopleCards && !selectedPerson && (
-                <PeopleCardList 
-                  people={[
+              <PeopleCardList 
+                people={[
                   {
                     name: 'Vinoth Ragunathan',
                     followers: '13.7K',
@@ -624,18 +629,28 @@ function SearchResults({ darkMode, isSidebarCollapsed, onSignUpClick, user, isAu
                     transition: 'opacity 0.5s ease-out, transform 0.5s ease-out'
                   }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: 28 }}>
-                      <div style={{ width: 60, height: 60, borderRadius: '50%', overflow: 'hidden', background: selectedPerson.avatarBg, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 26, color: '#fff', fontWeight: 700 }}>
-                        <span style={{ fontSize: 26 }}>{selectedPerson.name[0]}</span>
-                      </div>
-                      <div>
+                    <div style={{ width: 60, height: 60, borderRadius: '50%', overflow: 'hidden', background: selectedPerson.avatarBg, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 26, color: '#fff', fontWeight: 700 }}>
+                      <span style={{ fontSize: 26 }}>{selectedPerson.name[0]}</span>
+                    </div>
+                    <div>
                         <div style={{ fontSize: '1.4rem', fontWeight: 500, fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif', letterSpacing: '-0.02em' }}>{selectedPerson.name}</div>
                         <div style={{ fontSize: '1rem', color: darkMode ? '#bbb' : '#666', fontWeight: 400, marginTop: 6, fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif' }}>Interface Designer</div>
                         <div style={{ fontSize: '0.9rem', color: '#999', marginTop: 4, fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif' }}>Duff Gardens Area</div>
-                      </div>
                     </div>
+                  </div>
                     <div style={{ position: 'relative' }} className="connect-dropdown-container">
                       <button 
-                        onClick={() => setShowConnectDropdown(!showConnectDropdown)}
+                        ref={setConnectButtonRef}
+                        onClick={(e) => {
+                          if (!showConnectDropdown) {
+                            const rect = e.target.getBoundingClientRect();
+                            setDropdownPosition({
+                              top: rect.bottom + 8,
+                              right: window.innerWidth - rect.right
+                            });
+                          }
+                          setShowConnectDropdown(!showConnectDropdown);
+                        }}
                         style={{
                           display: 'flex',
                           alignItems: 'center',
@@ -667,6 +682,7 @@ function SearchResults({ darkMode, isSidebarCollapsed, onSignUpClick, user, isAu
                         </svg>
                       </button>
                       
+                      
                       {/* Connect Dropdown */}
                       {showConnectDropdown && (
                         <div style={{
@@ -680,8 +696,8 @@ function SearchResults({ darkMode, isSidebarCollapsed, onSignUpClick, user, isAu
                           boxShadow: '0 4px 20px rgba(0,0,0,0.15)',
                           padding: '8px 0',
                           minWidth: 200,
-                          zIndex: 1000,
-                          opacity: 1
+                          zIndex: 9999,
+                          isolation: 'isolate'
                         }}>
                           <div style={{ padding: '8px 16px', fontSize: '0.85rem', fontWeight: 500, color: '#666', fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif' }}>
                             Connect via:
@@ -859,8 +875,8 @@ function SearchResults({ darkMode, isSidebarCollapsed, onSignUpClick, user, isAu
                   }}>
                     <div style={{ fontWeight: 500, fontSize: '1.1rem', marginBottom: 16, marginTop: 32, fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif', letterSpacing: '-0.01em', color: darkMode ? '#fff' : '#111' }}>Overview</div>
                     <div style={{ fontSize: '0.95rem', color: darkMode ? '#d1d5db' : '#555', marginBottom: 28, lineHeight: 1.6, fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif', fontWeight: 400 }}>
-                      Vinoth Ragunathan is a creative interface designer known for his work at Duff Gardens and insidesticker.com. He specializes in user-centric design and has contributed to several open source projects. Vinoth is passionate about creating intuitive digital experiences and is active in the design community.
-                    </div>
+                    Vinoth Ragunathan is a creative interface designer known for his work at Duff Gardens and insidesticker.com. He specializes in user-centric design and has contributed to several open source projects. Vinoth is passionate about creating intuitive digital experiences and is active in the design community.
+                  </div>
                   </div>
                   <div style={{ 
                     opacity: profileAnimated.workExperience ? 1 : 0,
@@ -870,27 +886,27 @@ function SearchResults({ darkMode, isSidebarCollapsed, onSignUpClick, user, isAu
                     <div style={{ fontWeight: 500, fontSize: '1.1rem', marginBottom: 16, marginTop: 24, fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif', letterSpacing: '-0.01em', color: darkMode ? '#fff' : '#111' }}>Work Experience</div>
                     <div style={{ display: 'flex', alignItems: 'center', gap: 18, marginBottom: 12 }}>
                       <div style={{ width: 32, height: 32, borderRadius: 8, background: '#3a8dde', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff', fontWeight: 600, fontSize: 14 }}>VR</div>
-                      <div>
+                    <div>
                         <div style={{ fontWeight: 500, fontSize: '1rem', fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif', color: darkMode ? '#fff' : '#222' }}>Duff Gardens</div>
                         <div style={{ fontSize: '0.9rem', color: '#888', fontWeight: 400, marginTop: 2, fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif' }}>Lead Designer</div>
                         <div style={{ fontSize: '0.85rem', color: '#aaa', marginTop: 2, fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif' }}>2018 - Current</div>
-                      </div>
                     </div>
+                  </div>
                     <div style={{ fontSize: '0.9rem', color: darkMode ? '#bbb' : '#666', marginBottom: 20, marginLeft: 50, lineHeight: 1.5, fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif', fontWeight: 400 }}>
-                      Duff Gardens is a creative studio focused on playful, innovative digital products and experiences.
-                    </div>
+                    Duff Gardens is a creative studio focused on playful, innovative digital products and experiences.
+                  </div>
                     <div style={{ display: 'flex', alignItems: 'center', gap: 18, marginBottom: 12 }}>
                       <div style={{ width: 32, height: 32, borderRadius: 8, background: '#b388ff', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff', fontWeight: 600, fontSize: 14 }}>IS</div>
-                      <div>
+                    <div>
                         <div style={{ fontWeight: 500, fontSize: '1rem', fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif', color: darkMode ? '#fff' : '#222' }}>insidesticker.com</div>
                         <div style={{ fontSize: '0.9rem', color: '#888', fontWeight: 400, marginTop: 2, fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif' }}>Founder & Designer</div>
                         <div style={{ fontSize: '0.85rem', color: '#aaa', marginTop: 2, fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif' }}>2016 - 2018</div>
-                      </div>
-                    </div>
-                    <div style={{ fontSize: '0.9rem', color: darkMode ? '#bbb' : '#666', marginBottom: 24, marginLeft: 50, lineHeight: 1.5, fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif', fontWeight: 400 }}>
-                      insidesticker.com is a platform for custom, creative stickers and design resources.
                     </div>
                   </div>
+                    <div style={{ fontSize: '0.9rem', color: darkMode ? '#bbb' : '#666', marginBottom: 24, marginLeft: 50, lineHeight: 1.5, fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif', fontWeight: 400 }}>
+                    insidesticker.com is a platform for custom, creative stickers and design resources.
+                  </div>
+                </div>
                   <div style={{ 
                     opacity: profileAnimated.contact ? 1 : 0,
                     transform: profileAnimated.contact ? 'translateY(0)' : 'translateY(-20px)',
@@ -898,8 +914,8 @@ function SearchResults({ darkMode, isSidebarCollapsed, onSignUpClick, user, isAu
                   }}>
                     <div style={{ fontWeight: 500, fontSize: '1.1rem', marginBottom: 12, marginTop: 20, fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif', letterSpacing: '-0.01em', color: darkMode ? '#fff' : '#111' }}>Contact</div>
                     <div style={{ fontSize: '0.95rem', color: darkMode ? '#bbb' : '#666', fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif', fontWeight: 400 }}>vinoth@duffgardens.com</div>
-                  </div>
-                </div>
+              </div>
+      </div>
               </div>
             )}
       {/* Follow-up input fixed at the bottom, overlaying the answer text */}

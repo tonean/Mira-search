@@ -1,8 +1,7 @@
 import React, { useState, useEffect } from "react";
 import "./App.css";
 
-function ConnectionToggle({ label, onToggle }) {
-  const [enabled, setEnabled] = useState(false);
+function ConnectionToggle({ label, onToggle, enabled = false }) {
   const [thumbActive, setThumbActive] = useState(false);
 
   // Animate thumb scale on toggle
@@ -10,7 +9,6 @@ function ConnectionToggle({ label, onToggle }) {
     if (onToggle) {
       onToggle(label, !enabled);
     }
-    setEnabled(e => !e);
     setThumbActive(true);
     setTimeout(() => setThumbActive(false), 180); // 180ms scale effect
   };
@@ -60,15 +58,40 @@ function ConnectionToggle({ label, onToggle }) {
 
 // Accept isSidebarCollapsed as a prop
 export default function ConnectionsPage({ isSidebarCollapsed = false, onConnectionUpdate }) {
+  // Inject shake animation CSS
+  React.useEffect(() => {
+    const style = document.createElement('style');
+    style.textContent = `
+      @keyframes shake {
+        0%, 100% { transform: translateX(0); }
+        10%, 30%, 50%, 70%, 90% { transform: translateX(-4px); }
+        20%, 40%, 60%, 80% { transform: translateX(4px); }
+      }
+      .shake-animation {
+        animation: shake 0.5s ease-in-out;
+      }
+    `;
+    document.head.appendChild(style);
+    
+    return () => {
+      document.head.removeChild(style);
+    };
+  }, []);
   const [showTwitterModal, setShowTwitterModal] = useState(false);
   const [showLinkedInModal, setShowLinkedInModal] = useState(false);
   const [activeTab, setActiveTab] = useState('Manual');
+  const [twitterFile, setTwitterFile] = useState(null);
+  const [linkedInFile, setLinkedInFile] = useState(null);
+  const [twitterShake, setTwitterShake] = useState(false);
+  const [linkedInShake, setLinkedInShake] = useState(false);
+  const [twitterConnected, setTwitterConnected] = useState(false);
+  const [linkedInConnected, setLinkedInConnected] = useState(false);
 
   const handleToggleConnection = (label, enabled) => {
-    if (label === 'Twitter' && enabled) {
+    if (label === 'Twitter' && !twitterConnected) {
       setShowTwitterModal(true);
     }
-    if (label === 'LinkedIn' && enabled) {
+    if (label === 'LinkedIn' && !linkedInConnected) {
       setShowLinkedInModal(true);
     }
   };
@@ -77,9 +100,68 @@ export default function ConnectionsPage({ isSidebarCollapsed = false, onConnecti
     if (onConnectionUpdate) {
       onConnectionUpdate(service, true);
     }
-    // Close modals
+    
+    // Mark service as connected
+    if (service === 'Twitter') {
+      setTwitterConnected(true);
+    }
+    if (service === 'LinkedIn') {
+      setLinkedInConnected(true);
+    }
+    
+    // Close modals and reset files
     setShowTwitterModal(false);
     setShowLinkedInModal(false);
+    setTwitterFile(null);
+    setLinkedInFile(null);
+  };
+
+  const handleTwitterFileSelect = (event) => {
+    const file = event.target.files[0];
+    if (file) {
+      setTwitterFile(file);
+    }
+  };
+
+  const handleLinkedInFileSelect = (event) => {
+    const file = event.target.files[0];
+    if (file) {
+      setLinkedInFile(file);
+    }
+  };
+
+  const removeTwitterFile = () => {
+    setTwitterFile(null);
+    // Reset the file input
+    const fileInput = document.getElementById('twitter-file-input');
+    if (fileInput) fileInput.value = '';
+  };
+
+  const removeLinkedInFile = () => {
+    setLinkedInFile(null);
+    // Reset the file input
+    const fileInput = document.getElementById('linkedin-file-input');
+    if (fileInput) fileInput.value = '';
+  };
+
+  const handleTwitterUpload = () => {
+    if (twitterFile) {
+      handleConnectionSuccess('Twitter');
+    } else {
+      // Trigger shake animation
+      setTwitterShake(true);
+      setTimeout(() => setTwitterShake(false), 500);
+    }
+  };
+
+  const handleLinkedInUpload = () => {
+    if (linkedInFile) {
+      handleConnectionSuccess('LinkedIn');
+    } else {
+      // Trigger shake animation
+      setLinkedInShake(true);
+      setTimeout(() => setLinkedInShake(false), 500);
+    }
   };
 
   // Make content span the full width of the main area, with some responsive padding
@@ -116,7 +198,7 @@ export default function ConnectionsPage({ isSidebarCollapsed = false, onConnecti
             <div style={{ fontWeight: 600, fontSize: '1.13rem', color: '#222', marginBottom: 4 }}>LinkedIn</div>
             <div style={{ color: '#444', fontSize: '0.95rem' }}>Connect with LinkedIn.</div>
           </div>
-          <ConnectionToggle label="LinkedIn" onToggle={handleToggleConnection} />
+          <ConnectionToggle label="LinkedIn" onToggle={handleToggleConnection} enabled={linkedInConnected} />
         </div>
         <div style={{ background: '#fff', border: '1.5px solid #f0f0f0', borderRadius: 12, marginBottom: 32, display: 'flex', alignItems: 'center', padding: '20px 16px', gap: 18 }}>
           <img src="https://cdn-icons-png.flaticon.com/512/733/733579.png" alt="Twitter" style={{ width: 38, height: 38, marginRight: 8 }} />
@@ -124,7 +206,7 @@ export default function ConnectionsPage({ isSidebarCollapsed = false, onConnecti
             <div style={{ fontWeight: 600, fontSize: '1.13rem', color: '#222', marginBottom: 4 }}>Twitter</div>
             <div style={{ color: '#444', fontSize: '0.95rem' }}>Connect with Twitter.</div>
           </div>
-          <ConnectionToggle label="Twitter" onToggle={handleToggleConnection} />
+          <ConnectionToggle label="Twitter" onToggle={handleToggleConnection} enabled={twitterConnected} />
         </div>
         
         {/* Coming Soon Section */}
@@ -223,25 +305,102 @@ export default function ConnectionsPage({ isSidebarCollapsed = false, onConnecti
 
             {/* Manual Tab Content */}
             <div>
-                                 {/* File Upload Section */}
-                 <div style={{ 
-                   border: '2px dashed #e0e0e0', 
-                   borderRadius: '12px', 
-                   padding: '24px', 
-                   textAlign: 'center',
-                   marginBottom: '20px',
-                   backgroundColor: '#fafafa'
-                 }}>
-                   <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" style={{ marginRight: '6px' }}>
-                       <rect x="3" y="3" width="18" height="18" rx="2" stroke="#666" strokeWidth="2"/>
-                       <path d="M12 8v8M8 12h8" stroke="#666" strokeWidth="2" strokeLinecap="round"/>
-                     </svg>
-                     <h3 style={{ fontSize: '1.1rem', fontWeight: '600', color: '#222', margin: 0 }}>
-                       File upload
-                     </h3>
-                   </div>
-                 </div>
+              {/* Hidden File Input */}
+              <input
+                type="file"
+                id="twitter-file-input"
+                accept=".js,.json"
+                onChange={handleTwitterFileSelect}
+                style={{ display: 'none' }}
+              />
+              
+              {/* File Upload Section */}
+              <div 
+                onClick={() => document.getElementById('twitter-file-input').click()}
+                className={twitterShake ? 'shake-animation' : ''}
+                style={{ 
+                  border: twitterFile ? '2px solid #1DA1F2' : '2px dashed #e0e0e0', 
+                  borderRadius: '12px', 
+                  padding: '24px', 
+                  textAlign: 'center',
+                  marginBottom: '20px',
+                  backgroundColor: twitterFile ? '#f0f8ff' : '#fafafa',
+                  cursor: 'pointer',
+                  transition: 'all 0.2s ease',
+                  position: 'relative'
+                }}
+                onMouseEnter={(e) => {
+                  if (!twitterFile) {
+                    e.target.style.backgroundColor = '#f0f0f0';
+                    e.target.style.borderColor = '#ccc';
+                  }
+                }}
+                onMouseLeave={(e) => {
+                  if (!twitterFile) {
+                    e.target.style.backgroundColor = '#fafafa';
+                    e.target.style.borderColor = '#e0e0e0';
+                  }
+                }}
+              >
+                {twitterFile ? (
+                  <div>
+                    {/* X button to remove file */}
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        removeTwitterFile();
+                      }}
+                      style={{
+                        position: 'absolute',
+                        top: '8px',
+                        right: '8px',
+                        background: 'transparent',
+                        color: '#000',
+                        border: 'none',
+                        borderRadius: '50%',
+                        width: '20px',
+                        height: '20px',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        cursor: 'pointer',
+                        fontSize: '14px',
+                        fontWeight: 'bold',
+                        transition: 'color 0.2s'
+                      }}
+                      onMouseEnter={(e) => e.target.style.color = '#666'}
+                      onMouseLeave={(e) => e.target.style.color = '#000'}
+                    >
+                      ×
+                    </button>
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '8px' }}>
+                      <svg width="20" height="20" viewBox="0 0 24 24" fill="#1DA1F2" style={{ marginRight: '6px' }}>
+                        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                        <polyline points="14,2 14,8 20,8"/>
+                      </svg>
+                      <h3 style={{ fontSize: '1.1rem', fontWeight: '600', color: '#1DA1F2', margin: 0 }}>
+                        File Selected
+                      </h3>
+                    </div>
+                    <div style={{ fontSize: '0.9rem', color: '#666', marginBottom: '4px' }}>
+                      {twitterFile.name}
+                    </div>
+                    <div style={{ fontSize: '0.8rem', color: '#999' }}>
+                      {(twitterFile.size / 1024).toFixed(1)} KB
+                    </div>
+                  </div>
+                ) : (
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" style={{ marginRight: '6px' }}>
+                      <rect x="3" y="3" width="18" height="18" rx="2" stroke="#666" strokeWidth="2"/>
+                      <path d="M12 8v8M8 12h8" stroke="#666" strokeWidth="2" strokeLinecap="round"/>
+                    </svg>
+                    <h3 style={{ fontSize: '1.1rem', fontWeight: '600', color: '#222', margin: 0 }}>
+                      File upload
+                    </h3>
+                  </div>
+                )}
+              </div>
 
                  {/* Instructions */}
                  <div style={{ marginBottom: '20px', border: '1px solid #f0f0f0', borderRadius: '12px', padding: '20px' }}>
@@ -318,25 +477,31 @@ export default function ConnectionsPage({ isSidebarCollapsed = false, onConnecti
                 </div>
 
                                  {/* Upload Button */}
-                 <button style={{
-                   width: '100%',
-                   padding: '12px 20px',
-                   backgroundColor: '#1DA1F2',
-                   color: '#fff',
-                   border: 'none',
-                   borderRadius: '10px',
-                   fontSize: '1rem',
-                   fontWeight: '600',
-                   cursor: 'pointer',
-                   display: 'flex',
-                   alignItems: 'center',
-                   justifyContent: 'center',
-                   gap: '6px',
-                   transition: 'background-color 0.2s'
-                 }}
-                                  onMouseEnter={(e) => e.target.style.backgroundColor = '#1991DB'}
-                 onMouseLeave={(e) => e.target.style.backgroundColor = '#1DA1F2'}
-                 onClick={() => handleConnectionSuccess('Twitter')}
+                 <button 
+                   style={{
+                     width: '100%',
+                     padding: '12px 20px',
+                     backgroundColor: twitterFile ? '#333333' : '#ccc',
+                     color: '#fff',
+                     border: 'none',
+                     borderRadius: '10px',
+                     fontSize: '1rem',
+                     fontWeight: '600',
+                     cursor: 'pointer',
+                     display: 'flex',
+                     alignItems: 'center',
+                     justifyContent: 'center',
+                     gap: '6px',
+                     transition: 'background-color 0.2s',
+                     opacity: twitterFile ? 1 : 0.6
+                   }}
+                   onMouseEnter={(e) => {
+                     if (twitterFile) e.target.style.backgroundColor = '#222222';
+                   }}
+                   onMouseLeave={(e) => {
+                     if (twitterFile) e.target.style.backgroundColor = '#333333';
+                   }}
+                   onClick={() => handleTwitterUpload()}
                  >
                    <svg width="18" height="18" viewBox="0 0 24 24" fill="#fff">
                      <path d="M23.953 4.57a10 10 0 01-2.825.775 4.958 4.958 0 002.163-2.723c-.951.555-2.005.959-3.127 1.184a4.92 4.92 0 00-8.384 4.482C7.69 8.095 4.067 6.13 1.64 3.162a4.822 4.822 0 00-.666 2.475c0 1.71.87 3.213 2.188 4.096a4.904 4.904 0 01-2.228-.616v.06a4.923 4.923 0 003.946 4.827 4.996 4.996 0 01-2.212.085 4.936 4.936 0 004.604 3.417 9.867 9.867 0 01-6.102 2.105c-.39 0-.779-.023-1.17-.067a13.995 13.995 0 007.557 2.209c9.053 0 13.998-7.496 13.998-13.985 0-.21 0-.42-.015-.63A9.935 9.935 0 0024 4.59z"/>
@@ -404,24 +569,101 @@ export default function ConnectionsPage({ isSidebarCollapsed = false, onConnecti
 
             {/* Manual Tab Content */}
             <div>
+              {/* Hidden File Input */}
+              <input
+                type="file"
+                id="linkedin-file-input"
+                accept=".csv"
+                onChange={handleLinkedInFileSelect}
+                style={{ display: 'none' }}
+              />
+              
               {/* File Upload Section */}
-              <div style={{ 
-                border: '2px dashed #e0e0e0', 
-                borderRadius: '12px', 
-                padding: '24px', 
-                textAlign: 'center',
-                marginBottom: '20px',
-                backgroundColor: '#fafafa'
-              }}>
-                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" style={{ marginRight: '6px' }}>
-                    <rect x="3" y="3" width="18" height="18" rx="2" stroke="#666" strokeWidth="2"/>
-                    <path d="M12 8v8M8 12h8" stroke="#666" strokeWidth="2" strokeLinecap="round"/>
-                  </svg>
-                  <h3 style={{ fontSize: '1.1rem', fontWeight: '600', color: '#222', margin: 0 }}>
-                    File upload
-                  </h3>
-                </div>
+              <div 
+                onClick={() => document.getElementById('linkedin-file-input').click()}
+                className={linkedInShake ? 'shake-animation' : ''}
+                style={{ 
+                  border: linkedInFile ? '2px solid #0077B5' : '2px dashed #e0e0e0', 
+                  borderRadius: '12px', 
+                  padding: '24px', 
+                  textAlign: 'center',
+                  marginBottom: '20px',
+                  backgroundColor: linkedInFile ? '#f0f8ff' : '#fafafa',
+                  cursor: 'pointer',
+                  transition: 'all 0.2s ease',
+                  position: 'relative'
+                }}
+                onMouseEnter={(e) => {
+                  if (!linkedInFile) {
+                    e.target.style.backgroundColor = '#f0f0f0';
+                    e.target.style.borderColor = '#ccc';
+                  }
+                }}
+                onMouseLeave={(e) => {
+                  if (!linkedInFile) {
+                    e.target.style.backgroundColor = '#fafafa';
+                    e.target.style.borderColor = '#e0e0e0';
+                  }
+                }}
+              >
+                {linkedInFile ? (
+                  <div>
+                    {/* X button to remove file */}
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        removeLinkedInFile();
+                      }}
+                      style={{
+                        position: 'absolute',
+                        top: '8px',
+                        right: '8px',
+                        background: 'transparent',
+                        color: '#000',
+                        border: 'none',
+                        borderRadius: '50%',
+                        width: '20px',
+                        height: '20px',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        cursor: 'pointer',
+                        fontSize: '14px',
+                        fontWeight: 'bold',
+                        transition: 'color 0.2s'
+                      }}
+                      onMouseEnter={(e) => e.target.style.color = '#666'}
+                      onMouseLeave={(e) => e.target.style.color = '#000'}
+                    >
+                      ×
+                    </button>
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '8px' }}>
+                      <svg width="20" height="20" viewBox="0 0 24 24" fill="#0077B5" style={{ marginRight: '6px' }}>
+                        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                        <polyline points="14,2 14,8 20,8"/>
+                      </svg>
+                      <h3 style={{ fontSize: '1.1rem', fontWeight: '600', color: '#0077B5', margin: 0 }}>
+                        File Selected
+                      </h3>
+                    </div>
+                    <div style={{ fontSize: '0.9rem', color: '#666', marginBottom: '4px' }}>
+                      {linkedInFile.name}
+                    </div>
+                    <div style={{ fontSize: '0.8rem', color: '#999' }}>
+                      {(linkedInFile.size / 1024).toFixed(1)} KB
+                    </div>
+                  </div>
+                ) : (
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" style={{ marginRight: '6px' }}>
+                      <rect x="3" y="3" width="18" height="18" rx="2" stroke="#666" strokeWidth="2"/>
+                      <path d="M12 8v8M8 12h8" stroke="#666" strokeWidth="2" strokeLinecap="round"/>
+                    </svg>
+                    <h3 style={{ fontSize: '1.1rem', fontWeight: '600', color: '#222', margin: 0 }}>
+                      File upload
+                    </h3>
+                  </div>
+                )}
               </div>
 
               {/* Instructions */}
@@ -499,26 +741,32 @@ export default function ConnectionsPage({ isSidebarCollapsed = false, onConnecti
               </div>
 
               {/* Upload Button */}
-              <button style={{
-                width: '100%',
-                padding: '12px 20px',
-                backgroundColor: '#0077B5',
-                color: '#fff',
-                border: 'none',
-                borderRadius: '10px',
-                fontSize: '1rem',
-                fontWeight: '600',
-                cursor: 'pointer',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                gap: '6px',
-                transition: 'background-color 0.2s'
-              }}
-                             onMouseEnter={(e) => e.target.style.backgroundColor = '#005582'}
-               onMouseLeave={(e) => e.target.style.backgroundColor = '#0077B5'}
-               onClick={() => handleConnectionSuccess('LinkedIn')}
-               >
+              <button 
+                style={{
+                  width: '100%',
+                  padding: '12px 20px',
+                  backgroundColor: linkedInFile ? '#333333' : '#ccc',
+                  color: '#fff',
+                  border: 'none',
+                  borderRadius: '10px',
+                  fontSize: '1rem',
+                  fontWeight: '600',
+                  cursor: 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: '6px',
+                  transition: 'background-color 0.2s',
+                  opacity: linkedInFile ? 1 : 0.6
+                }}
+                onMouseEnter={(e) => {
+                  if (linkedInFile) e.target.style.backgroundColor = '#222222';
+                }}
+                onMouseLeave={(e) => {
+                  if (linkedInFile) e.target.style.backgroundColor = '#333333';
+                }}
+                                 onClick={() => handleLinkedInUpload()}
+              >
                  <svg width="18" height="18" viewBox="0 0 24 24" fill="#fff">
                    <path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/>
                  </svg>
