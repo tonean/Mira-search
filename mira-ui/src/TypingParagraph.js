@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from "react";
 
-export default function TypingParagraph({ text }) {
+export default function TypingParagraph({ text, speed = 1 }) {
   const [displayed, setDisplayed] = useState("");
   const [done, setDone] = useState(false);
   const [paragraphs, setParagraphs] = useState([]);
@@ -8,9 +8,9 @@ export default function TypingParagraph({ text }) {
   const [currentChar, setCurrentChar] = useState(0);
   const typingRef = useRef();
 
-  // Split text into paragraphs by double newlines or single newlines
+  // Treat as single paragraph (no line splitting)
   useEffect(() => {
-    const paras = text.split(/\n+/g);
+    const paras = [text]; // Keep as single paragraph
     setParagraphs(paras);
     setCurrentPara(0);
     setCurrentChar(0);
@@ -32,7 +32,7 @@ export default function TypingParagraph({ text }) {
           return prevParas.join("\n\n");
         });
         setCurrentChar(c => c + 1);
-      }, 1); // ~1ms per char for faster typing
+      }, speed); // configurable typing speed
     } else {
       // Pause briefly before next paragraph
       setTimeout(() => {
@@ -43,33 +43,15 @@ export default function TypingParagraph({ text }) {
     return () => clearTimeout(typingRef.current);
   }, [currentChar, currentPara, paragraphs, done]);
 
-  // Fade-in effect for each paragraph
-  const rendered = displayed.split("\n\n").map((para, idx) => (
-    <p
-      key={idx}
-      style={{
-        opacity: para.length > 0 ? 1 : 0,
-        transition: "opacity 0.7s cubic-bezier(0.4,0,0.2,1)",
-        fontFamily: 'Georgia, serif',
-        color: '#222',
-        lineHeight: 1.7,
-        fontSize: '1.05rem',
-        margin: idx === 0 ? '0 0 18px 0' : '18px 0 0 0',
-        maxWidth: 700,
-        padding: '0 24px',
-        marginLeft: 'auto',
-        marginRight: 'auto',
-        whiteSpace: 'pre-line',
-      }}
-    >
-      {para}
-      {(!done && idx === currentPara) ? <span className="typing-cursor">|</span> : null}
-    </p>
-  ));
-
+  // Render as single span without paragraph formatting
   return (
-    <div className="ai-trends-text fade-in-animated">
-      {rendered}
-    </div>
+    <span style={{
+      lineHeight: 1.6,
+      fontSize: 'inherit',
+      color: 'inherit',
+    }}>
+      {displayed}
+      {!done ? <span className="typing-cursor">|</span> : null}
+    </span>
   );
 } 

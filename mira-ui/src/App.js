@@ -33,6 +33,7 @@ function SearchResults({ darkMode, isSidebarCollapsed, onSignUpClick, user, isAu
   const questionRef = useRef();
   const hiddenDivRef = useRef();
   const [showPeopleCards, setShowPeopleCards] = useState(false);
+  const [showAIResponse, setShowAIResponse] = useState(false);
   const [thinkingDots, setThinkingDots] = useState('');
   const [selectedPerson, setSelectedPerson] = useState(null);
 
@@ -70,9 +71,10 @@ function SearchResults({ darkMode, isSidebarCollapsed, onSignUpClick, user, isAu
     }
   }, [editValue, editing]);
 
-  // Show people cards after 2 seconds if query matches
+  // Show AI response and people cards with proper timing
   useEffect(() => {
     if (query.trim() === 'Engineers who have contributed to open source projects') {
+      setShowAIResponse(false);
       setShowPeopleCards(false);
       setThinkingDots('');
       let dotCount = 0;
@@ -80,15 +82,25 @@ function SearchResults({ darkMode, isSidebarCollapsed, onSignUpClick, user, isAu
         dotCount = (dotCount + 1) % 4;
         setThinkingDots('.'.repeat(dotCount));
       }, 400);
-      const timer = setTimeout(() => {
-        setShowPeopleCards(true);
+      
+      // Show AI response after thinking
+      const aiTimer = setTimeout(() => {
+        setShowAIResponse(true);
         clearInterval(dotsInterval);
       }, 3200);
+      
+      // Show people cards after typing animation completes (3.2s thinking + ~3.25s typing + 0.4s buffer)
+      const cardsTimer = setTimeout(() => {
+        setShowPeopleCards(true);
+      }, 6850);
+      
       return () => {
-        clearTimeout(timer);
+        clearTimeout(aiTimer);
+        clearTimeout(cardsTimer);
         clearInterval(dotsInterval);
       };
     } else {
+      setShowAIResponse(false);
       setShowPeopleCards(false);
       setThinkingDots('');
     }
@@ -233,7 +245,15 @@ function SearchResults({ darkMode, isSidebarCollapsed, onSignUpClick, user, isAu
       {/* Query row */}
       <div
         ref={questionRef}
-        style={{ position: 'relative', marginTop: -20, marginBottom: 38, maxWidth: 1000, marginLeft: 'auto', marginRight: 'auto' }}
+        style={{ 
+          position: 'relative', 
+          marginTop: -20, 
+          marginBottom: 38, 
+          maxWidth: 1000, 
+          marginLeft: 'auto', 
+          marginRight: 'auto',
+          display: selectedPerson ? 'none' : 'block'
+        }}
       >
         {editing ? (
           <div style={{ position: 'relative', width: '100%' }}>
@@ -388,28 +408,93 @@ function SearchResults({ darkMode, isSidebarCollapsed, onSignUpClick, user, isAu
               )}
             </div>
             <hr className="ai-divider" />
-            {query.trim() === 'Engineers who have contributed to open source projects' && (
-              !showPeopleCards ? (
+          </>
+        )}
+      </div>
+      {query.trim() === 'Engineers who have contributed to open source projects' && (
+              !showAIResponse ? (
                 <div style={{
                   maxWidth: 700,
-                  margin: '0 auto 24px auto',
-                  color: 'var(--text-muted)',
-                  fontSize: '1.08rem',
-                  textAlign: 'left',
-                  lineHeight: 1.6,
-                  minHeight: 60,
+                  margin: '20px auto 24px auto',
+                  padding: '0 24px',
                   display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'flex-start',
+                  gap: '16px',
+                  alignItems: 'flex-start',
+                  minHeight: 60,
                 }}>
-                  <span className="thinking-shimmer"><span className="shimmer-text">Finding engineers with recent open source activity{thinkingDots}</span></span>
+                  <div style={{
+                    width: '40px',
+                    height: '40px',
+                    borderRadius: '8px',
+                    background: darkMode ? 'var(--card-bg)' : '#fff',
+                    border: `1.5px solid #f0f0f0`,
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    flexShrink: 0,
+                    marginTop: '2px'
+                  }}>
+                    <svg width="24" height="24" viewBox="0 0 28 28" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <circle cx="14" cy="14" r="10" stroke={darkMode ? 'var(--text)' : '#222'} strokeWidth="1.8" fill={darkMode ? 'var(--card-bg)' : '#fff'}/>
+                      <circle cx="14" cy="14" r="4.5" stroke={darkMode ? 'var(--text)' : '#222'} strokeWidth="1.8" fill={darkMode ? 'var(--card-bg)' : '#fff'}/>
+                    </svg>
+                  </div>
+                  <div style={{
+                    flex: 1,
+                    color: 'var(--text-muted)',
+                    fontSize: '1.05rem',
+                    lineHeight: 1.6,
+                    marginTop: '12px'
+                  }}>
+                    <span className="thinking-shimmer"><span className="shimmer-text">Finding engineers with recent open source activity{thinkingDots}</span></span>
+                  </div>
                 </div>
               ) : null
             )}
-            {/* People card mockup below */}
+            {/* AI Response */}
+            {query.trim() === 'Engineers who have contributed to open source projects' && showAIResponse && !selectedPerson && (
+              <div style={{
+                maxWidth: 700,
+                margin: '0 auto 24px auto',
+                padding: '0 24px',
+                display: 'flex',
+                gap: '16px',
+                alignItems: 'flex-start',
+                minHeight: 60,
+              }}>
+                <div style={{
+                  width: '40px',
+                  height: '40px',
+                  borderRadius: '8px',
+                  background: darkMode ? 'var(--card-bg)' : '#fff',
+                  border: `1.5px solid #f0f0f0`,
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  flexShrink: 0,
+                  marginTop: '2px'
+                }}>
+                  <svg width="24" height="24" viewBox="0 0 28 28" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <circle cx="14" cy="14" r="10" stroke={darkMode ? 'var(--text)' : '#222'} strokeWidth="1.8" fill={darkMode ? 'var(--card-bg)' : '#fff'}/>
+                    <circle cx="14" cy="14" r="4.5" stroke={darkMode ? 'var(--text)' : '#222'} strokeWidth="1.8" fill={darkMode ? 'var(--card-bg)' : '#fff'}/>
+                  </svg>
+                </div>
+                <div style={{
+                  flex: 1,
+                  color: 'var(--text)',
+                  fontSize: '1.05rem',
+                  lineHeight: 1.6,
+                  marginTop: '4px'
+                }}>
+                  <TypingParagraph text="There are countless engineers who have made significant contributions to open-source projects. Here are a few notable examples:" speed={25} />
+                </div>
+              </div>
+            )}
+
+            {/* People Cards */}
             {query.trim() === 'Engineers who have contributed to open source projects' && showPeopleCards && !selectedPerson && (
-              <PeopleCardList 
-                people={[
+                <PeopleCardList 
+                  people={[
                   {
                     name: 'Vinoth Ragunathan',
                     followers: '13.7K',
@@ -440,27 +525,6 @@ function SearchResults({ darkMode, isSidebarCollapsed, onSignUpClick, user, isAu
                     meta: ['🎨 Behance', 'priyapatel.art'],
                     description: 'Product designer passionate about accessibility',
                     avatarBg: 'linear-gradient(135deg, #ff6a88 0%, #ff99ac 100%)',
-                  },
-                  {
-                    name: 'Jordan Lee',
-                    followers: '9.8K',
-                    meta: ['🧑‍💻 github.com/jordanlee', 'Medium'],
-                    description: 'AI researcher and technical writer',
-                    avatarBg: 'linear-gradient(135deg, #43cea2 0%, #185a9d 100%)',
-                  },
-                  {
-                    name: 'Sofia Garcia',
-                    followers: '7.3K',
-                    meta: ['🌎 Remote', 'sofiagarcia.dev'],
-                    description: 'Frontend developer and mentor',
-                    avatarBg: 'linear-gradient(135deg, #f7971e 0%, #ffd200 100%)',
-                  },
-                  {
-                    name: 'Chris Wang',
-                    followers: '10.2K',
-                    meta: ['📚 Academia.edu', 'Stanford'],
-                    description: 'Professor in computer science and ML',
-                    avatarBg: 'linear-gradient(135deg, #00c6ff 0%, #0072ff 100%)',
                   },
                 ]}
                 darkMode={darkMode}
@@ -518,8 +582,7 @@ function SearchResults({ darkMode, isSidebarCollapsed, onSignUpClick, user, isAu
                 </div>
               </div>
             )}
-          </>
-        )}
+        </div>
       </div>
       {/* Follow-up input fixed at the bottom, overlaying the answer text */}
       <div 
@@ -1220,7 +1283,7 @@ function PeopleCard({ person, index, visible, flip, darkMode }) {
         border: darkMode ? '1.2px solid #444' : '1.2px solid #ececec',
         opacity: visible ? 1 : 0,
         transform: visible ? 'translateY(0)' : 'translateY(40px)',
-        transition: `background 0.18s, opacity 0.7s cubic-bezier(.4,0,.2,1) ${index * 0.18}s, transform 0.7s cubic-bezier(.4,0,.2,1) ${index * 0.18}s`,
+        transition: `background 0.18s, opacity 1s cubic-bezier(.4,0,.2,1) ${index * 0.2}s, transform 1s cubic-bezier(.4,0,.2,1) ${index * 0.2}s`,
         margin: 0,
         boxSizing: 'border-box',
         cursor: 'pointer',
@@ -1255,7 +1318,7 @@ function PeopleCardList({ people, darkMode, onCardClick }) {
                 next[i] = true;
                 return next;
               });
-            }, i * 120);
+            }, i * 200);
             observers[i].disconnect();
           }
         },
@@ -1273,7 +1336,7 @@ function PeopleCardList({ people, darkMode, onCardClick }) {
     let timeout;
     // Wait for the last card's fade-in to finish before starting flips
     const fadeInDuration = 700; // ms, matches CSS
-    const lastDelay = (people.length - 1) * 120; // ms
+    const lastDelay = (people.length - 1) * 200; // ms
     timeout = setTimeout(() => {
       function triggerFlip() {
         const visibleIdxs = visibleCards.map((v, i) => v ? i : null).filter(i => i !== null);
@@ -1298,8 +1361,8 @@ function PeopleCardList({ people, darkMode, onCardClick }) {
       margin: '32px 48px 0 48px',
       display: 'grid',
       gridTemplateColumns: 'repeat(auto-fit, minmax(270px, 1fr))',
-      gridRowGap: 60,
-      gridColumnGap: 27,
+      gridRowGap: 30,
+      gridColumnGap: 20,
       alignItems: 'stretch',
       paddingBottom: 220,
     }}>
