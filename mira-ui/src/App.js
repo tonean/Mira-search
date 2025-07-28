@@ -251,7 +251,7 @@ function SearchResults({ darkMode, isSidebarCollapsed, onSignUpClick, user, isAu
   );
 
   return (
-    <div style={{ color: 'var(--text-light)', background: 'var(--bg)', minHeight: '100vh', padding: '48px 0' }}>
+    <div style={{ color: 'var(--text-light)', background: 'var(--bg)', minHeight: '100vh', padding: '48px 0', overflowY: 'auto' }}>
       {/* Sticky bar for research question */}
       {query.trim() === 'Research the latest trends in AI' && showStickyBar && (
         <div style={{ position: 'fixed', top: 0, left: 0, right: 0, zIndex: 2000, background: 'var(--bg)', borderBottom: '2px solid var(--sidebar-border)', display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0 32px', height: 62 }}>
@@ -616,7 +616,7 @@ function SearchResults({ darkMode, isSidebarCollapsed, onSignUpClick, user, isAu
                   margin: '0 auto 0 auto', 
                   color: darkMode ? '#fff' : '#232427', 
                   padding: '0 8px', 
-                  paddingBottom: 220
+                  paddingBottom: 200
                 }}>
                   <div style={{ 
                     display: 'flex', 
@@ -1063,7 +1063,7 @@ function SearchResults({ darkMode, isSidebarCollapsed, onSignUpClick, user, isAu
       </div>
       {/* Answer text (no card, no background) */}
       {query.trim() === 'Research the latest trends in AI' && (
-        <div style={{ marginTop: 0, paddingBottom: 180 }}>
+        <div style={{ marginTop: 0, paddingBottom: 200 }}>
           {mockupAnswer}
           {/* Share button */}
           <div style={{ display: 'flex', justifyContent: 'flex-end', maxWidth: 700, margin: '32px auto 0 auto', padding: '0 24px' }}>
@@ -1598,26 +1598,25 @@ function SearchResultsWithHistory({ onAddChat, darkMode, isSidebarCollapsed, onS
   return <SearchResults darkMode={darkMode} isSidebarCollapsed={isSidebarCollapsed} onSignUpClick={onSignUpClick} user={user} isAuthenticated={isAuthenticated} />;
 }
 
-function PeopleCard({ person, index, visible, flip, darkMode }) {
+function PeopleCard({ person, index, visible, darkMode }) {
   const [isHovered, setIsHovered] = React.useState(false);
   return (
     <div
-      className={flip ? 'flip-animate' : ''}
       style={{
-        background: darkMode ? 'none' : (isHovered ? '#f5f5f5' : '#fff'),
-        borderRadius: 16,
-        padding: '20px 20px 14px 20px',
+        background: darkMode ? 'none' : (isHovered ? '#f9f9f9' : '#fff'),
+        borderRadius: 12,
+        padding: '20px 24px',
         color: darkMode ? '#fff' : '#232427',
         boxShadow: 'none',
         display: 'flex',
-        flexDirection: 'column',
-        alignItems: 'flex-start',
-        width: 270,
-        height: 180,
-        border: darkMode ? '1.2px solid #444' : '1.2px solid #ececec',
+        alignItems: 'center',
+        gap: '20px',
+        width: '100%',
+        minHeight: 120,
+        border: darkMode ? '1.2px solid #444' : '1.2px solid #e5e5e5',
         opacity: visible ? 1 : 0,
         transform: visible ? 'translateY(0)' : 'translateY(40px)',
-        transition: `background 0.18s, opacity 1s cubic-bezier(.4,0,.2,1) ${index * 0.2}s, transform 1s cubic-bezier(.4,0,.2,1) ${index * 0.2}s`,
+        transition: `background 0.18s, opacity 1s cubic-bezier(.4,0,.2,1) ${index * 0.15}s, transform 1s cubic-bezier(.4,0,.2,1) ${index * 0.15}s`,
         margin: 0,
         boxSizing: 'border-box',
         cursor: 'pointer',
@@ -1625,10 +1624,82 @@ function PeopleCard({ person, index, visible, flip, darkMode }) {
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
     >
-      <div style={{ fontWeight: 600, fontSize: '1.08rem', color: darkMode ? '#fff' : '#232427', marginBottom: 6, lineHeight: 1.25 }}>{person.name}</div>
-      <div style={{ color: darkMode ? '#d1d5db' : '#444', fontSize: '0.97rem', marginBottom: 10, lineHeight: 1.4, overflow: 'hidden', textOverflow: 'ellipsis', display: '-webkit-box', WebkitLineClamp: 3, WebkitBoxOrient: 'vertical' }}>{person.description}</div>
-      <div style={{ color: darkMode ? '#bbb' : '#888', fontSize: '0.91rem', marginTop: 'auto', display: 'flex', alignItems: 'center', gap: 10 }}>
-        {person.meta.map((m, i) => <span key={i}>{m}</span>)}
+      {/* Avatar */}
+      <div style={{ 
+        width: 80, 
+        height: 80, 
+        borderRadius: '50%', 
+        overflow: 'hidden', 
+        background: person.avatarBg, 
+        display: 'flex', 
+        alignItems: 'center', 
+        justifyContent: 'center', 
+        fontSize: 32, 
+        color: '#fff', 
+        fontWeight: 700,
+        flexShrink: 0
+      }}>
+        {person.avatarIcon ? person.avatarIcon : <span style={{ fontSize: 32 }}>{person.name[0]}</span>}
+      </div>
+      
+      {/* Content */}
+      <div style={{ flex: 1, minWidth: 0 }}>
+        <div style={{ 
+          fontWeight: 600, 
+          fontSize: '1.25rem', 
+          color: darkMode ? '#fff' : '#232427', 
+          marginBottom: 8, 
+          lineHeight: 1.2,
+          fontFamily: 'Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif'
+        }}>
+          {person.name}
+        </div>
+        
+        {/* Followers */}
+        <div style={{ 
+          color: darkMode ? '#bbb' : '#666', 
+          fontSize: '0.95rem', 
+          marginBottom: 10,
+          fontWeight: 500
+        }}>
+          {person.followers} followers
+        </div>
+        
+        {/* Description */}
+        <div style={{ 
+          color: darkMode ? '#d1d5db' : '#555', 
+          fontSize: '0.95rem', 
+          marginBottom: 12, 
+          lineHeight: 1.5,
+          overflow: 'hidden',
+          textOverflow: 'ellipsis',
+          display: '-webkit-box',
+          WebkitLineClamp: 2,
+          WebkitBoxOrient: 'vertical'
+        }}>
+          {person.description}
+        </div>
+        
+        {/* Meta info */}
+        <div style={{ 
+          color: darkMode ? '#aaa' : '#777', 
+          fontSize: '0.9rem', 
+          display: 'flex', 
+          alignItems: 'center', 
+          gap: 12,
+          flexWrap: 'wrap'
+        }}>
+          {person.meta.map((m, i) => (
+            <span key={i} style={{
+              background: darkMode ? '#333' : '#f0f0f0',
+              padding: '4px 8px',
+              borderRadius: '6px',
+              fontSize: '0.85rem'
+            }}>
+              {m}
+            </span>
+          ))}
+        </div>
       </div>
     </div>
   );
@@ -1636,7 +1707,6 @@ function PeopleCard({ person, index, visible, flip, darkMode }) {
 
 function PeopleCardList({ people, darkMode, onCardClick }) {
   const [visibleCards, setVisibleCards] = React.useState(Array(people.length).fill(false));
-  const [flipIndex, setFlipIndex] = React.useState(null);
   const cardRefs = React.useRef([]);
   React.useEffect(() => {
     const observers = [];
@@ -1652,7 +1722,7 @@ function PeopleCardList({ people, darkMode, onCardClick }) {
                 next[i] = true;
                 return next;
               });
-            }, i * 200);
+            }, i * 150);
             observers[i].disconnect();
           }
         },
@@ -1663,47 +1733,20 @@ function PeopleCardList({ people, darkMode, onCardClick }) {
     return () => observers.forEach(obs => obs && obs.disconnect());
   }, [people.length]);
 
-  // Flip animation logic (auto, random, fast)
-  React.useEffect(() => {
-    // Only start flip animation after all cards have faded in
-    if (!visibleCards.every(Boolean)) return;
-    let timeout;
-    // Wait for the last card's fade-in to finish before starting flips
-    const fadeInDuration = 700; // ms, matches CSS
-    const lastDelay = (people.length - 1) * 200; // ms
-    timeout = setTimeout(() => {
-      function triggerFlip() {
-        const visibleIdxs = visibleCards.map((v, i) => v ? i : null).filter(i => i !== null);
-        if (visibleIdxs.length === 0) return;
-        const randomIdx = visibleIdxs[Math.floor(Math.random() * visibleIdxs.length)];
-        setFlipIndex(randomIdx);
-        timeout = setTimeout(() => {
-          setFlipIndex(null);
-          timeout = setTimeout(triggerFlip, 1200);
-        }, 500); // match animation duration
-      }
-      triggerFlip();
-    }, fadeInDuration + lastDelay);
-    return () => clearTimeout(timeout);
-  }, [visibleCards, people.length]);
-
-  React.useEffect(() => { injectFlipAnimStyle(darkMode); }, [darkMode]);
-
   return (
     <div style={{
-      maxWidth: 900,
-      margin: '32px 48px 0 48px',
-      display: 'grid',
-      gridTemplateColumns: 'repeat(auto-fit, minmax(270px, 1fr))',
-      gridRowGap: 30,
-      gridColumnGap: 20,
-      alignItems: 'stretch',
-      paddingBottom: 220,
+      maxWidth: 700,
+      margin: '32px auto 0 auto',
+      padding: '0 24px',
+      display: 'flex',
+      flexDirection: 'column',
+      gap: 16,
+      paddingBottom: 160,
     }}>
       {people.map((person, i) => (
         <div key={i} ref={el => cardRefs.current[i] = el}>
           <div onClick={() => onCardClick && onCardClick(person)}>
-            <PeopleCard person={person} index={i} visible={visibleCards[i]} flip={flipIndex === i} darkMode={darkMode} />
+            <PeopleCard person={person} index={i} visible={visibleCards[i]} darkMode={darkMode} />
           </div>
         </div>
       ))}
@@ -1711,27 +1754,6 @@ function PeopleCardList({ people, darkMode, onCardClick }) {
   );
 }
 
-// Add flip animation CSS to the file (inject into <style> for demo)
-function injectFlipAnimStyle(darkMode) {
-  if (typeof document === 'undefined') return;
-  let style = document.getElementById('flip-anim-style');
-  if (style) style.remove();
-  style = document.createElement('style');
-  style.id = 'flip-anim-style';
-  style.innerHTML = `
-    @keyframes flipY {
-      0% { transform: rotateY(0deg); background: ${darkMode ? '#222' : '#fff'}; }
-      40% { transform: rotateY(180deg); background: ${darkMode ? '#222' : '#e0e7ff'}; }
-      60% { transform: rotateY(180deg); background: ${darkMode ? '#222' : '#e0e7ff'}; }
-      100% { transform: rotateY(360deg); background: ${darkMode ? '#222' : '#fff'}; }
-    }
-    .flip-animate {
-      animation: flipY 0.5s cubic-bezier(.4,0,.2,1);
-      backface-visibility: hidden;
-      perspective: 800px;
-    }
-  `;
-  document.head.appendChild(style);
-}
+
 
 export default App;
