@@ -1220,10 +1220,10 @@ function AppWithRouter({ isSidebarCollapsed, onToggleSidebar, showSignIn, setSho
   const handleGoogleOAuthResponse = (code, state) => {
     console.log("Received Google OAuth response:", { code, state });
     
-    // Parse the state to determine which modal was open
+    // Parse the state to get modal type and saved page state
     try {
       const stateData = JSON.parse(decodeURIComponent(state));
-      const { modalType } = stateData;
+      const { modalType, currentPath, currentSearch } = stateData;
       
       // Simulate getting user data from the authorization code
       // In a real app, you'd send this code to your backend
@@ -1251,22 +1251,42 @@ function AppWithRouter({ isSidebarCollapsed, onToggleSidebar, showSignIn, setSho
       console.log("Authentication successful for:", modalType);
       console.log("User data:", mockUserData);
       
-      // Clean up the URL
-      window.history.replaceState({}, document.title, window.location.pathname);
+      // Restore the original page state by constructing the original URL
+      const originalUrl = currentPath + (currentSearch || '');
+      
+      // Navigate back to the original page with preserved state
+      if (originalUrl !== window.location.pathname + window.location.search) {
+        window.history.replaceState({}, document.title, originalUrl);
+        // Trigger a page refresh to ensure all components load with the restored state
+        window.location.reload();
+      } else {
+        // If we're already on the right page, just clean up OAuth params
+        window.history.replaceState({}, document.title, originalUrl);
+      }
       
     } catch (error) {
       console.error("Error parsing OAuth state:", error);
+      // Fallback: just clean up the URL if state parsing fails
+      window.history.replaceState({}, document.title, window.location.pathname);
     }
   };
 
   const handleGoogleSignUp = () => {
     console.log("Redirecting to Google Sign Up...");
     
-    // Create state parameter to track which modal was open
-    const state = encodeURIComponent(JSON.stringify({ modalType: 'signup' }));
+    // Save current page state to restore after authentication
+    const currentState = {
+      modalType: 'signup',
+      currentPath: window.location.pathname,
+      currentSearch: window.location.search,
+      timestamp: Date.now()
+    };
     
-    // Get the current origin for debugging
-    const redirectUri = window.location.origin;
+    // Create state parameter with current page info
+    const state = encodeURIComponent(JSON.stringify(currentState));
+    
+    // Use current full URL as redirect URI
+    const redirectUri = window.location.href.split('?')[0]; // Remove existing query params
     console.log("Redirect URI:", redirectUri);
     
     // Construct Google OAuth URL
@@ -1281,28 +1301,39 @@ function AppWithRouter({ isSidebarCollapsed, onToggleSidebar, showSignIn, setSho
     
     console.log("Full Google Auth URL:", googleAuthUrl);
     
-    // Open in new window/tab
-    window.open(googleAuthUrl, '_blank', 'width=500,height=600');
+    // Redirect current page to Google Auth
+    window.location.href = googleAuthUrl;
   };
 
   const handleGoogleLogin = () => {
     console.log("Redirecting to Google Login...");
     
-    // Create state parameter to track which modal was open
-    const state = encodeURIComponent(JSON.stringify({ modalType: 'login' }));
+    // Save current page state to restore after authentication
+    const currentState = {
+      modalType: 'login',
+      currentPath: window.location.pathname,
+      currentSearch: window.location.search,
+      timestamp: Date.now()
+    };
+    
+    // Create state parameter with current page info
+    const state = encodeURIComponent(JSON.stringify(currentState));
+    
+    // Use current full URL as redirect URI
+    const redirectUri = window.location.href.split('?')[0]; // Remove existing query params
     
     // Construct Google OAuth URL
     const googleAuthUrl = `https://accounts.google.com/o/oauth2/v2/auth?` +
       `client_id=302037822597-jsac8r6ugd6um4igmfvmuu2bsaquttpq.apps.googleusercontent.com&` +
-      `redirect_uri=${encodeURIComponent(window.location.origin)}&` +
+      `redirect_uri=${encodeURIComponent(redirectUri)}&` +
       `response_type=code&` +
       `scope=openid email profile&` +
       `state=${state}&` +
       `access_type=offline&` +
       `prompt=consent`;
     
-    // Open in new window/tab
-    window.open(googleAuthUrl, '_blank', 'width=500,height=600');
+    // Redirect current page to Google Auth
+    window.location.href = googleAuthUrl;
   };
 
   const handleLogout = () => {
@@ -1742,9 +1773,13 @@ function AccuracyDot({ score, person, darkMode, isActive, onHover, onLeave }) {
   );
 }
 
-function PeopleCard({ person, index, visible, darkMode }) {
+function PeopleCard({ person, index, visible, darkMode, totalCards }) {
   const [isHovered, setIsHovered] = React.useState(false);
   const [activeTooltip, setActiveTooltip] = React.useState(null);
+  
+  // Calculate delay based on total cards for better pacing
+  const baseDelay = totalCards <= 2 ? 0.3 : totalCards <= 4 ? 0.25 : 0.2;
+  const animationDelay = index * baseDelay;
   
   return (
     <div
@@ -1761,8 +1796,8 @@ function PeopleCard({ person, index, visible, darkMode }) {
         minHeight: 120,
         border: darkMode ? '1.2px solid #444' : '1.2px solid #e5e5e5',
         opacity: visible ? 1 : 0,
-        transform: visible ? 'translateY(0)' : 'translateY(40px)',
-        transition: `background 0.18s, opacity 1s cubic-bezier(.4,0,.2,1) ${index * 0.15}s, transform 1s cubic-bezier(.4,0,.2,1) ${index * 0.15}s`,
+        transform: visible ? 'translateY(0)' : 'translateY(-40px)',
+        transition: `background 0.18s, opacity 1s cubic-bezier(.4,0,.2,1) ${animationDelay}s, transform 1s cubic-bezier(.4,0,.2,1) ${animationDelay}s`,
         margin: 0,
         boxSizing: 'border-box',
         cursor: 'pointer',
@@ -1921,6 +1956,10 @@ function PeopleCardList({ people, darkMode, animationsCompleted, onCardClick }) 
       observers[i] = new window.IntersectionObserver(
         ([entry]) => {
           if (entry.isIntersecting) {
+            // Calculate delay based on total cards for better pacing
+            const baseDelay = people.length <= 2 ? 300 : people.length <= 4 ? 250 : 200;
+            const delay = i * baseDelay;
+            
             setTimeout(() => {
               setVisibleCards((prev) => {
                 if (prev[i]) return prev;
@@ -1928,7 +1967,7 @@ function PeopleCardList({ people, darkMode, animationsCompleted, onCardClick }) 
                 next[i] = true;
                 return next;
               });
-            }, i * 150);
+            }, delay);
             observers[i].disconnect();
           }
         },
@@ -1952,7 +1991,7 @@ function PeopleCardList({ people, darkMode, animationsCompleted, onCardClick }) 
       {people.map((person, i) => (
         <div key={i} ref={el => cardRefs.current[i] = el}>
           <div onClick={() => onCardClick && onCardClick(person)}>
-            <PeopleCard person={person} index={i} visible={visibleCards[i]} darkMode={darkMode} />
+            <PeopleCard person={person} index={i} visible={visibleCards[i]} darkMode={darkMode} totalCards={people.length} />
           </div>
         </div>
       ))}
