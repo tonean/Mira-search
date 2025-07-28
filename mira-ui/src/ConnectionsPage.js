@@ -192,7 +192,7 @@ export default function ConnectionsPage({ isSidebarCollapsed = false, onConnecti
         </div>
         <div style={{ marginBottom: 18 }}>
         </div>
-        <div style={{ background: '#fff', border: '1.5px solid #f0f0f0', borderRadius: 12, marginBottom: 14, display: 'flex', alignItems: 'center', padding: '20px 16px', gap: 18 }}>
+        <div style={{ border: '1.5px solid #f0f0f0', borderRadius: 12, marginBottom: 14, display: 'flex', alignItems: 'center', padding: '20px 16px', gap: 18 }}>
           <img src="https://cdn-icons-png.flaticon.com/512/174/174857.png" alt="LinkedIn" style={{ width: 38, height: 38, marginRight: 8 }} />
           <div style={{ flex: 1 }}>
             <div style={{ fontWeight: 600, fontSize: '1.13rem', color: '#222', marginBottom: 4 }}>LinkedIn</div>
@@ -200,7 +200,7 @@ export default function ConnectionsPage({ isSidebarCollapsed = false, onConnecti
           </div>
           <ConnectionToggle label="LinkedIn" onToggle={handleToggleConnection} enabled={linkedInConnected} />
         </div>
-        <div style={{ background: '#fff', border: '1.5px solid #f0f0f0', borderRadius: 12, marginBottom: 32, display: 'flex', alignItems: 'center', padding: '20px 16px', gap: 18 }}>
+        <div style={{ border: '1.5px solid #f0f0f0', borderRadius: 12, marginBottom: 32, display: 'flex', alignItems: 'center', padding: '20px 16px', gap: 18 }}>
           <img src="https://cdn-icons-png.flaticon.com/512/733/733579.png" alt="Twitter" style={{ width: 38, height: 38, marginRight: 8 }} />
           <div style={{ flex: 1 }}>
             <div style={{ fontWeight: 600, fontSize: '1.13rem', color: '#222', marginBottom: 4 }}>Twitter</div>

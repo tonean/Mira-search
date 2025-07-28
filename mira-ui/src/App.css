@@ -5,11 +5,11 @@ body {
   color: var(--text);
 }
 :root {
-  --bg: #fff;
-  --bg-alt: #fff;
-  --sidebar-bg: #f5f5f3;
+  --bg: #fdfdfc;
+  --bg-alt: #fdfdfc;
+  --sidebar-bg: #f8f8f7;
   --sidebar-border: #ececec;
-  --main-bg: #fff;
+  --main-bg: #fdfdfc;
   --text: #222;
   --text-light: #444;
   --text-muted: #888;

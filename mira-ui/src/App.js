@@ -90,11 +90,18 @@ function SearchResults({ darkMode, isSidebarCollapsed, onSignUpClick, user, isAu
         return;
       }
       
-      // Start fresh animations every time (except when coming back from profile)
+      // If animations were already completed, show everything immediately (returning from profile)
+      if (animationsCompleted) {
+        setShowAIResponse(true);
+        setShowPeopleCards(true);
+        setThinkingDots('');
+        return;
+      }
+      
+      // Start fresh animations only on first visit
       setShowAIResponse(false);
       setShowPeopleCards(false);
       setThinkingDots('');
-      setAnimationsCompleted(false);
       
       let dotCount = 0;
       const dotsInterval = setInterval(() => {
@@ -125,16 +132,7 @@ function SearchResults({ darkMode, isSidebarCollapsed, onSignUpClick, user, isAu
       setThinkingDots('');
       setAnimationsCompleted(false); // Reset for other queries
     }
-  }, [query, selectedPerson]);
-
-  // When returning from profile view, show content immediately
-  useEffect(() => {
-    if (selectedPerson === null && query.trim() === 'Engineers who have contributed to open source projects' && animationsCompleted) {
-      setShowAIResponse(true);
-      setShowPeopleCards(true);
-      setThinkingDots('');
-    }
-  }, [selectedPerson, query, animationsCompleted]);
+  }, [query, selectedPerson, animationsCompleted]);
 
   // Trigger profile fade-down animation with staggered timing
   useEffect(() => {
@@ -244,14 +242,14 @@ function SearchResults({ darkMode, isSidebarCollapsed, onSignUpClick, user, isAu
   };
 
   // --- MOCKUP TEXT ---
-  const aiTrendsText = `The latest trends in AI for 2025 center on several key shifts, impacting both technological development and real-world applications:\nAI Reasoning & Agentic AI: Large language models (LLMs) and frontier models are moving beyond mere text generation to advanced reasoning—enabling tools that can interpret, decide, and act on complex tasks. The concept of agentic AI is gaining momentum, with AI agents working autonomously to simplify work and personal life, signaling a shift from passive tools to active collaborators.\nCustom Silicon and Efficiency: As the demand for AI computational power rises, companies are turning to custom silicon—specialized processors designed for AI workloads—to optimize performance and manage energy use. AI is also becoming more resource-efficient, driven by innovations to manage costs and environmental concerns.\nMultimodal and Embodied AI: AI is rapidly expanding past text into multimodal models that combine language, images, video, and audio, as seen in tools like OpenAI’s Sora. This enables more dynamic and versatile AI systems. Additionally, embodied AI—where AI powers robots and interacts with the physical world—is progressing, signaling improvements in robotics and automated systems.\nBeyond Chatbots: The focus is shifting away from simple conversational interfaces. Instead, businesses are building software that leverages foundational AI models as back-end infrastructure, deploying generative AI for tasks such as summarizing, analyzing, or autonomously acting on unstructured data.\nAI in Scientific Discovery & Healthcare: AI-driven breakthroughs in science and medicine are accelerating, especially in fields like drug discovery, climate science, and materials engineering. AI-powered research is unlocking solutions to intricate challenges in biomedicine and sustainability.\nMainstream Adoption & Tangible Productivity Gains: Usage of AI in business is skyrocketing, with 78% of organizations adopting AI in 2024 compared to 55% in 2023. The technology is driving productivity gains, skill gap narrowing, and new business models across industries.\nMeasuring AI Efficacy and Responsible AI: With increased adoption comes a greater emphasis on evaluating AI performance and mitigating risks, including privacy, safety, and ethical concerns. Businesses and regulators are developing new benchmarks and metrics for AI effectiveness and trustworthiness.\nCloud Migrations and AI Workloads: Hyperscalers (cloud giants) are investing in infrastructure to accommodate surges in AI workloads, with a focus on secure, scalable cloud solutions integrated with advanced AI capabilities.\nOpen-Weight Models & Accessibility: Open-source and open-weight AI models are narrowing the gap with proprietary systems, making high-quality AI more accessible and affordable for wider use cases.\nDiversification and Benchmark Saturation: As LLMs and foundational models saturate traditional benchmarks, attention is turning toward new domain-specific models and diverse architectures to push the next stage of progress.\nThese trends reflect a broader movement from AI as hype to AI as practical, integrated technology—delivering measurable value, automating complex workflows, and reshaping economic and social systems.`;
+  const aiTrendsText = `The latest trends in AI for 2025 center on several key shifts, impacting both technological development and real-world applications:\nAI Reasoning & Agentic AI: Large language models (LLMs) and frontier models are moving beyond mere text generation to advanced reasoning—enabling tools that can interpret, decide, and act on complex tasks. The concept of agentic AI is gaining momentum, with AI agents working autonomously to simplify work and personal life, signaling a shift from passive tools to active collaborators.\nCustom Silicon and Efficiency: As the demand for AI computational power rises, companies are turning to custom silicon—specialized processors designed for AI workloads—to optimize performance and manage energy use. AI is also becoming more resource-efficient, driven by innovations to manage costs and environmental concerns.\nMultimodal and Embodied AI: AI is rapidly expanding past text into multimodal models that combine language, images, video, and audio, as seen in tools like OpenAI's Sora. This enables more dynamic and versatile AI systems. Additionally, embodied AI—where AI powers robots and interacts with the physical world—is progressing, signaling improvements in robotics and automated systems.\nBeyond Chatbots: The focus is shifting away from simple conversational interfaces. Instead, businesses are building software that leverages foundational AI models as back-end infrastructure, deploying generative AI for tasks such as summarizing, analyzing, or autonomously acting on unstructured data.\nAI in Scientific Discovery & Healthcare: AI-driven breakthroughs in science and medicine are accelerating, especially in fields like drug discovery, climate science, and materials engineering. AI-powered research is unlocking solutions to intricate challenges in biomedicine and sustainability.\nMainstream Adoption & Tangible Productivity Gains: Usage of AI in business is skyrocketing, with 78% of organizations adopting AI in 2024 compared to 55% in 2023. The technology is driving productivity gains, skill gap narrowing, and new business models across industries.\nMeasuring AI Efficacy and Responsible AI: With increased adoption comes a greater emphasis on evaluating AI performance and mitigating risks, including privacy, safety, and ethical concerns. Businesses and regulators are developing new benchmarks and metrics for AI effectiveness and trustworthiness.\nCloud Migrations and AI Workloads: Hyperscalers (cloud giants) are investing in infrastructure to accommodate surges in AI workloads, with a focus on secure, scalable cloud solutions integrated with advanced AI capabilities.\nOpen-Weight Models & Accessibility: Open-source and open-weight AI models are narrowing the gap with proprietary systems, making high-quality AI more accessible and affordable for wider use cases.\nDiversification and Benchmark Saturation: As LLMs and foundational models saturate traditional benchmarks, attention is turning toward new domain-specific models and diverse architectures to push the next stage of progress.\nThese trends reflect a broader movement from AI as hype to AI as practical, integrated technology—delivering measurable value, automating complex workflows, and reshaping economic and social systems.`;
 
   const mockupAnswer = (
     <TypingParagraph text={aiTrendsText} />
   );
 
   return (
-    <div style={{ color: 'var(--text-light)', background: 'var(--bg)', minHeight: '100vh', padding: '48px 0', overflowY: 'auto' }}>
+    <div style={{ color: 'var(--text-light)', background: 'var(--bg)', minHeight: '100vh', padding: '48px 0' }}>
       {/* Sticky bar for research question */}
       {query.trim() === 'Research the latest trends in AI' && showStickyBar && (
         <div style={{ position: 'fixed', top: 0, left: 0, right: 0, zIndex: 2000, background: 'var(--bg)', borderBottom: '2px solid var(--sidebar-border)', display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0 32px', height: 62 }}>
@@ -570,36 +568,61 @@ function SearchResults({ darkMode, isSidebarCollapsed, onSignUpClick, user, isAu
                   {
                     name: 'Vinoth Ragunathan',
                     followers: '13.7K',
-                    meta: ['🏡 duff gardens', '🎲 insidesticker.com', 'helvetiica'],
-                    description: 'interface designer',
+                    platform: 'twitter',
+                    username: 'vinothrag',
                     avatarBg: 'linear-gradient(135deg, #3a8dde 0%, #b388ff 100%)',
+                    scores: [
+                      { label: 'Engineering', color: 'green' },
+                      { label: 'Open Source', color: 'green' },
+                      { label: 'Recent Activity', color: 'yellow' }
+                    ],
+                    quote: 'Just shipped a new React component library that makes UI development 10x faster. Open source is the way forward!'
                   },
                   {
                     name: 'michael shillingburg',
                     followers: '8.2K',
-                    meta: ['🌐 shilly.co', 'shillingburger'],
-                    description: '3D artist and interface designer ✨ designing @ https://t.co/hJOniBW62E photo editor: https://t.co/EKiGRBrUZ6 drawing site: https://t.co/uv3jbaB0q1 👋 michael@shilly.co',
+                    platform: 'github',
+                    username: 'shillingburger',
                     avatarBg: '#7c3aed',
                     avatarIcon: (
                       <svg width="48" height="48" viewBox="0 0 48 48" fill="none"><circle cx="24" cy="24" r="24" fill="#7c3aed"/><path d="M32 32c0-4.418-3.582-8-8-8s-8 3.582-8 8" stroke="#fff" strokeWidth="2" strokeLinecap="round"/><circle cx="24" cy="20" r="4" fill="#fff"/></svg>
                     ),
+                    scores: [
+                      { label: 'Engineering', color: 'green' },
+                      { label: 'Open Source', color: 'green' },
+                      { label: 'Recent Activity', color: 'green' }
+                    ],
+                    quote: 'Contributing to 15+ open source projects this year. Code should be accessible to everyone, not just big tech.'
                   },
                   {
                     name: 'Alex Kim',
                     followers: '5.1K',
-                    meta: ['📍 San Francisco', 'alexkim.com'],
-                    description: 'Full-stack engineer and open source contributor',
+                    platform: 'linkedin',
+                    username: 'alex-kim-dev',
                     avatarBg: 'linear-gradient(135deg, #ffb347 0%, #ffcc33 100%)',
+                    scores: [
+                      { label: 'Engineering', color: 'green' },
+                      { label: 'Open Source', color: 'yellow' },
+                      { label: 'Recent Activity', color: 'green' }
+                    ],
+                    quote: 'Built a ML framework that handles distributed training across multiple GPUs. Performance gains are incredible.'
                   },
                   {
                     name: 'Priya Patel',
                     followers: '12.4K',
-                    meta: ['🎨 Behance', 'priyapatel.art'],
-                    description: 'Product designer passionate about accessibility',
+                    platform: 'twitter',
+                    username: 'priya_builds',
                     avatarBg: 'linear-gradient(135deg, #ff6a88 0%, #ff99ac 100%)',
+                    scores: [
+                      { label: 'Engineering', color: 'yellow' },
+                      { label: 'Open Source', color: 'green' },
+                      { label: 'Recent Activity', color: 'green' }
+                    ],
+                    quote: 'Accessibility in open source is my passion. Every user deserves software that works for them.'
                   },
                 ]}
                 darkMode={darkMode}
+                animationsCompleted={animationsCompleted}
                 onCardClick={person => {
                   if (person.name === 'Vinoth Ragunathan') setSelectedPerson(person);
                 }}
@@ -1598,12 +1621,135 @@ function SearchResultsWithHistory({ onAddChat, darkMode, isSidebarCollapsed, onS
   return <SearchResults darkMode={darkMode} isSidebarCollapsed={isSidebarCollapsed} onSignUpClick={onSignUpClick} user={user} isAuthenticated={isAuthenticated} />;
 }
 
+function AccuracyDot({ score, person, darkMode, isActive, onHover, onLeave }) {
+  const getTooltipContent = () => {
+    switch(score.label) {
+      case 'Engineering':
+        return {
+          question: 'Is this person a software engineer?',
+          answer: score.color === 'green' ? 'Yes' : score.color === 'yellow' ? 'Likely' : 'No',
+          details: score.color === 'green' ? 'Strong engineering background with technical contributions' : 
+                  score.color === 'yellow' ? 'Some technical experience, mixed background' : 
+                  'Limited engineering experience found'
+        };
+      case 'Open Source':
+        return {
+          question: 'Has contributed to open source?',
+          answer: score.color === 'green' ? 'Yes' : score.color === 'yellow' ? 'Some' : 'Minimal',
+          details: score.color === 'green' ? 'Active open source contributor with multiple projects' : 
+                  score.color === 'yellow' ? 'Some open source activity, occasional contributions' : 
+                  'Very limited open source involvement'
+        };
+      case 'Recent Activity':
+        return {
+          question: 'Recent technical activity?',
+          answer: score.color === 'green' ? 'Very Active' : score.color === 'yellow' ? 'Moderate' : 'Low',
+          details: score.color === 'green' ? 'High recent activity in past 6 months' : 
+                  score.color === 'yellow' ? 'Some activity, but less frequent' : 
+                  'Limited recent technical activity'
+        };
+      default:
+        return { question: '', answer: '', details: '' };
+    }
+  };
+
+  const tooltipContent = getTooltipContent();
+  
+  return (
+    <div 
+      style={{ 
+        position: 'relative', 
+        display: 'flex',
+        alignItems: 'center',
+        gap: 4,
+        fontSize: '0.8rem',
+        color: darkMode ? '#ccc' : '#666',
+        cursor: 'pointer',
+        borderRadius: 4,
+        padding: '2px 4px',
+        transition: 'background-color 0.2s'
+      }}
+      onMouseEnter={onHover}
+      onMouseLeave={onLeave}
+    >
+      <div 
+        style={{
+          width: 8,
+          height: 8,
+          borderRadius: '50%',
+          backgroundColor: score.color === 'green' ? '#22c55e' : 
+                          score.color === 'yellow' ? '#eab308' : '#ef4444'
+        }}
+      />
+      <span>{score.label}</span>
+      
+      {isActive && (
+        <div style={{
+          position: 'absolute',
+          bottom: 'calc(100% + 8px)',
+          left: '50%',
+          transform: 'translateX(-50%)',
+          backgroundColor: '#fff',
+          border: '1px solid #e0e0e0',
+          borderRadius: 8,
+          padding: '12px 16px',
+          minWidth: 280,
+          maxWidth: 320,
+          boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
+          zIndex: 1000,
+          fontSize: '0.9rem',
+          lineHeight: 1.4
+        }}>
+          <div style={{ marginBottom: 8 }}>
+            <span style={{ color: '#666', fontWeight: 500 }}>
+              {tooltipContent.question}
+            </span>
+            <span style={{ 
+              color: score.color === 'green' ? '#22c55e' : 
+                    score.color === 'yellow' ? '#eab308' : '#ef4444',
+              fontWeight: 600,
+              marginLeft: 6
+            }}>
+              {tooltipContent.answer}
+            </span>
+          </div>
+          
+          <div style={{ 
+            color: '#888', 
+            fontSize: '0.85rem',
+            borderTop: '1px solid #f0f0f0',
+            paddingTop: 8,
+            marginTop: 8
+          }}>
+            {tooltipContent.details}
+          </div>
+          
+          {/* Tooltip arrow */}
+          <div style={{
+            position: 'absolute',
+            top: '100%',
+            left: '50%',
+            transform: 'translateX(-50%)',
+            width: 0,
+            height: 0,
+            borderLeft: '6px solid transparent',
+            borderRight: '6px solid transparent',
+            borderTop: '6px solid #fff'
+          }} />
+        </div>
+      )}
+    </div>
+  );
+}
+
 function PeopleCard({ person, index, visible, darkMode }) {
   const [isHovered, setIsHovered] = React.useState(false);
+  const [activeTooltip, setActiveTooltip] = React.useState(null);
+  
   return (
     <div
       style={{
-        background: darkMode ? 'none' : (isHovered ? '#f9f9f9' : '#fff'),
+        background: 'transparent',
         borderRadius: 12,
         padding: '20px 24px',
         color: darkMode ? '#fff' : '#232427',
@@ -1647,7 +1793,7 @@ function PeopleCard({ person, index, visible, darkMode }) {
         <div style={{ 
           fontWeight: 600, 
           fontSize: '1.25rem', 
-          color: darkMode ? '#fff' : '#232427', 
+          color: darkMode ? '#fff' : '#555', 
           marginBottom: 8, 
           lineHeight: 1.2,
           fontFamily: 'Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif'
@@ -1658,57 +1804,117 @@ function PeopleCard({ person, index, visible, darkMode }) {
         {/* Followers */}
         <div style={{ 
           color: darkMode ? '#bbb' : '#666', 
-          fontSize: '0.95rem', 
+          fontSize: '0.85rem', 
           marginBottom: 10,
-          fontWeight: 500
+          fontWeight: 500,
+          fontFamily: 'SF Pro Display, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif'
         }}>
           {person.followers} followers
         </div>
         
-        {/* Description */}
+        {/* Social Platform */}
         <div style={{ 
-          color: darkMode ? '#d1d5db' : '#555', 
-          fontSize: '0.95rem', 
-          marginBottom: 12, 
-          lineHeight: 1.5,
+          display: 'flex', 
+          alignItems: 'center', 
+          gap: 8, 
+          marginBottom: 12 
+        }}>
+          {person.platform === 'twitter' && (
+            <>
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="#1DA1F2">
+                <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
+              </svg>
+              <span style={{ 
+                color: darkMode ? '#bbb' : '#666', 
+                fontSize: '0.9rem',
+                fontWeight: 500
+              }}>
+                @{person.username}
+              </span>
+            </>
+          )}
+          {person.platform === 'github' && (
+            <>
+              <svg width="16" height="16" viewBox="0 0 24 24" fill={darkMode ? '#fff' : '#333'}>
+                <path d="M12 0C5.374 0 0 5.373 0 12 0 17.302 3.438 21.8 8.207 23.387c.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23A11.509 11.509 0 0112 5.803c1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576C20.566 21.797 24 17.3 24 12c0-6.627-5.373-12-12-12z"/>
+              </svg>
+              <span style={{ 
+                color: darkMode ? '#bbb' : '#666', 
+                fontSize: '0.9rem',
+                fontWeight: 500
+              }}>
+                {person.username}
+              </span>
+            </>
+          )}
+          {person.platform === 'linkedin' && (
+            <>
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="#0077B5">
+                <path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a2.062 2.062 0 01-2.063-2.065 2.064 2.064 0 112.063 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/>
+              </svg>
+              <span style={{ 
+                color: darkMode ? '#bbb' : '#666', 
+                fontSize: '0.9rem',
+                fontWeight: 500
+              }}>
+                {person.username}
+              </span>
+            </>
+          )}
+        </div>
+
+        {/* Accuracy Scores */}
+        <div style={{ 
+          display: 'flex', 
+          gap: 8, 
+          marginBottom: 12,
+          alignItems: 'center'
+        }}>
+          {person.scores.map((score, i) => (
+            <AccuracyDot 
+              key={i}
+              score={score} 
+              person={person} 
+              darkMode={darkMode} 
+              isActive={activeTooltip === i}
+              onHover={() => setActiveTooltip(i)}
+              onLeave={() => setActiveTooltip(null)}
+            />
+          ))}
+        </div>
+        
+        {/* Relevant Quote */}
+        <div style={{ 
+          color: darkMode ? '#bbb' : '#999', 
+          fontSize: '0.9rem', 
+          lineHeight: 1.4,
+          position: 'relative',
+          paddingLeft: 12,
+          borderLeft: `2px solid ${darkMode ? '#444' : '#e5e5e5'}`,
           overflow: 'hidden',
           textOverflow: 'ellipsis',
           display: '-webkit-box',
           WebkitLineClamp: 2,
           WebkitBoxOrient: 'vertical'
         }}>
-          {person.description}
-        </div>
-        
-        {/* Meta info */}
-        <div style={{ 
-          color: darkMode ? '#aaa' : '#777', 
-          fontSize: '0.9rem', 
-          display: 'flex', 
-          alignItems: 'center', 
-          gap: 12,
-          flexWrap: 'wrap'
-        }}>
-          {person.meta.map((m, i) => (
-            <span key={i} style={{
-              background: darkMode ? '#333' : '#f0f0f0',
-              padding: '4px 8px',
-              borderRadius: '6px',
-              fontSize: '0.85rem'
-            }}>
-              {m}
-            </span>
-          ))}
+          "{person.quote}"
         </div>
       </div>
     </div>
   );
 }
 
-function PeopleCardList({ people, darkMode, onCardClick }) {
+function PeopleCardList({ people, darkMode, animationsCompleted, onCardClick }) {
   const [visibleCards, setVisibleCards] = React.useState(Array(people.length).fill(false));
   const cardRefs = React.useRef([]);
+  
   React.useEffect(() => {
+    // If animations were already completed, show all cards immediately
+    if (animationsCompleted) {
+      setVisibleCards(Array(people.length).fill(true));
+      return;
+    }
+    
     const observers = [];
     people.forEach((_, i) => {
       if (!cardRefs.current[i]) return;
@@ -1731,7 +1937,7 @@ function PeopleCardList({ people, darkMode, onCardClick }) {
       observers[i].observe(cardRefs.current[i]);
     });
     return () => observers.forEach(obs => obs && obs.disconnect());
-  }, [people.length]);
+  }, [people.length, animationsCompleted]);
 
   return (
     <div style={{

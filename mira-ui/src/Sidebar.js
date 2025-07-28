@@ -52,7 +52,7 @@ export default function Sidebar({ isCollapsed, onToggleCollapse, chatHistory = [
         left: 0,
         height: '100vh',
         width: 290,
-        background: darkMode ? 'var(--sidebar-bg)' : '#fbfbfc',
+        background: 'var(--sidebar-bg)',
         border: `1.5px solid ${darkMode ? 'var(--sidebar-border)' : '#ececec'}`,
         borderRadius: 16,
         margin: 8,
@@ -140,8 +140,8 @@ export default function Sidebar({ isCollapsed, onToggleCollapse, chatHistory = [
             padding: '7px 0 7px 12px', 
             fontSize: '0.93rem', 
             borderRadius: 8, 
-            background: darkMode ? 'var(--input-action-active-bg)' : '#f5f5f5', 
-            color: darkMode ? 'var(--text)' : '#222', 
+            background: darkMode ? 'var(--input-action-active-bg)' : '#111', 
+            color: darkMode ? 'var(--text)' : '#fff', 
             border: 'none', 
             fontWeight: 500, 
             display: 'flex', 
@@ -155,7 +155,7 @@ export default function Sidebar({ isCollapsed, onToggleCollapse, chatHistory = [
               navigate("/");
             }
           }}>
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke={darkMode ? 'var(--text-muted)' : '#555'} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke={darkMode ? 'var(--text-muted)' : '#fff'} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
             <span>New Chat</span>
           </button>
           <button className="new-task-btn" style={{ 
