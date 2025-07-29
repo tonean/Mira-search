@@ -1,4 +1,24 @@
-# Getting Started with Create React App
+# Mira Search - People Search Engine
+
+A React-based people search engine that helps you find and connect with professionals based on their skills, experience, and open source contributions.
+
+## Environment Variables
+
+Before running the application, you need to set up environment variables. Create a `.env.local` file in the `mira-ui` directory with the following variables:
+
+```env
+# Google OAuth Configuration
+REACT_APP_GOOGLE_CLIENT_ID=your_google_client_id_here
+REACT_APP_GOOGLE_CLIENT_SECRET=your_google_client_secret_here
+
+# Supabase Configuration
+REACT_APP_SUPABASE_URL=your_supabase_url_here
+REACT_APP_SUPABASE_ANON_KEY=your_supabase_anon_key_here
+```
+
+**Important**: Never commit your `.env.local` file to version control. It's already included in `.gitignore`.
+
+## Getting Started
 
 This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
 

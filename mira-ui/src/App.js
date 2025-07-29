@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from "react";
+import React, { useState, useRef, useEffect, useCallback } from "react";
 import ReactDOM from "react-dom";
 import Sidebar from "./Sidebar";
 import TopBar from "./TopBar";
@@ -9,6 +9,15 @@ import { BrowserRouter as Router, Routes, Route, useLocation, useNavigate } from
 import "./App.css";
 import ConnectionsPage from "./ConnectionsPage";
 import TypingParagraph from "./TypingParagraph";
+import { supabaseAuth, supabaseDB } from './supabase';
+
+// Supabase configuration
+// TODO: Replace with your actual Supabase credentials
+const SUPABASE_URL = 'YOUR_SUPABASE_URL';
+const SUPABASE_ANON_KEY = 'YOUR_SUPABASE_ANON_KEY';
+
+// Initialize Supabase client
+// const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
 function SearchResults({ darkMode, isSidebarCollapsed, onSignUpClick, user, isAuthenticated }) {
   const location = useLocation();
@@ -1145,17 +1154,84 @@ function App() {
   const toggleDarkMode = () => setDarkMode((d) => !d);
 
   // Handler to add a chat/search to history
-  const handleAddChat = (query) => {
+  const handleAddChat = useCallback((query) => {
+    console.log("Adding chat to history:", query);
     setChatHistory((prev) => {
-      if (!query.trim() || prev.includes(query)) return prev;
-      return [query, ...prev].slice(0, 20); // keep max 20
+      if (!query.trim() || prev.includes(query)) {
+        console.log("Query already exists or is empty, skipping");
+        return prev;
+      }
+      const newHistory = [query, ...prev].slice(0, 20); // keep max 20
+      console.log("New chat history:", newHistory);
+      
+      // Save to localStorage if user is authenticated
+      const savedUser = localStorage.getItem('mira_user');
+      if (savedUser) {
+        try {
+          const userData = JSON.parse(savedUser);
+          localStorage.setItem(`mira_chat_history_${userData.id}`, JSON.stringify(newHistory));
+          console.log("Saved chat history to localStorage for user:", userData.id);
+        } catch (error) {
+          console.error("Error saving chat history:", error);
+        }
+      } else {
+        console.log("No authenticated user found, not saving to localStorage");
+      }
+      
+      return newHistory;
     });
-  };
+  }, []);
 
   // Handler to delete a chat by index
-  const handleDeleteChat = (idx) => {
-    setChatHistory((prev) => prev.filter((_, i) => i !== idx));
-  };
+  const handleDeleteChat = useCallback((idx) => {
+    console.log("Deleting chat at index:", idx);
+    setChatHistory((prev) => {
+      const newHistory = prev.filter((_, i) => i !== idx);
+      console.log("Updated chat history after deletion:", newHistory);
+      
+      // Save to localStorage if user is authenticated
+      const savedUser = localStorage.getItem('mira_user');
+      if (savedUser) {
+        try {
+          const userData = JSON.parse(savedUser);
+          localStorage.setItem(`mira_chat_history_${userData.id}`, JSON.stringify(newHistory));
+          console.log("Saved updated chat history to localStorage for user:", userData.id);
+        } catch (error) {
+          console.error("Error saving chat history:", error);
+        }
+      } else {
+        console.log("No authenticated user found, not saving to localStorage");
+      }
+      
+      return newHistory;
+    });
+  }, []);
+
+  // Function to clear chat history (called on logout)
+  const clearChatHistory = useCallback(() => {
+    setChatHistory([]);
+  }, []);
+
+  // Function to restore chat history for a specific user
+  const restoreChatHistory = useCallback((userId) => {
+    console.log("Attempting to restore chat history for user:", userId);
+    const savedChatHistory = localStorage.getItem(`mira_chat_history_${userId}`);
+    console.log("Found saved chat history:", savedChatHistory);
+    
+    if (savedChatHistory) {
+      try {
+        const chatHistory = JSON.parse(savedChatHistory);
+        setChatHistory(chatHistory);
+        console.log("Successfully restored chat history for user:", userId, chatHistory);
+      } catch (error) {
+        console.error("Error parsing saved chat history:", error);
+        setChatHistory([]);
+      }
+    } else {
+      console.log("No saved chat history found for user:", userId);
+      setChatHistory([]);
+    }
+  }, []);
 
   if (showLoadingScreen) {
     return <LoadingScreen onOpenMira={handleOpenMira} />;
@@ -1174,6 +1250,9 @@ function App() {
           chatHistory={chatHistory}
           onAddChat={handleAddChat}
           onDeleteChat={handleDeleteChat}
+          setChatHistory={setChatHistory}
+          clearChatHistory={clearChatHistory}
+          restoreChatHistory={restoreChatHistory}
         />} />
       </Routes>
     </Router>
@@ -1181,12 +1260,16 @@ function App() {
 }
 
 // AppWithRouter is a wrapper to get useNavigate and pass it up
-function AppWithRouter({ isSidebarCollapsed, onToggleSidebar, showSignIn, setShowSignIn, darkMode, toggleDarkMode, chatHistory, onAddChat, onDeleteChat }) {
+function AppWithRouter({ isSidebarCollapsed, onToggleSidebar, showSignIn, setShowSignIn, darkMode, toggleDarkMode, chatHistory, onAddChat, onDeleteChat, setChatHistory, clearChatHistory, restoreChatHistory }) {
   const navigate = useNavigate();
   const [showSignUpModal, setShowSignUpModal] = useState(false);
   const [signUpEmail, setSignUpEmail] = useState("");
   const [showLoginModal, setShowLoginModal] = useState(false);
   const [loginEmail, setLoginEmail] = useState("");
+  const [showPasswordModal, setShowPasswordModal] = useState(false);
+  const [loginPassword, setLoginPassword] = useState("");
+  const [emailError, setEmailError] = useState("");
+  const [passwordError, setPasswordError] = useState("");
   const [user, setUser] = useState(null);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [connectedServices, setConnectedServices] = useState([]);
@@ -1211,33 +1294,185 @@ function AppWithRouter({ isSidebarCollapsed, onToggleSidebar, showSignIn, setSho
     const code = urlParams.get('code');
     const state = urlParams.get('state');
     
+    console.log("OAuth useEffect triggered:", { code: !!code, state: !!state, currentUrl: window.location.href });
+    
     if (code && state) {
       // Handle the OAuth response
       handleGoogleOAuthResponse(code, state);
     }
   }, []);
 
-  const handleGoogleOAuthResponse = (code, state) => {
+  // Restore authentication state from localStorage on app load
+  useEffect(() => {
+    const savedUser = localStorage.getItem('mira_user');
+    const savedAuth = localStorage.getItem('mira_authenticated');
+    
+    if (savedUser && savedAuth === 'true') {
+      try {
+        const userData = JSON.parse(savedUser);
+        setUser(userData);
+        setIsAuthenticated(true);
+        console.log("Restored authentication state from localStorage:", userData);
+        
+        // Load user-specific data
+        restoreChatHistory(userData.id);
+        setConnectedServices([]);
+        
+        const savedConnections = localStorage.getItem(`mira_connections_${userData.id}`);
+        
+        if (savedConnections) {
+          try {
+            const connections = JSON.parse(savedConnections);
+            setConnectedServices(connections);
+            console.log("Loaded user connections:", connections);
+          } catch (error) {
+            console.error("Error parsing saved connections:", error);
+          }
+        } else if (userData.provider === 'demo') {
+          // Auto-connect demo user if no saved connections
+          const demoConnections = ['Twitter', 'LinkedIn'];
+          setConnectedServices(demoConnections);
+          localStorage.setItem(`mira_connections_${userData.id}`, JSON.stringify(demoConnections));
+          console.log("Auto-connected demo user to:", demoConnections);
+        }
+        
+      } catch (error) {
+        console.error("Error parsing saved user data:", error);
+        // Clear invalid data
+        localStorage.removeItem('mira_user');
+        localStorage.removeItem('mira_authenticated');
+        clearChatHistory();
+        setConnectedServices([]);
+      }
+    } else {
+      // No authenticated user, clear all data
+      clearChatHistory();
+      setConnectedServices([]);
+    }
+  }, [clearChatHistory, restoreChatHistory]);
+
+  // Debug function to check localStorage (can be called from console)
+  window.debugChatHistory = () => {
+    const savedUser = localStorage.getItem('mira_user');
+    if (savedUser) {
+      const userData = JSON.parse(savedUser);
+      const savedChatHistory = localStorage.getItem(`mira_chat_history_${userData.id}`);
+      console.log("Current user:", userData);
+      console.log("Saved chat history:", savedChatHistory);
+      if (savedChatHistory) {
+        console.log("Parsed chat history:", JSON.parse(savedChatHistory));
+      }
+    } else {
+      console.log("No authenticated user found");
+    }
+  };
+
+  // Test function to add demo chat history (can be called from console)
+  window.addDemoChats = () => {
+    const demoChats = [
+      "Engineers who have contributed to open source projects",
+      "Find developers with React experience",
+      "Search for Python developers in San Francisco",
+      "Find designers who work with Figma"
+    ];
+    
+    const savedUser = localStorage.getItem('mira_user');
+    if (savedUser) {
+      const userData = JSON.parse(savedUser);
+      localStorage.setItem(`mira_chat_history_${userData.id}`, JSON.stringify(demoChats));
+      console.log("Added demo chats for user:", userData.id, demoChats);
+      
+      // If user is currently logged in, update the state
+      if (userData.id === "demo_user") {
+        setChatHistory(demoChats);
+        console.log("Updated current chat history state");
+      }
+    } else {
+      console.log("No authenticated user found");
+    }
+  };
+
+  const handleGoogleOAuthResponse = async (code, state) => {
     console.log("Received Google OAuth response:", { code, state });
     
     // Parse the state to get modal type and saved page state
     try {
       const stateData = JSON.parse(decodeURIComponent(state));
-      const { modalType, currentPath, currentSearch } = stateData;
+      const { modalType } = stateData;
       
-      // Simulate getting user data from the authorization code
-      // In a real app, you'd send this code to your backend
-      const mockUserData = {
-        id: 'google_' + Math.random().toString(36).substr(2, 9),
-        email: 'user@example.com',
-        name: 'John Doe',
-        picture: 'https://lh3.googleusercontent.com/a/default-user',
-        provider: 'google'
+      // Exchange authorization code for access token
+      const tokenResponse = await fetch('https://oauth2.googleapis.com/token', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded',
+        },
+        body: new URLSearchParams({
+          code: code,
+          client_id: process.env.REACT_APP_GOOGLE_CLIENT_ID || '302037822597-jsac8r6ugd6um4igmfvmuu2bsaquttpq.apps.googleusercontent.com',
+          client_secret: process.env.REACT_APP_GOOGLE_CLIENT_SECRET || 'YOUR_GOOGLE_CLIENT_SECRET', // Use environment variable
+          redirect_uri: window.location.origin,
+          grant_type: 'authorization_code',
+        }),
+      });
+      
+      if (!tokenResponse.ok) {
+        throw new Error('Failed to exchange code for token');
+      }
+      
+      const tokenData = await tokenResponse.json();
+      const accessToken = tokenData.access_token;
+      
+      // Fetch user info from Google
+      const userResponse = await fetch('https://www.googleapis.com/oauth2/v2/userinfo', {
+        headers: {
+          'Authorization': `Bearer ${accessToken}`
+        }
+      });
+      
+      if (!userResponse.ok) {
+        throw new Error('Failed to fetch user info');
+      }
+      
+      const googleUserData = await userResponse.json();
+      
+      // Transform Google user data to our format
+      const userData = {
+        id: `google_${googleUserData.id}`,
+        email: googleUserData.email,
+        name: googleUserData.name,
+        given_name: googleUserData.given_name,
+        family_name: googleUserData.family_name,
+        picture: googleUserData.picture,
+        provider: 'google',
+        access_token: accessToken
       };
       
       // Set user data and authentication state
-      setUser(mockUserData);
+      setUser(userData);
       setIsAuthenticated(true);
+      
+      // Persist authentication state to localStorage
+      localStorage.setItem('mira_user', JSON.stringify(userData));
+      localStorage.setItem('mira_authenticated', 'true');
+      
+      // Clear current chat history and load user-specific data
+      clearChatHistory();
+      setConnectedServices([]);
+      
+      // Load user-specific data
+      restoreChatHistory(userData.id);
+      
+      const savedConnections = localStorage.getItem(`mira_connections_${userData.id}`);
+      
+      if (savedConnections) {
+        try {
+          const connections = JSON.parse(savedConnections);
+          setConnectedServices(connections);
+          console.log("Loaded user connections:", connections);
+        } catch (error) {
+          console.error("Error parsing saved connections:", error);
+        }
+      }
       
       // Close the appropriate modal
       if (modalType === 'signup') {
@@ -1249,25 +1484,59 @@ function AppWithRouter({ isSidebarCollapsed, onToggleSidebar, showSignIn, setSho
       }
       
       console.log("Authentication successful for:", modalType);
-      console.log("User data:", mockUserData);
+      console.log("User data:", userData);
       
-      // Restore the original page state by constructing the original URL
-      const originalUrl = currentPath + (currentSearch || '');
-      
-      // Navigate back to the original page with preserved state
-      if (originalUrl !== window.location.pathname + window.location.search) {
-        window.history.replaceState({}, document.title, originalUrl);
-        // Trigger a page refresh to ensure all components load with the restored state
-        window.location.reload();
-      } else {
-        // If we're already on the right page, just clean up OAuth params
-        window.history.replaceState({}, document.title, originalUrl);
-      }
+      // Always redirect to homepage after authentication
+      setTimeout(() => {
+        console.log("Redirecting to homepage after authentication");
+        navigate('/');
+        // Clean up OAuth params from URL
+        window.history.replaceState({}, document.title, '/');
+      }, 100);
       
     } catch (error) {
-      console.error("Error parsing OAuth state:", error);
-      // Fallback: just clean up the URL if state parsing fails
-      window.history.replaceState({}, document.title, window.location.pathname);
+      console.error("Error in OAuth flow:", error);
+      
+      // Fallback to mock data for development
+      const mockUserData = {
+        id: 'google_' + Math.random().toString(36).substr(2, 9),
+        email: 'morgant11@montclair.edu',
+        name: 'Morgan T',
+        given_name: 'Morgan',
+        family_name: 'T',
+        picture: 'https://lh3.googleusercontent.com/a/default-user',
+        provider: 'google'
+      };
+      
+      setUser(mockUserData);
+      setIsAuthenticated(true);
+      localStorage.setItem('mira_user', JSON.stringify(mockUserData));
+      localStorage.setItem('mira_authenticated', 'true');
+      
+      // Clear current chat history and load user-specific data
+      clearChatHistory();
+      setConnectedServices([]);
+      
+      // Load user-specific data
+      restoreChatHistory(mockUserData.id);
+      
+      const savedConnections = localStorage.getItem(`mira_connections_${mockUserData.id}`);
+      
+      if (savedConnections) {
+        try {
+          const connections = JSON.parse(savedConnections);
+          setConnectedServices(connections);
+          console.log("Loaded user connections:", connections);
+        } catch (error) {
+          console.error("Error parsing saved connections:", error);
+        }
+      }
+      
+      // Always redirect to homepage after authentication
+      setTimeout(() => {
+        navigate('/');
+        window.history.replaceState({}, document.title, '/');
+      }, 100);
     }
   };
 
@@ -1285,13 +1554,13 @@ function AppWithRouter({ isSidebarCollapsed, onToggleSidebar, showSignIn, setSho
     // Create state parameter with current page info
     const state = encodeURIComponent(JSON.stringify(currentState));
     
-    // Use current full URL as redirect URI
-    const redirectUri = window.location.href.split('?')[0]; // Remove existing query params
+    // Use base domain as redirect URI (Google OAuth requirement)
+    const redirectUri = window.location.origin;
     console.log("Redirect URI:", redirectUri);
     
     // Construct Google OAuth URL
     const googleAuthUrl = `https://accounts.google.com/o/oauth2/v2/auth?` +
-      `client_id=302037822597-jsac8r6ugd6um4igmfvmuu2bsaquttpq.apps.googleusercontent.com&` +
+      `client_id=${process.env.REACT_APP_GOOGLE_CLIENT_ID || '302037822597-jsac8r6ugd6um4igmfvmuu2bsaquttpq.apps.googleusercontent.com'}&` +
       `redirect_uri=${encodeURIComponent(redirectUri)}&` +
       `response_type=code&` +
       `scope=openid email profile&` +
@@ -1319,12 +1588,12 @@ function AppWithRouter({ isSidebarCollapsed, onToggleSidebar, showSignIn, setSho
     // Create state parameter with current page info
     const state = encodeURIComponent(JSON.stringify(currentState));
     
-    // Use current full URL as redirect URI
-    const redirectUri = window.location.href.split('?')[0]; // Remove existing query params
+    // Use base domain as redirect URI (Google OAuth requirement)
+    const redirectUri = window.location.origin;
     
     // Construct Google OAuth URL
     const googleAuthUrl = `https://accounts.google.com/o/oauth2/v2/auth?` +
-      `client_id=302037822597-jsac8r6ugd6um4igmfvmuu2bsaquttpq.apps.googleusercontent.com&` +
+      `client_id=${process.env.REACT_APP_GOOGLE_CLIENT_ID || '302037822597-jsac8r6ugd6um4igmfvmuu2bsaquttpq.apps.googleusercontent.com'}&` +
       `redirect_uri=${encodeURIComponent(redirectUri)}&` +
       `response_type=code&` +
       `scope=openid email profile&` +
@@ -1337,20 +1606,116 @@ function AppWithRouter({ isSidebarCollapsed, onToggleSidebar, showSignIn, setSho
   };
 
   const handleLogout = () => {
+    // Clear user-specific data from localStorage (but keep chat history)
+    if (user) {
+      localStorage.removeItem(`mira_connections_${user.id}`);
+    }
+    
     setUser(null);
     setIsAuthenticated(false);
+    // Clear localStorage
+    localStorage.removeItem('mira_user');
+    localStorage.removeItem('mira_authenticated');
+    // Clear chat history state when logging out (but keep in localStorage)
+    clearChatHistory();
     console.log("User logged out");
+  };
+
+  const handleDemoLogin = () => {
+    setEmailError("");
+    setPasswordError("");
+    
+    if (loginEmail === "demo@mira.com") {
+      // Show password modal
+      setShowLoginModal(false);
+      setShowPasswordModal(true);
+    } else {
+      // Show error for invalid email
+      setEmailError("Please sign up or use demo@mira.com");
+      // Add shake animation by temporarily adding a class
+      const emailInput = document.getElementById('login-email-input');
+      if (emailInput) {
+        emailInput.style.animation = 'shake 0.5s ease-in-out';
+        setTimeout(() => {
+          emailInput.style.animation = '';
+        }, 500);
+      }
+    }
+  };
+
+  const handleDemoPassword = () => {
+    setPasswordError("");
+    
+    if (loginPassword === "demo") {
+      // Create demo user data
+      const demoUserData = {
+        id: "demo_user",
+        email: "demo@mira.com",
+        name: "Demo User",
+        given_name: "Demo",
+        family_name: "User",
+        picture: "https://ui-avatars.com/api/?name=Demo+User&background=6366f1&color=fff&size=40",
+        provider: 'demo'
+      };
+      
+      // Set user data and authentication state
+      setUser(demoUserData);
+      setIsAuthenticated(true);
+      
+      // Persist authentication state to localStorage
+      localStorage.setItem('mira_user', JSON.stringify(demoUserData));
+      localStorage.setItem('mira_authenticated', 'true');
+      
+      // Load user-specific data
+      console.log("Demo login: About to restore chat history for:", demoUserData.id);
+      restoreChatHistory(demoUserData.id);
+      setConnectedServices([]);
+      
+      // Auto-connect Twitter and LinkedIn for demo user
+      const demoConnections = ['Twitter', 'LinkedIn'];
+      setConnectedServices(demoConnections);
+      localStorage.setItem(`mira_connections_${demoUserData.id}`, JSON.stringify(demoConnections));
+      console.log("Auto-connected demo user to:", demoConnections);
+      
+      // Close modals
+      setShowPasswordModal(false);
+      setLoginEmail("");
+      setLoginPassword("");
+      
+      console.log("Demo user logged in:", demoUserData);
+    } else {
+      // Show error for invalid password
+      setPasswordError("Incorrect password. Use 'demo'");
+      // Add shake animation
+      const passwordInput = document.getElementById('login-password-input');
+      if (passwordInput) {
+        passwordInput.style.animation = 'shake 0.5s ease-in-out';
+        setTimeout(() => {
+          passwordInput.style.animation = '';
+        }, 500);
+      }
+    }
   };
 
   const handleConnectionUpdate = (service, connected) => {
     setConnectedServices(prev => {
+      let newConnections;
       if (connected) {
-        return prev.includes(service) ? prev : [...prev, service];
+        newConnections = prev.includes(service) ? prev : [...prev, service];
       } else {
-        return prev.filter(s => s !== service);
+        newConnections = prev.filter(s => s !== service);
       }
+      
+      // Save to localStorage if user is authenticated
+      if (user && isAuthenticated) {
+        localStorage.setItem(`mira_connections_${user.id}`, JSON.stringify(newConnections));
+      }
+      
+      return newConnections;
     });
   };
+
+
 
   return (
     <div className="app-container">
@@ -1376,7 +1741,7 @@ function AppWithRouter({ isSidebarCollapsed, onToggleSidebar, showSignIn, setSho
         <Routes>
           <Route path="/" element={<MainContent darkMode={darkMode} />} />
           <Route path="/search" element={<SearchResultsWithHistory onAddChat={onAddChat} darkMode={darkMode} isSidebarCollapsed={isSidebarCollapsed} onSignUpClick={() => setShowSignUpModal(true)} user={user} isAuthenticated={isAuthenticated} />} />
-          <Route path="/connections" element={<ConnectionsPage isSidebarCollapsed={isSidebarCollapsed} onConnectionUpdate={handleConnectionUpdate} />} />
+          <Route path="/connections" element={<ConnectionsPage isSidebarCollapsed={isSidebarCollapsed} onConnectionUpdate={handleConnectionUpdate} user={user} isAuthenticated={isAuthenticated} />} />
         </Routes>
       </div>
       {showSignIn && <SignInPanel onClose={() => setShowSignIn(false)} />}
@@ -1562,25 +1927,39 @@ function AppWithRouter({ isSidebarCollapsed, onToggleSidebar, showSignIn, setSho
               </h2>
               {/* Email Input Field */}
               <input
+                id="login-email-input"
                 type="email"
                 placeholder="Enter your email"
                 value={loginEmail}
                 onChange={e => setLoginEmail(e.target.value)}
+                onKeyDown={e => e.key === 'Enter' && isValidEmail(loginEmail) && handleDemoLogin()}
                 style={{
                   width: '100%',
                   padding: '12px 16px',
                   fontSize: '1rem',
-                  border: '1px solid #e0e0e0',
+                  border: emailError ? '1px solid #ff4444' : '1px solid #e0e0e0',
                   borderRadius: '8px',
                   backgroundColor: '#f8f8f8',
                   color: '#333',
-                  marginBottom: '16px',
+                  marginBottom: emailError ? '8px' : '16px',
                   boxSizing: 'border-box',
                   outline: 'none'
                 }}
               />
+              {/* Error message */}
+              {emailError && (
+                <div style={{
+                  color: '#ff4444',
+                  fontSize: '0.875rem',
+                  marginBottom: '16px',
+                  textAlign: 'center'
+                }}>
+                  {emailError}
+                </div>
+              )}
               {/* Continue with email button */}
               <button
+                onClick={handleDemoLogin}
                 disabled={!isValidEmail(loginEmail)}
                 style={{
                   width: '100%',
@@ -1632,6 +2011,130 @@ function AppWithRouter({ isSidebarCollapsed, onToggleSidebar, showSignIn, setSho
                   <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
                 </svg>
                 Log in with Google
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+      
+      {/* Password Modal */}
+      {showPasswordModal && (
+        <div style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          backgroundColor: 'rgba(0, 0, 0, 0.5)',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          zIndex: 3000
+        }}>
+          <div style={{
+            backgroundColor: '#fff',
+            borderRadius: '12px',
+            padding: '24px',
+            maxWidth: '400px',
+            width: '90%',
+            position: 'relative',
+            boxShadow: '0 10px 25px rgba(0, 0, 0, 0.2)'
+          }}>
+            <button
+              onClick={() => { 
+                setShowPasswordModal(false); 
+                setLoginPassword(""); 
+                setPasswordError("");
+                setShowLoginModal(true);
+              }}
+              style={{
+                position: 'absolute',
+                top: '12px',
+                right: '12px',
+                background: 'none',
+                border: 'none',
+                fontSize: '20px',
+                cursor: 'pointer',
+                color: '#666',
+                width: '30px',
+                height: '30px',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                borderRadius: '50%',
+                transition: 'background-color 0.2s'
+              }}
+              onMouseEnter={(e) => e.target.style.backgroundColor = '#f0f0f0'}
+              onMouseLeave={(e) => e.target.style.backgroundColor = 'transparent'}
+            >
+              ×
+            </button>
+            <div style={{ marginTop: '8px' }}>
+              <h2 style={{ margin: '0 0 24px 0', fontSize: '1.5rem', fontWeight: '600', color: '#222', textAlign: 'center' }}>
+                Enter your password
+              </h2>
+              <p style={{ 
+                margin: '0 0 16px 0', 
+                fontSize: '0.875rem', 
+                color: '#888', 
+                textAlign: 'center', 
+                fontStyle: 'italic',
+                animation: 'passwordHint 2s ease-in-out infinite',
+                opacity: 0.7,
+                transition: 'color 0.3s ease'
+              }}>
+                Password: demo
+              </p>
+              {/* Password Input Field */}
+              <input
+                id="login-password-input"
+                type="password"
+                placeholder="Enter your password"
+                value={loginPassword}
+                onChange={e => setLoginPassword(e.target.value)}
+                onKeyDown={e => e.key === 'Enter' && handleDemoPassword()}
+                style={{
+                  width: '100%',
+                  padding: '12px 16px',
+                  fontSize: '1rem',
+                  border: passwordError ? '1px solid #ff4444' : '1px solid #e0e0e0',
+                  borderRadius: '8px',
+                  backgroundColor: '#f8f8f8',
+                  color: '#333',
+                  marginBottom: passwordError ? '8px' : '16px',
+                  boxSizing: 'border-box',
+                  outline: 'none'
+                }}
+              />
+              {/* Error message */}
+              {passwordError && (
+                <div style={{
+                  color: '#ff4444',
+                  fontSize: '0.875rem',
+                  marginBottom: '16px',
+                  textAlign: 'center'
+                }}>
+                  {passwordError}
+                </div>
+              )}
+              {/* Continue button */}
+              <button
+                onClick={handleDemoPassword}
+                style={{
+                  width: '100%',
+                  padding: '12px 16px',
+                  fontSize: '1rem',
+                  fontWeight: '500',
+                  backgroundColor: '#111',
+                  color: '#fff',
+                  border: 'none',
+                  borderRadius: '8px',
+                  cursor: 'pointer',
+                  marginBottom: '16px',
+                  transition: 'background-color 0.2s'
+                }}
+              >
+                Continue
               </button>
             </div>
           </div>

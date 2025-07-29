@@ -57,7 +57,7 @@ function ConnectionToggle({ label, onToggle, enabled = false }) {
 }
 
 // Accept isSidebarCollapsed as a prop
-export default function ConnectionsPage({ isSidebarCollapsed = false, onConnectionUpdate }) {
+export default function ConnectionsPage({ isSidebarCollapsed = false, onConnectionUpdate, user, isAuthenticated }) {
   // Inject shake animation CSS
   React.useEffect(() => {
     const style = document.createElement('style');
@@ -87,7 +87,20 @@ export default function ConnectionsPage({ isSidebarCollapsed = false, onConnecti
   const [twitterConnected, setTwitterConnected] = useState(false);
   const [linkedInConnected, setLinkedInConnected] = useState(false);
 
+  // Auto-connect demo user to Twitter and LinkedIn
+  useEffect(() => {
+    if (isAuthenticated && user && user.provider === 'demo') {
+      setTwitterConnected(true);
+      setLinkedInConnected(true);
+    }
+  }, [isAuthenticated, user]);
+
   const handleToggleConnection = (label, enabled) => {
+    // For demo user, prevent disconnecting services
+    if (isAuthenticated && user && user.provider === 'demo') {
+      return; // Demo user cannot disconnect services
+    }
+    
     if (label === 'Twitter' && !twitterConnected) {
       setShowTwitterModal(true);
     }
