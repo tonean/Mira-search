@@ -428,6 +428,8 @@ const LoadingScreen = ({ onOpenMira }) => {
         </>
       ) : currentPage === 'mission' ? (
         <MissionPage />
+      ) : currentPage === 'use-cases' ? (
+        <UseCasesPage />
       ) : null}
       
       {/* Footer */}
@@ -1033,6 +1035,167 @@ function MissionPage() {
             "The best way to predict the future is to invent it." — Alan Kay
           </p>
         </div>
+      </div>
+    </div>
+  );
+} 
+
+// Use Cases Page Component
+function UseCasesPage() {
+  const [activeCategory, setActiveCategory] = useState('Featured');
+  
+  const categories = ['Featured', 'Research', 'Life', 'Data Analysis', 'Education', 'Productivity', 'WTF'];
+  
+  const useCases = [
+    {
+      title: "Trip to Japan in april",
+      description: "Mira integrates comprehensive travel information to create personalized itineraries and produces a custom travel handbook tailored specifically for your Japanese adventure.",
+      icon: "🧳",
+      tag: "Maps & Key Locations",
+      category: "Featured"
+    },
+    {
+      title: "Interactive course on the momentum theorem",
+      description: "Mira develops engaging video presentations for middle school educators, clearly explaining the momentum theorem through accessible and educational content.",
+      icon: "⚙️",
+      category: "Featured"
+    },
+    {
+      title: "Comparative analysis of insurance policies",
+      description: "Looking to compare insurance options? Mira generates clear, structured comparison tables highlighting key policy information with optimal recommendations tailored to your needs.",
+      icon: "🔄",
+      category: "Featured"
+    }
+  ];
+  
+  return (
+    <div style={{ 
+      maxWidth: '1200px', 
+      margin: '0 auto', 
+      padding: '60px 40px',
+      fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
+      background: 'transparent'
+    }}>
+      {/* Header Section */}
+      <div style={{ textAlign: 'center', marginBottom: '60px' }}>
+        <div style={{ 
+          fontSize: '0.9rem', 
+          color: '#666', 
+          marginBottom: '16px',
+          textTransform: 'uppercase',
+          letterSpacing: '0.05em'
+        }}>
+          Use cases
+        </div>
+        <h1 style={{ 
+          fontSize: '2.5rem', 
+          fontWeight: '700', 
+          color: '#000', 
+          marginBottom: '16px',
+          lineHeight: '1.2'
+        }}>
+          Explore use cases from our official collection.
+        </h1>
+        <p style={{ 
+          fontSize: '1.1rem', 
+          color: '#333', 
+          lineHeight: '1.5',
+          maxWidth: '600px',
+          margin: '0 auto'
+        }}>
+          Learn how Mira handles real-world tasks through step-by-step replays.
+        </p>
+      </div>
+      
+      {/* Category Tabs */}
+      <div style={{ 
+        display: 'flex', 
+        justifyContent: 'center', 
+        gap: '12px', 
+        marginBottom: '60px',
+        flexWrap: 'wrap'
+      }}>
+        {categories.map((category) => (
+          <button
+            key={category}
+            onClick={() => setActiveCategory(category)}
+            style={{
+              padding: '12px 20px',
+              borderRadius: '25px',
+              border: '1px solid #e5e5e5',
+              background: activeCategory === category ? '#000' : 'transparent',
+              color: activeCategory === category ? '#fff' : '#000',
+              fontSize: '0.9rem',
+              fontWeight: '500',
+              cursor: 'pointer',
+              transition: 'all 0.2s ease',
+              fontFamily: 'inherit'
+            }}
+          >
+            {category}
+          </button>
+        ))}
+      </div>
+      
+      {/* Content Cards Grid */}
+      <div style={{ 
+        display: 'grid', 
+        gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', 
+        gap: '24px',
+        maxWidth: '1000px',
+        margin: '0 auto'
+      }}>
+        {useCases.map((useCase, index) => (
+          <div key={index} style={{ 
+            background: 'transparent', 
+            borderRadius: '12px', 
+            border: '2px solid #e5e5e5',
+            padding: '32px',
+            boxShadow: 'none',
+            transition: 'all 0.2s ease',
+            cursor: 'pointer'
+          }}>
+            <div style={{ 
+              fontSize: '2rem', 
+              marginBottom: '16px',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              width: '48px',
+              height: '48px',
+              background: 'transparent',
+              borderRadius: '8px'
+            }}>
+              {useCase.icon}
+            </div>
+            <h3 style={{ 
+              fontSize: '1.1rem', 
+              fontWeight: '600', 
+              color: '#000', 
+              marginBottom: '12px',
+              lineHeight: '1.3'
+            }}>
+              {useCase.title}
+            </h3>
+            <p style={{ 
+              fontSize: '0.9rem', 
+              color: '#666', 
+              lineHeight: '1.5',
+              marginBottom: useCase.tag ? '12px' : '0'
+            }}>
+              {useCase.description}
+            </p>
+            {useCase.tag && (
+              <div style={{ 
+                fontSize: '0.8rem', 
+                color: '#999',
+                marginTop: '8px'
+              }}>
+                {useCase.tag}
+              </div>
+            )}
+          </div>
+        ))}
       </div>
     </div>
   );
