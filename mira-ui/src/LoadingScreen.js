@@ -990,9 +990,9 @@ function MissionPage() {
           color: '#888',
           fontSize: '0.9rem'
         }}>
-          <span>Published on March 15, 2024</span>
+          <span>Published on July 27, 2025</span>
           <span>•</span>
-          <span>5 min read</span>
+          <span>1 min read</span>
         </div>
       </div>
       
@@ -1066,16 +1066,7 @@ function MissionPage() {
           transform: paragraph4Visible ? 'translateY(0)' : 'translateY(30px)',
           transition: 'opacity 0.8s ease, transform 0.8s ease'
         }}>
-          <span style={{ 
-            fontWeight: 'bold', 
-            fontSize: '1.3rem',
-            background: 'linear-gradient(45deg, #667eea 0%, #764ba2 25%, #f093fb 50%, #f5576c 75%, #4facfe 100%)',
-            backgroundSize: '400% 400%',
-            WebkitBackgroundClip: 'text',
-            WebkitTextFillColor: 'transparent',
-            backgroundClip: 'text',
-            animation: 'gradientShift 3s ease infinite'
-          }}>Jacky</span> brought his own unique perspective to our partnership - a brilliant mind for systems thinking and a passion for solving complex technical challenges.
+          Jacky brought his own unique perspective to our partnership - a brilliant mind for systems thinking and a passion for solving complex technical challenges.
         </p>
         
         <p style={{ 
@@ -1095,7 +1086,15 @@ function MissionPage() {
           transform: paragraph4Visible ? 'translateY(0)' : 'translateY(30px)',
           transition: 'opacity 0.8s ease, transform 0.8s ease'
         }}>
-          What's worse is that even when we identify the right person, we have no clue what to say to them that will actually resonate. We want to connect not just professionally, but personally - to understand if they're truly the right fit for collaboration. But people only share fragments of themselves online, leaving you guessing at how to make authentic connections.
+          What's worse is that even when we identify the right person, we have no clue what to say to them that will actually resonate. <span style={{ 
+            fontWeight: 'bold',
+            background: 'linear-gradient(45deg, #667eea 0%, #764ba2 25%, #f093fb 50%, #f5576c 75%, #4facfe 100%)',
+            backgroundSize: '400% 400%',
+            WebkitBackgroundClip: 'text',
+            WebkitTextFillColor: 'transparent',
+            backgroundClip: 'text',
+            animation: 'gradientShift 3s ease infinite'
+          }}>We want to connect not just professionally, but personally - to understand if they're truly the right fit for collaboration.</span> But people only share fragments of themselves online, leaving you guessing at how to make authentic connections.
         </p>
         
         <h2 style={{ 
