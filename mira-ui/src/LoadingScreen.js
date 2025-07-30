@@ -197,13 +197,15 @@ const LoadingScreen = ({ onOpenMira }) => {
       <nav className={`nav-bar ${showNavBar ? 'fade-in' : ''}`} style={{ justifyContent: 'center' }}>
         <div className="nav-links" style={{ justifyContent: 'center', width: '100%', display: 'flex' }}>
           <a href="#" className={`nav-link ${currentPage === 'home' ? 'active' : ''}`} onClick={() => handlePageChange('home')}>
-            <span className="nav-dot"></span>
+            {currentPage === 'home' && <span className="nav-dot"></span>}
             Home
           </a>
           <a href="#" className={`nav-link ${currentPage === 'mission' ? 'active' : ''}`} onClick={() => handlePageChange('mission')}>
+            {currentPage === 'mission' && <span className="nav-dot"></span>}
             Mission
           </a>
           <a href="#" className={`nav-link ${currentPage === 'use-cases' ? 'active' : ''}`} onClick={() => handlePageChange('use-cases')}>
+            {currentPage === 'use-cases' && <span className="nav-dot"></span>}
             Use Cases
           </a>
         </div>
@@ -231,13 +233,13 @@ const LoadingScreen = ({ onOpenMira }) => {
         
         {/* Call to action button */}
         <div className={`cta-container ${showButton ? 'fade-in' : ''}`}>
-          <div className="cta-pill">
+          <div className="cta-pill" onClick={handleOpenMira} style={{ cursor: 'pointer' }}>
             <span className="demo-text">Try it yourself</span>
-            <button className="open-mira-btn" onClick={handleOpenMira} style={{ marginLeft: '20px' }}>
+            <button className="open-mira-btn" style={{ marginLeft: '20px' }}>
               Open Mira
             </button>
           </div>
-          <div className={`launch-team-text ${showButton ? 'fade-in' : ''}`}>
+          <div className={`launch-team-text ${showButton ? 'fade-in' : ''}`} onClick={() => handlePageChange('mission')} style={{ cursor: 'pointer' }}>
             For Jason Calacanis and the Launch Team →
           </div>
         </div>
@@ -901,6 +903,48 @@ function PeopleCardList({ people }) {
 
 // Mission Page Component
 function MissionPage() {
+  const [gradientVisible, setGradientVisible] = useState(false);
+  const [paragraph1Visible, setParagraph1Visible] = useState(false);
+  const [paragraph2Visible, setParagraph2Visible] = useState(false);
+  const [paragraph3Visible, setParagraph3Visible] = useState(false);
+  const [paragraph4Visible, setParagraph4Visible] = useState(false);
+  const [paragraph5Visible, setParagraph5Visible] = useState(false);
+  const [paragraph6Visible, setParagraph6Visible] = useState(false);
+  const [paragraph7Visible, setParagraph7Visible] = useState(false);
+  const [paragraph8Visible, setParagraph8Visible] = useState(false);
+  const [paragraph9Visible, setParagraph9Visible] = useState(false);
+  const [paragraph10Visible, setParagraph10Visible] = useState(false);
+
+  // Intersection Observer for gradient animation
+  useEffect(() => {
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          setGradientVisible(true);
+          
+          // Start staggered animations
+          setTimeout(() => setParagraph1Visible(true), 500);
+          setTimeout(() => setParagraph2Visible(true), 1000);
+          setTimeout(() => setParagraph3Visible(true), 1500);
+          setTimeout(() => setParagraph4Visible(true), 2000);
+          setTimeout(() => setParagraph5Visible(true), 2500);
+          setTimeout(() => setParagraph6Visible(true), 3000);
+          setTimeout(() => setParagraph7Visible(true), 3500);
+          setTimeout(() => setParagraph8Visible(true), 4000);
+          setTimeout(() => setParagraph9Visible(true), 4500);
+          setTimeout(() => setParagraph10Visible(true), 5000);
+          
+          observer.disconnect();
+        }
+      });
+    }, { threshold: 0.3 });
+
+    const gradientElement = document.querySelector('.gradient-text-animation');
+    if (gradientElement) observer.observe(gradientElement);
+
+    return () => observer.disconnect();
+  }, []);
+
   return (
     <div style={{ 
       maxWidth: '800px', 
@@ -908,17 +952,28 @@ function MissionPage() {
       padding: '60px 40px',
       fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif'
     }}>
+      {/* Add CSS for gradient animation */}
+      <style>
+        {`
+          @keyframes gradientShift {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+          }
+        `}
+      </style>
+      
       {/* Article Header */}
       <div style={{ marginBottom: '60px' }}>
         <h1 style={{ 
           fontSize: '3rem', 
           fontWeight: '700', 
-          color: '#1a1a1a', 
+          color: '#444', 
           marginBottom: '20px',
           lineHeight: '1.2',
           letterSpacing: '-0.02em'
         }}>
-          Our Mission
+          Why Mira? Why Us?
         </h1>
         <p style={{ 
           fontSize: '1.3rem', 
@@ -942,99 +997,181 @@ function MissionPage() {
       </div>
       
       {/* Article Content */}
-      <div style={{ lineHeight: '1.8', color: '#333' }}>
-        <p style={{ fontSize: '1.1rem', marginBottom: '30px' }}>
-          In today's hyperconnected world, we're paradoxically more isolated than ever. While we have access to billions of people through social media, finding meaningful connections that drive our personal and professional growth remains a significant challenge.
+      <div style={{ lineHeight: '1.8', color: '#333', marginTop: '-20px' }}>
+        <p 
+          className="gradient-text-animation"
+          style={{ 
+            fontSize: '1.1rem', 
+            marginBottom: '20px',
+            background: 'linear-gradient(45deg, #667eea 0%, #764ba2 25%, #f093fb 50%, #f5576c 75%, #4facfe 100%)',
+            backgroundSize: '400% 400%',
+            WebkitBackgroundClip: 'text',
+            WebkitTextFillColor: 'transparent',
+            backgroundClip: 'text',
+            animation: gradientVisible ? 'gradientShift 3s ease infinite' : 'none',
+            opacity: gradientVisible ? 1 : 0,
+            transform: gradientVisible ? 'translateY(0)' : 'translateY(20px)',
+            transition: 'opacity 0.8s ease, transform 0.8s ease'
+          }}
+        >
+          The phrase <strong>"it's not about what you know, but who you know"</strong> is bullsh#t.
+        </p>
+        
+        <p style={{ 
+          fontSize: '1.1rem', 
+          marginBottom: '30px',
+          opacity: paragraph1Visible ? 1 : 0,
+          transform: paragraph1Visible ? 'translateY(0)' : 'translateY(30px)',
+          transition: 'opacity 0.8s ease, transform 0.8s ease'
+        }}>
+          Because it always ends up that you <strong>"don't know"</strong> the right person for that moment you need them most. And even when you do figure out who that person is, you have no idea what to say to them that won't sound like every other desperate LinkedIn message they ignore daily.
         </p>
         
         <h2 style={{ 
           fontSize: '2rem', 
           fontWeight: '600', 
-          color: '#1a1a1a', 
+          color: '#444', 
           marginTop: '50px', 
-          marginBottom: '25px'
+          marginBottom: '25px',
+          opacity: paragraph2Visible ? 1 : 0,
+          transform: paragraph2Visible ? 'translateY(0)' : 'translateY(30px)',
+          transition: 'opacity 0.8s ease, transform 0.8s ease'
+        }}>
+          Our Story - Tone & Jacky
+        </h2>
+        
+        <p style={{ 
+          fontSize: '1.1rem', 
+          marginBottom: '30px',
+          opacity: paragraph3Visible ? 1 : 0,
+          transform: paragraph3Visible ? 'translateY(0)' : 'translateY(30px)',
+          transition: 'opacity 0.8s ease, transform 0.8s ease'
+        }}>
+          I've been building things since I was 11 years old. Coming from a less fortunate background, I couldn't afford half the games I wanted, so I developed the mindset of designing and building the games I actually wanted to play. That early necessity became my introduction to design, leading me to create developer tools for <strong>Adobe Express</strong> and, more recently, develop logical algorithms for digital electromagnetic mirrors (DMDs) alongside my co-founder <span style={{ 
+            fontWeight: 'bold', 
+            fontSize: '1.3rem',
+            background: 'linear-gradient(45deg, #667eea 0%, #764ba2 25%, #f093fb 50%, #f5576c 75%, #4facfe 100%)',
+            backgroundSize: '400% 400%',
+            WebkitBackgroundClip: 'text',
+            WebkitTextFillColor: 'transparent',
+            backgroundClip: 'text',
+            animation: 'gradientShift 3s ease infinite'
+          }}>Jacky</span> - who I luckily met during the one random occasion I sat next to the nerdy, awkward guy in my Intro to Java computer science course.
+        </p>
+        
+        <p style={{ 
+          fontSize: '1.1rem', 
+          marginBottom: '30px',
+          opacity: paragraph4Visible ? 1 : 0,
+          transform: paragraph4Visible ? 'translateY(0)' : 'translateY(30px)',
+          transition: 'opacity 0.8s ease, transform 0.8s ease'
+        }}>
+          <span style={{ 
+            fontWeight: 'bold', 
+            fontSize: '1.3rem',
+            background: 'linear-gradient(45deg, #667eea 0%, #764ba2 25%, #f093fb 50%, #f5576c 75%, #4facfe 100%)',
+            backgroundSize: '400% 400%',
+            WebkitBackgroundClip: 'text',
+            WebkitTextFillColor: 'transparent',
+            backgroundClip: 'text',
+            animation: 'gradientShift 3s ease infinite'
+          }}>Jacky</span> brought his own unique perspective to our partnership - a brilliant mind for systems thinking and a passion for solving complex technical challenges.
+        </p>
+        
+        <p style={{ 
+          fontSize: '1.1rem', 
+          marginBottom: '30px',
+          opacity: paragraph4Visible ? 1 : 0,
+          transform: paragraph4Visible ? 'translateY(0)' : 'translateY(30px)',
+          transition: 'opacity 0.8s ease, transform 0.8s ease'
+        }}>
+          Together, we discovered that throughout our diverse backgrounds in precise design and engineering, we've consistently faced one recurring problem: <strong>we can't find who we're looking for when we want to build something from scratch.</strong>
+        </p>
+        
+        <p style={{ 
+          fontSize: '1.1rem', 
+          marginBottom: '30px',
+          opacity: paragraph4Visible ? 1 : 0,
+          transform: paragraph4Visible ? 'translateY(0)' : 'translateY(30px)',
+          transition: 'opacity 0.8s ease, transform 0.8s ease'
+        }}>
+          What's worse is that even when we identify the right person, we have no clue what to say to them that will actually resonate. We want to connect not just professionally, but personally - to understand if they're truly the right fit for collaboration. But people only share fragments of themselves online, leaving you guessing at how to make authentic connections.
+        </p>
+        
+        <h2 style={{ 
+          fontSize: '2rem', 
+          fontWeight: '600', 
+          color: '#444', 
+          marginTop: '50px', 
+          marginBottom: '25px',
+          opacity: paragraph5Visible ? 1 : 0,
+          transform: paragraph5Visible ? 'translateY(0)' : 'translateY(30px)',
+          transition: 'opacity 0.8s ease, transform 0.8s ease'
         }}>
           The Problem We're Solving
         </h2>
         
-        <p style={{ fontSize: '1.1rem', marginBottom: '30px' }}>
-          Traditional networking is broken. It's time-consuming, often superficial, and rarely leads to the deep, meaningful connections that truly matter. LinkedIn connections become digital dust, Twitter follows fade into the noise, and email introductions get lost in overflowing inboxes.
-        </p>
-        
-        <p style={{ fontSize: '1.1rem', marginBottom: '30px' }}>
-          We're building Mira to solve this fundamental human need: the ability to find and connect with the right people at the right time, for the right reasons.
+        <p style={{ 
+          fontSize: '1.1rem', 
+          marginBottom: '30px',
+          opacity: paragraph6Visible ? 1 : 0,
+          transform: paragraph6Visible ? 'translateY(0)' : 'translateY(30px)',
+          transition: 'opacity 0.8s ease, transform 0.8s ease'
+        }}>
+          This problem isn't just unique to me. Millions of new graduates, career changers, immigrants, and entrepreneurs face this same <strong>"networking cold start"</strong> dilemma. Existing tools like LinkedIn Sales Navigator assume you already have a network to leverage. But what if you don't? What if you're starting from zero and need to build meaningful professional relationships from scratch?
         </p>
         
         <h2 style={{ 
           fontSize: '2rem', 
           fontWeight: '600', 
-          color: '#1a1a1a', 
+          color: '#444', 
           marginTop: '50px', 
-          marginBottom: '25px'
+          marginBottom: '25px',
+          opacity: paragraph7Visible ? 1 : 0,
+          transform: paragraph7Visible ? 'translateY(0)' : 'translateY(30px)',
+          transition: 'opacity 0.8s ease, transform 0.8s ease'
         }}>
-          Our Vision
+          The Solution
         </h2>
         
-        <p style={{ fontSize: '1.1rem', marginBottom: '30px' }}>
-          Imagine a world where finding your next co-founder, mentor, or collaborator is as simple as asking a question in plain English. Where your network isn't just a collection of contacts, but a living, breathing ecosystem of opportunities and relationships.
-        </p>
-        
-        <p style={{ fontSize: '1.1rem', marginBottom: '30px' }}>
-          Mira transforms how we discover and connect with people who share our passions, complement our skills, and align with our goals. We're not just building another social network—we're building the intelligence layer that makes every connection meaningful.
-        </p>
-        
-        <h2 style={{ 
-          fontSize: '2rem', 
-          fontWeight: '600', 
-          color: '#1a1a1a', 
-          marginTop: '50px', 
-          marginBottom: '25px'
+        <p style={{ 
+          fontSize: '1.1rem', 
+          marginBottom: '30px',
+          opacity: paragraph8Visible ? 1 : 0,
+          transform: paragraph8Visible ? 'translateY(0)' : 'translateY(30px)',
+          transition: 'opacity 0.8s ease, transform 0.8s ease'
         }}>
-          The Technology
-        </h2>
-        
-        <p style={{ fontSize: '1.1rem', marginBottom: '30px' }}>
-          At the heart of Mira is advanced natural language processing that understands not just what you're looking for, but why you're looking for it. Our AI analyzes your existing connections, their connections, and the broader network to surface the most relevant people for your specific needs.
+          That's exactly why Jacky and I created <span style={{ 
+            fontWeight: 'bold', 
+            fontSize: '1.3rem',
+            background: 'linear-gradient(45deg, #667eea 0%, #764ba2 25%, #f093fb 50%, #f5576c 75%, #4facfe 100%)',
+            backgroundSize: '400% 400%',
+            WebkitBackgroundClip: 'text',
+            WebkitTextFillColor: 'transparent',
+            backgroundClip: 'text',
+            animation: 'gradientShift 3s ease infinite'
+          }}>Mira</span>.
         </p>
         
-        <p style={{ fontSize: '1.1rem', marginBottom: '30px' }}>
-          Whether you're searching for "AI researchers working on climate solutions" or "designers who've built products for healthcare," Mira understands context, intent, and nuance in ways that traditional search simply cannot.
-        </p>
-        
-        <h2 style={{ 
-          fontSize: '2rem', 
-          fontWeight: '600', 
-          color: '#1a1a1a', 
-          marginTop: '50px', 
-          marginBottom: '25px'
+        <p style={{ 
+          fontSize: '1.1rem', 
+          marginBottom: '30px',
+          opacity: paragraph9Visible ? 1 : 0,
+          transform: paragraph9Visible ? 'translateY(0)' : 'translateY(30px)',
+          transition: 'opacity 0.8s ease, transform 0.8s ease'
         }}>
-          Join Us
-        </h2>
-        
-        <p style={{ fontSize: '1.1rem', marginBottom: '30px' }}>
-          We're just getting started. The future of networking is intelligent, contextual, and human-centered. It's about quality over quantity, meaning over metrics, and genuine connections over superficial interactions.
+          We realized that everyone is actually connected through social graphs in ways they never realize. That startup founder you need might be following someone who follows you on Twitter. That brilliant engineer you want to collaborate with might be two degrees away through your GitHub connections. <strong>The paths exist - they're just invisible.</strong>
         </p>
         
-        <p style={{ fontSize: '1.1rem', marginBottom: '50px' }}>
-          Join us in building a world where everyone can find their people, their purpose, and their potential through the power of intelligent networking.
-        </p>
-        
-        <div style={{ 
-          padding: '30px', 
-          background: '#f8f9fa', 
-          borderRadius: '12px', 
-          border: '1px solid #e5e5e5',
-          marginTop: '40px'
+        <p style={{ 
+          fontSize: '1.1rem', 
+          marginBottom: '30px',
+          opacity: paragraph10Visible ? 1 : 0,
+          transform: paragraph10Visible ? 'translateY(0)' : 'translateY(30px)',
+          transition: 'opacity 0.8s ease, transform 0.8s ease'
         }}>
-          <p style={{ 
-            fontSize: '1.1rem', 
-            color: '#555', 
-            fontStyle: 'italic',
-            margin: 0
-          }}>
-            "The best way to predict the future is to invent it." — Alan Kay
-          </p>
-        </div>
+          But finding the path isn't enough. The real breakthrough came when we integrated <strong>Qloo's cultural intelligence API</strong>. Now Mira doesn't just tell you who to contact - it reveals how to connect authentically by understanding their cultural preferences, communication style, and shared interests beyond just their job title.
+        </p>
       </div>
     </div>
   );
@@ -1043,30 +1180,305 @@ function MissionPage() {
 // Use Cases Page Component
 function UseCasesPage() {
   const [activeCategory, setActiveCategory] = useState('Featured');
+  const [headingVisible, setHeadingVisible] = useState(false);
+  const [headingGradient, setHeadingGradient] = useState(false);
   
-  const categories = ['Featured', 'Research', 'Life', 'Data Analysis', 'Education', 'Productivity', 'WTF'];
+  const categories = ['Featured', 'Networking', 'Startups', 'Investors', 'Talent', 'Partnerships', 'Community'];
+  
+  // Intersection Observer for the heading animation
+  useEffect(() => {
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          setHeadingVisible(true);
+          setHeadingGradient(true);
+          // Stop gradient after 3 seconds and make it black
+          setTimeout(() => {
+            setHeadingGradient(false);
+          }, 3000);
+          observer.disconnect();
+        }
+      });
+    }, { threshold: 0.3 });
+
+    const heading = document.querySelector('.use-cases-heading');
+    if (heading) observer.observe(heading);
+
+    return () => observer.disconnect();
+  }, []);
   
   const useCases = [
     {
-      title: "Trip to Japan in april",
-      description: "Mira integrates comprehensive travel information to create personalized itineraries and produces a custom travel handbook tailored specifically for your Japanese adventure.",
-      icon: "🧳",
-      tag: "Maps & Key Locations",
+      title: "Find your next co-founder",
+      description: "Mira searches through your network and beyond to find potential co-founders who complement your skills, share your vision, and are ready to build something amazing together.",
+      icon: (
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M12 2L13.09 8.26L20 9L13.09 9.74L12 16L10.91 9.74L4 9L10.91 8.26L12 2Z" fill="currentColor"/>
+        </svg>
+      ),
+      tag: "Startup Networking",
       category: "Featured"
     },
     {
-      title: "Interactive course on the momentum theorem",
-      description: "Mira develops engaging video presentations for middle school educators, clearly explaining the momentum theorem through accessible and educational content.",
-      icon: "⚙️",
+      title: "Connect with investors",
+      description: "Mira identifies investors in your network who are actively funding companies in your space, with detailed insights on their investment thesis and recent portfolio companies.",
+      icon: (
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="2"/>
+          <path d="M12 6V18M8 12H16" stroke="currentColor" strokeWidth="2"/>
+        </svg>
+      ),
+      tag: "Investment Network",
       category: "Featured"
     },
     {
-      title: "Comparative analysis of insurance policies",
-      description: "Looking to compare insurance options? Mira generates clear, structured comparison tables highlighting key policy information with optimal recommendations tailored to your needs.",
-      icon: "🔄",
+      title: "Hire top talent",
+      description: "Mira finds exceptional engineers, designers, and operators in your extended network who are open to new opportunities and match your company's culture and technical needs.",
+      icon: (
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M17 21V19C17 17.9391 16.5786 16.9217 15.8284 16.1716C15.0783 15.4214 14.0609 15 13 15H5C3.93913 15 2.92172 15.4214 2.17157 16.1716C1.42143 16.9217 1 17.9391 1 19V21M23 21V19C22.9993 18.1137 22.7044 17.2528 22.1614 16.5523C21.6184 15.8519 20.8581 15.3516 20 15.13M16 3.13C16.8604 3.35031 17.623 3.85071 18.1676 4.55232C18.7122 5.25392 19.0078 6.11683 19.0078 7.005C19.0078 7.89317 18.7122 8.75608 18.1676 9.45768C17.623 10.1593 16.8604 10.6597 16 10.88M13 7C13 9.20914 11.2091 11 9 11C6.79086 11 5 9.20914 5 7C5 4.79086 6.79086 3 9 3C11.2091 3 13 4.79086 13 7Z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+        </svg>
+      ),
+      tag: "Talent Discovery",
       category: "Featured"
     }
   ];
+ 
+  // Different use cases for each category
+  const allUseCases = {
+    'Featured': [
+      {
+        title: "Find your next co-founder",
+        description: "Mira searches through your network and beyond to find potential co-founders who complement your skills, share your vision, and are ready to build something amazing together.",
+        icon: (
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M12 2L13.09 8.26L20 9L13.09 9.74L12 16L10.91 9.74L4 9L10.91 8.26L12 2Z" fill="currentColor"/>
+          </svg>
+        ),
+        tag: "Startup Networking"
+      },
+      {
+        title: "Connect with investors",
+        description: "Mira identifies investors in your network who are actively funding companies in your space, with detailed insights on their investment thesis and recent portfolio companies.",
+        icon: (
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="2"/>
+            <path d="M12 6V18M8 12H16" stroke="currentColor" strokeWidth="2"/>
+          </svg>
+        ),
+        tag: "Investment Network"
+      },
+      {
+        title: "Hire top talent",
+        description: "Mira finds exceptional engineers, designers, and operators in your extended network who are open to new opportunities and match your company's culture and technical needs.",
+        icon: (
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M17 21V19C17 17.9391 16.5786 16.9217 15.8284 16.1716C15.0783 15.4214 14.0609 15 13 15H5C3.93913 15 2.92172 15.4214 2.17157 16.1716C1.42143 16.9217 1 17.9391 1 19V21M23 21V19C22.9993 18.1137 22.7044 17.2528 22.1614 16.5523C21.6184 15.8519 20.8581 15.3516 20 15.13M16 3.13C16.8604 3.35031 17.623 3.85071 18.1676 4.55232C18.7122 5.25392 19.0078 6.11683 19.0078 7.005C19.0078 7.89317 18.7122 8.75608 18.1676 9.45768C17.623 10.1593 16.8604 10.6597 16 10.88M13 7C13 9.20914 11.2091 11 9 11C6.79086 11 5 9.20914 5 7C5 4.79086 6.79086 3 9 3C11.2091 3 13 4.79086 13 7Z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+          </svg>
+        ),
+        tag: "Talent Discovery"
+      }
+    ],
+    'Networking': [
+      {
+        title: "Expand your professional network",
+        description: "Mira discovers professionals in your industry who share your interests and can help advance your career through meaningful connections and mentorship opportunities.",
+        icon: (
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M16 4C18.21 4 20 5.79 20 8C20 10.21 18.21 12 16 12C13.79 12 12 10.21 12 8C12 5.79 13.79 4 16 4ZM8 4C10.21 4 12 5.79 12 8C12 10.21 10.21 12 8 12C5.79 12 4 10.21 4 8C4 5.79 5.79 4 8 4ZM8 14C5.79 14 4 15.79 4 18V20H12V18C12 15.79 10.21 14 8 14ZM16 14C13.79 14 12 15.79 12 18V20H20V18C20 15.79 18.21 14 16 14Z" fill="currentColor"/>
+          </svg>
+        ),
+        tag: "Professional Growth"
+      },
+      {
+        title: "Find industry mentors",
+        description: "Connect with experienced professionals who can guide your career development and provide valuable insights into your industry's best practices and opportunities.",
+        icon: (
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M12 2L13.09 8.26L20 9L13.09 9.74L12 16L10.91 9.74L4 9L10.91 8.26L12 2Z" fill="currentColor"/>
+          </svg>
+        ),
+        tag: "Mentorship"
+      },
+      {
+        title: "Join exclusive communities",
+        description: "Discover private communities and groups where industry leaders share insights, opportunities, and collaborate on innovative projects.",
+        icon: (
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <circle cx="12" cy="12" r="3" stroke="currentColor" strokeWidth="2"/>
+            <path d="M12 1V3M12 21V23M4.22 4.22L5.64 5.64M18.36 18.36L19.78 19.78M1 12H3M21 12H23M4.22 19.78L5.64 18.36M18.36 5.64L19.78 4.22" stroke="currentColor" strokeWidth="2"/>
+          </svg>
+        ),
+        tag: "Community Access"
+      }
+    ],
+    'Startups': [
+      {
+        title: "Find technical co-founders",
+        description: "Mira identifies experienced engineers and developers in your network who are looking for their next startup opportunity and match your technical requirements.",
+        icon: (
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M9 12L11 14L15 10M21 12C21 16.9706 16.9706 21 12 21C7.02944 21 3 16.9706 3 12C3 7.02944 7.02944 3 12 3C16.9706 3 21 7.02944 21 12Z" stroke="currentColor" strokeWidth="2"/>
+          </svg>
+        ),
+        tag: "Technical Team"
+      },
+      {
+        title: "Discover early adopters",
+        description: "Find potential customers and early adopters in your network who are most likely to try your product and provide valuable feedback for iteration.",
+        icon: (
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M12 2L13.09 8.26L20 9L13.09 9.74L12 16L10.91 9.74L4 9L10.91 8.26L12 2Z" fill="currentColor"/>
+          </svg>
+        ),
+        tag: "Customer Discovery"
+      },
+      {
+        title: "Connect with startup advisors",
+        description: "Find experienced entrepreneurs and advisors who can help you navigate the challenges of building and scaling your startup.",
+        icon: (
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M9 12L11 14L15 10M21 12C21 16.9706 16.9706 21 12 21C7.02944 21 3 16.9706 3 12C3 7.02944 7.02944 3 12 3C16.9706 3 21 7.02944 21 12Z" stroke="currentColor" strokeWidth="2"/>
+          </svg>
+        ),
+        tag: "Advisory Network"
+      }
+    ],
+    'Investors': [
+      {
+        title: "Find angel investors",
+        description: "Discover angel investors in your network who are actively funding early-stage startups and have a track record in your industry.",
+        icon: (
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="2"/>
+            <path d="M12 6V18M8 12H16" stroke="currentColor" strokeWidth="2"/>
+          </svg>
+        ),
+        tag: "Angel Network"
+      },
+      {
+        title: "Connect with VCs",
+        description: "Identify venture capitalists who have invested in similar companies and understand your market opportunity and business model.",
+        icon: (
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M12 2L13.09 8.26L20 9L13.09 9.74L12 16L10.91 9.74L4 9L10.91 8.26L12 2Z" fill="currentColor"/>
+          </svg>
+        ),
+        tag: "VC Connections"
+      },
+      {
+        title: "Find strategic investors",
+        description: "Discover corporate investors and strategic partners who can provide not just capital, but also valuable industry connections and market access.",
+        icon: (
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M17 21V19C17 17.9391 16.5786 16.9217 15.8284 16.1716C15.0783 15.4214 14.0609 15 13 15H5C3.93913 15 2.92172 15.4214 2.17157 16.1716C1.42143 16.9217 1 17.9391 1 19V21M23 21V19C22.9993 18.1137 22.7044 17.2528 22.1614 16.5523C21.6184 15.8519 20.8581 15.3516 20 15.13M16 3.13C16.8604 3.35031 17.623 3.85071 18.1676 4.55232C18.7122 5.25392 19.0078 6.11683 19.0078 7.005C19.0078 7.89317 18.7122 8.75608 18.1676 9.45768C17.623 10.1593 16.8604 10.6597 16 10.88M13 7C13 9.20914 11.2091 11 9 11C6.79086 11 5 9.20914 5 7C5 4.79086 6.79086 3 9 3C11.2091 3 13 4.79086 13 7Z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+          </svg>
+        ),
+        tag: "Strategic Partners"
+      }
+    ],
+    'Talent': [
+      {
+        title: "Hire senior engineers",
+        description: "Find experienced software engineers and technical leaders who are open to new opportunities and match your technology stack and culture.",
+        icon: (
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M10 20L14 4M18 8L22 12L18 16M6 16L2 12L6 8" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+          </svg>
+        ),
+        tag: "Engineering"
+      },
+      {
+        title: "Find product designers",
+        description: "Discover talented product designers and UX professionals who can help create exceptional user experiences for your product.",
+        icon: (
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M12 2L13.09 8.26L20 9L13.09 9.74L12 16L10.91 9.74L4 9L10.91 8.26L12 2Z" fill="currentColor"/>
+          </svg>
+        ),
+        tag: "Design"
+      },
+      {
+        title: "Recruit sales leaders",
+        description: "Find experienced sales professionals and revenue leaders who can help scale your go-to-market strategy and build your customer base.",
+        icon: (
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M17 21V19C17 17.9391 16.5786 16.9217 15.8284 16.1716C15.0783 15.4214 14.0609 15 13 15H5C3.93913 15 2.92172 15.4214 2.17157 16.1716C1.42143 16.9217 1 17.9391 1 19V21M23 21V19C22.9993 18.1137 22.7044 17.2528 22.1614 16.5523C21.6184 15.8519 20.8581 15.3516 20 15.13M16 3.13C16.8604 3.35031 17.623 3.85071 18.1676 4.55232C18.7122 5.25392 19.0078 6.11683 19.0078 7.005C19.0078 7.89317 18.7122 8.75608 18.1676 9.45768C17.623 10.1593 16.8604 10.6597 16 10.88M13 7C13 9.20914 11.2091 11 9 11C6.79086 11 5 9.20914 5 7C5 4.79086 6.79086 3 9 3C11.2091 3 13 4.79086 13 7Z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+          </svg>
+        ),
+        tag: "Sales"
+      }
+    ],
+    'Partnerships': [
+      {
+        title: "Find channel partners",
+        description: "Discover potential channel partners and resellers who can help you reach new markets and scale your distribution strategy.",
+        icon: (
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M12 2L13.09 8.26L20 9L13.09 9.74L12 16L10.91 9.74L4 9L10.91 8.26L12 2Z" fill="currentColor"/>
+          </svg>
+        ),
+        tag: "Channel Strategy"
+      },
+      {
+        title: "Connect with integrators",
+        description: "Find technology integrators and consultants who can help implement your solution and expand your market reach.",
+        icon: (
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M10 20L14 4M18 8L22 12L18 16M6 16L2 12L6 8" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+          </svg>
+        ),
+        tag: "Integration"
+      },
+      {
+        title: "Find co-marketing partners",
+        description: "Discover companies with complementary products who can help you reach new audiences through co-marketing initiatives.",
+        icon: (
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <circle cx="12" cy="12" r="3" stroke="currentColor" strokeWidth="2"/>
+            <path d="M12 1V3M12 21V23M4.22 4.22L5.64 5.64M18.36 18.36L19.78 19.78M1 12H3M21 12H23M4.22 19.78L5.64 18.36M18.36 5.64L19.78 4.22" stroke="currentColor" strokeWidth="2"/>
+          </svg>
+        ),
+        tag: "Marketing"
+      }
+    ],
+    'Community': [
+      {
+        title: "Join founder communities",
+        description: "Discover exclusive founder communities and mastermind groups where entrepreneurs share insights, challenges, and support each other's growth.",
+        icon: (
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M16 4C18.21 4 20 5.79 20 8C20 10.21 18.21 12 16 12C13.79 12 12 10.21 12 8C12 5.79 13.79 4 16 4ZM8 4C10.21 4 12 5.79 12 8C12 10.21 10.21 12 8 12C5.79 12 4 10.21 4 8C4 5.79 5.79 4 8 4ZM8 14C5.79 14 4 15.79 4 18V20H12V18C12 15.79 10.21 14 8 14ZM16 14C13.79 14 12 15.79 12 18V20H20V18C20 15.79 18.21 14 16 14Z" fill="currentColor"/>
+          </svg>
+        ),
+        tag: "Founder Network"
+      },
+      {
+        title: "Find industry groups",
+        description: "Connect with industry-specific groups and associations where professionals discuss trends, share opportunities, and collaborate on projects.",
+        icon: (
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <circle cx="12" cy="12" r="3" stroke="currentColor" strokeWidth="2"/>
+            <path d="M12 1V3M12 21V23M4.22 4.22L5.64 5.64M18.36 18.36L19.78 19.78M1 12H3M21 12H23M4.22 19.78L5.64 18.36M18.36 5.64L19.78 4.22" stroke="currentColor" strokeWidth="2"/>
+          </svg>
+        ),
+        tag: "Industry Groups"
+      },
+      {
+        title: "Join learning communities",
+        description: "Find communities focused on continuous learning and skill development where members share knowledge and support each other's growth.",
+        icon: (
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M12 2L13.09 8.26L20 9L13.09 9.74L12 16L10.91 9.74L4 9L10.91 8.26L12 2Z" fill="currentColor"/>
+          </svg>
+        ),
+        tag: "Learning"
+      }
+    ]
+  };
+ 
+  // Get current use cases based on active category
+  const currentUseCases = allUseCases[activeCategory] || allUseCases['Featured'];
   
   return (
     <div style={{ 
@@ -1087,14 +1499,8 @@ function UseCasesPage() {
         }}>
           Use cases
         </div>
-        <h1 style={{ 
-          fontSize: '2.5rem', 
-          fontWeight: '700', 
-          color: '#000', 
-          marginBottom: '16px',
-          lineHeight: '1.2'
-        }}>
-          Explore use cases from our official collection.
+        <h1 className={`use-cases-heading ${headingVisible ? 'fade-in' : ''} ${headingGradient ? 'gradient-animation' : ''}`}>
+          Discover how Mira transforms your networking.
         </h1>
         <p style={{ 
           fontSize: '1.1rem', 
@@ -1103,7 +1509,7 @@ function UseCasesPage() {
           maxWidth: '600px',
           margin: '0 auto'
         }}>
-          Learn how Mira handles real-world tasks through step-by-step replays.
+          See how professionals use Mira to find the right people and build meaningful connections.
         </p>
       </div>
       
@@ -1145,7 +1551,7 @@ function UseCasesPage() {
         maxWidth: '1000px',
         margin: '0 auto'
       }}>
-        {useCases.map((useCase, index) => (
+        {currentUseCases.map((useCase, index) => (
           <div key={index} style={{ 
             background: 'transparent', 
             borderRadius: '12px', 
@@ -1156,7 +1562,7 @@ function UseCasesPage() {
             cursor: 'pointer'
           }}>
             <div style={{ 
-              fontSize: '2rem', 
+              color: '#666',
               marginBottom: '16px',
               display: 'flex',
               alignItems: 'center',

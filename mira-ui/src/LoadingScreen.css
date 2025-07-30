@@ -868,3 +868,34 @@
   opacity: 1;
   transform: translateY(0);
 } 
+
+/* Fade in animation for Use Cases heading */
+.use-cases-heading {
+  opacity: 0;
+  transform: translateY(30px);
+  transition: all 0.8s ease;
+  font-size: 2.5rem;
+  font-weight: 700;
+  color: #000;
+  margin-bottom: 16px;
+  line-height: 1.2;
+}
+
+.use-cases-heading.fade-in {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.use-cases-heading.gradient-animation {
+  background: linear-gradient(45deg, #ff6b35, #f7931e, #4ecdc4, #45b7d1, #96ceb4, #feca57, #ff9ff3, #54a0ff);
+  background-size: 200% 100%;
+  background-clip: text;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: gradientWave 3s ease-in-out;
+}
+
+.use-cases-heading:not(.gradient-animation) {
+  color: #000 !important;
+  -webkit-text-fill-color: #000 !important;
+} 
