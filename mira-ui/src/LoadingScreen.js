@@ -102,7 +102,7 @@ const EnhancedLandingPage = ({ onOpenMira }) => {
               key={gradientKey}
               className={`gradient-text ${gradientActive ? 'active' : ''} ${gradientPaused ? 'paused' : ''}`}
             >
-              Find your internet peeps
+              Find your peeps
             </span>
           </div>
         </div>
