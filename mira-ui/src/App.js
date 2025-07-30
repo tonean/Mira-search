@@ -11,6 +11,37 @@ import ConnectionsPage from "./ConnectionsPage";
 import TypingParagraph from "./TypingParagraph";
 import { supabaseAuth, supabaseDB } from './supabase';
 
+// Network Dot Component
+function NetworkDot({ enabled = false, onToggle }) {
+  return (
+    <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginLeft: 8 }}>
+      <button
+        onClick={() => onToggle(!enabled)}
+        style={{
+          width: 12,
+          height: 12,
+          borderRadius: '50%',
+          background: enabled ? '#4CAF50' : '#f44336',
+          border: 'none',
+          cursor: 'pointer',
+          boxShadow: enabled ? '0 0 8px rgba(76, 175, 80, 0.6)' : '0 0 8px rgba(244, 67, 54, 0.6)',
+          transition: 'background 0.2s ease',
+        }}
+        title={enabled ? "Network only (enabled)" : "Network only (disabled)"}
+      />
+      <span style={{ 
+        color: '#999', 
+        fontSize: '0.85rem',
+        fontWeight: 400,
+        letterSpacing: 0.05,
+        fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif'
+      }}>
+        Network only
+      </span>
+    </div>
+  );
+}
+
 // Supabase configuration
 // TODO: Replace with your actual Supabase credentials
 const SUPABASE_URL = 'YOUR_SUPABASE_URL';
@@ -29,13 +60,10 @@ function SearchResults({ darkMode, isSidebarCollapsed, onSignUpClick, user, isAu
   const [copied, setCopied] = useState(false);
   // Follow-up search bar state and handlers
   const [followupValue, setFollowupValue] = useState("");
-  const [isMicActive, setIsMicActive] = useState(false);
+  const [networkOnly, setNetworkOnly] = useState(false);
   const followupRef = useRef();
   const editTextRef = useRef();
-  // Add file input ref
-  const fileInputRef = useRef();
-  // State for selected files in follow-up bar
-  const [selectedFiles, setSelectedFiles] = useState([]);
+
   const navigate = useNavigate();
   // Share button state
   const [shareCopied, setShareCopied] = useState(false);
@@ -56,6 +84,8 @@ function SearchResults({ darkMode, isSidebarCollapsed, onSignUpClick, user, isAu
   });
   const [connectButtonRef, setConnectButtonRef] = useState(null);
   const [dropdownPosition, setDropdownPosition] = useState({ top: 0, right: 0 });
+  const [hoveredPattern, setHoveredPattern] = useState(null);
+  const [tooltipPosition, setTooltipPosition] = useState({ x: 0, y: 0 });
 
   // Effect to show sticky bar when question is out of view
   useEffect(() => {
@@ -209,30 +239,14 @@ function SearchResults({ darkMode, isSidebarCollapsed, onSignUpClick, user, isAu
     textarea.style.height = 'auto';
     textarea.style.height = textarea.scrollHeight + 'px';
   };
-  const handleFollowupMicClick = () => {
-    setIsMicActive(!isMicActive);
-  };
+
   const handleFollowupKeyDown = (e) => {
     if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault();
       // Implement search or follow-up action here
     }
   };
-  const handleFileInputClick = () => {
-    if (fileInputRef.current) {
-      fileInputRef.current.value = null;
-      fileInputRef.current.click();
-    }
-  };
-  const handleFileChange = (e) => {
-    const files = Array.from(e.target.files);
-    if (files && files.length > 0) {
-      setSelectedFiles(files);
-    }
-  };
-  const handleRemoveFile = (index) => {
-    setSelectedFiles(prev => prev.filter((_, i) => i !== index));
-  };
+
 
   // Share button handler
   const handleShare = () => {
@@ -247,7 +261,6 @@ function SearchResults({ darkMode, isSidebarCollapsed, onSignUpClick, user, isAu
     navigate(`/search?q=${encodeURIComponent(text)}`);
     setEditValue(text);
     setFollowupValue("");
-    setSelectedFiles([]);
   };
 
   // --- MOCKUP TEXT ---
@@ -666,8 +679,13 @@ function SearchResults({ darkMode, isSidebarCollapsed, onSignUpClick, user, isAu
                     </div>
                     <div>
                         <div style={{ fontSize: '1.4rem', fontWeight: 500, fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif', letterSpacing: '-0.02em' }}>{selectedPerson.name}</div>
-                        <div style={{ fontSize: '1rem', color: darkMode ? '#bbb' : '#666', fontWeight: 400, marginTop: 6, fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif' }}>Interface Designer</div>
-                        <div style={{ fontSize: '0.9rem', color: '#999', marginTop: 4, fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif' }}>Duff Gardens Area</div>
+                        <div style={{ fontSize: '1rem', color: darkMode ? '#bbb' : '#666', fontWeight: 400, marginTop: 6, fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif' }}>Senior Software Engineer</div>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginTop: 4 }}>
+                          <svg width="16" height="16" viewBox="0 0 24 24" fill="#1da1f2">
+                            <path d="M23 3a10.9 10.9 0 0 1-3.14 1.53 4.48 4.48 0 0 0-7.86 3v1A10.66 10.66 0 0 1 3 4s-4 9 5 13a11.64 11.64 0 0 1-7 2c9 5 20 0 20-11.5a4.5 4.5 0 0 0-.08-.83A7.72 7.72 0 0 0 23 3z"/>
+                          </svg>
+                          <span style={{ fontSize: '0.9rem', color: '#1da1f2', fontWeight: 500, fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif' }}>@vinoth_ragunathan</span>
+                        </div>
                     </div>
                   </div>
                     <div style={{ position: 'relative' }} className="connect-dropdown-container">
@@ -899,6 +917,63 @@ function SearchResults({ darkMode, isSidebarCollapsed, onSignUpClick, user, isAu
                         </div>
                       )}
                     </div>
+                    
+                    {/* Pattern Tooltip */}
+                    {hoveredPattern && (
+                      <div style={{
+                        position: 'fixed',
+                        left: tooltipPosition.x,
+                        top: tooltipPosition.y,
+                        backgroundColor: darkMode ? '#1f2937' : '#ffffff',
+                        border: `1px solid ${darkMode ? '#374151' : '#e5e7eb'}`,
+                        borderRadius: 4,
+                        padding: '16px',
+                        boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
+                        zIndex: 10000,
+                        width: 300,
+                        fontSize: '0.85rem',
+                        color: darkMode ? '#d1d5db' : '#374151',
+                        fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif',
+                        lineHeight: 1.4
+                      }}>
+                        {hoveredPattern === 'opensource' && (
+                          <div>
+                            <div style={{ fontWeight: 600, marginBottom: 4, color: darkMode ? '#fbbf24' : '#d97706' }}>Pattern Analysis</div>
+                            <div>Open Source Contributors → React Enthusiasts</div>
+                            <div style={{ fontSize: '0.8rem', color: darkMode ? '#9ca3af' : '#6b7280', marginTop: 4 }}>
+                              Based on data from similar profiles, open source contributors often gravitate toward React ecosystem development.
+                            </div>
+                          </div>
+                        )}
+                        {hoveredPattern === 'react' && (
+                          <div>
+                            <div style={{ fontWeight: 600, marginBottom: 4, color: darkMode ? '#fbbf24' : '#d97706' }}>Pattern Analysis</div>
+                            <div>React Devs → Performance Optimization</div>
+                            <div style={{ fontSize: '0.8rem', color: darkMode ? '#9ca3af' : '#6b7280', marginTop: 4 }}>
+                              React developers frequently develop expertise in performance optimization as they scale applications.
+                            </div>
+                          </div>
+                        )}
+                        {hoveredPattern === 'community' && (
+                          <div>
+                            <div style={{ fontWeight: 600, marginBottom: 4, color: darkMode ? '#fbbf24' : '#d97706' }}>Pattern Analysis</div>
+                            <div>Node.js Users → Community Leaders</div>
+                            <div style={{ fontSize: '0.8rem', color: darkMode ? '#9ca3af' : '#6b7280', marginTop: 4 }}>
+                              Node.js developers often become community mentors due to the collaborative nature of the ecosystem.
+                            </div>
+                          </div>
+                        )}
+                        {hoveredPattern === 'performance' && (
+                          <div>
+                            <div style={{ fontWeight: 600, marginBottom: 4, color: darkMode ? '#fbbf24' : '#d97706' }}>Pattern Analysis</div>
+                            <div>Performance Devs → System Architects</div>
+                            <div style={{ fontSize: '0.8rem', color: darkMode ? '#9ca3af' : '#6b7280', marginTop: 4 }}>
+                              Performance optimization specialists often evolve into system architecture roles as they gain experience.
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    )}
                   </div>
                   <div style={{ 
                     opacity: profileAnimated.overview ? 1 : 0,
@@ -907,7 +982,7 @@ function SearchResults({ darkMode, isSidebarCollapsed, onSignUpClick, user, isAu
                   }}>
                     <div style={{ fontWeight: 500, fontSize: '1.1rem', marginBottom: 16, marginTop: 32, fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif', letterSpacing: '-0.01em', color: darkMode ? '#fff' : '#111' }}>Overview</div>
                     <div style={{ fontSize: '0.95rem', color: darkMode ? '#d1d5db' : '#555', marginBottom: 28, lineHeight: 1.6, fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif', fontWeight: 400 }}>
-                    Vinoth Ragunathan is a creative interface designer known for his work at Duff Gardens and insidesticker.com. He specializes in user-centric design and has contributed to several open source projects. Vinoth is passionate about creating intuitive digital experiences and is active in the design community.
+                    Vinoth Ragunathan is a senior software engineer with extensive experience in open source development. He has contributed to major projects like React, Node.js, and various developer tools. His expertise spans full-stack development, system architecture, and developer experience optimization. Vinoth is known for his thoughtful code reviews and mentorship in the open source community.
                   </div>
                   </div>
                   <div style={{ 
@@ -915,29 +990,327 @@ function SearchResults({ darkMode, isSidebarCollapsed, onSignUpClick, user, isAu
                     transform: profileAnimated.workExperience ? 'translateY(0)' : 'translateY(-20px)',
                     transition: 'opacity 0.5s ease-out, transform 0.5s ease-out'
                   }}>
-                    <div style={{ fontWeight: 500, fontSize: '1.1rem', marginBottom: 16, marginTop: 24, fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif', letterSpacing: '-0.01em', color: darkMode ? '#fff' : '#111' }}>Work Experience</div>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 18, marginBottom: 12 }}>
-                      <div style={{ width: 32, height: 32, borderRadius: 8, background: '#3a8dde', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff', fontWeight: 600, fontSize: 14 }}>VR</div>
-                    <div>
-                        <div style={{ fontWeight: 500, fontSize: '1rem', fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif', color: darkMode ? '#fff' : '#222' }}>Duff Gardens</div>
-                        <div style={{ fontSize: '0.9rem', color: '#888', fontWeight: 400, marginTop: 2, fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif' }}>Lead Designer</div>
-                        <div style={{ fontSize: '0.85rem', color: '#aaa', marginTop: 2, fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif' }}>2018 - Current</div>
+                                        <div style={{ fontWeight: 500, fontSize: '1.1rem', marginBottom: 16, marginTop: 24, fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif', letterSpacing: '-0.01em', color: darkMode ? '#fff' : '#111' }}>Why we think you're a good match</div>
+                    <div style={{ marginBottom: 28 }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 12 }}>
+                        <div style={{ width: 20, height: 20, borderRadius: '50%', backgroundColor: '#10b981', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                          <svg width="12" height="12" viewBox="0 0 24 24" fill="#fff">
+                            <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                          </svg>
+                    </div>
+                                                <span 
+                          style={{ fontSize: '0.9rem', color: darkMode ? '#d1d5db' : '#333', fontWeight: 500, fontFamily: 'Georgia, "Times New Roman", serif', cursor: 'pointer' }}
+                          onMouseEnter={(e) => {
+                            setHoveredPattern('opensource');
+                            setTooltipPosition({ x: e.target.getBoundingClientRect().right + 20, y: e.target.getBoundingClientRect().top });
+                          }}
+                          onMouseLeave={() => setHoveredPattern(null)}
+                        >
+                          Open Source Contributor
+                        </span>
+                        <svg 
+                          width="14" height="14" viewBox="0 0 24 24" fill="none" 
+                          style={{ marginLeft: 4, cursor: 'pointer' }}
+                          onMouseEnter={(e) => {
+                            setHoveredPattern('opensource');
+                            setTooltipPosition({ x: e.target.getBoundingClientRect().right + 20, y: e.target.getBoundingClientRect().top });
+                          }}
+                          onMouseLeave={() => setHoveredPattern(null)}
+                        >
+                          <circle cx="12" cy="12" r="10" stroke="#9ca3af" strokeWidth="1.5"/>
+                          <path d="M12 16v-4M12 8h.01" stroke="#9ca3af" strokeWidth="1.5" strokeLinecap="round"/>
+                        </svg>
+                      </div>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 12 }}>
+                        <div style={{ width: 20, height: 20, borderRadius: '50%', backgroundColor: '#10b981', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                          <svg width="12" height="12" viewBox="0 0 24 24" fill="#fff">
+                            <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                          </svg>
+                        </div>
+                        <span 
+                          style={{ fontSize: '0.9rem', color: darkMode ? '#d1d5db' : '#333', fontWeight: 500, fontFamily: 'Georgia, "Times New Roman", serif', cursor: 'pointer' }}
+                          onMouseEnter={(e) => {
+                            setHoveredPattern('react');
+                            setTooltipPosition({ x: e.target.getBoundingClientRect().right + 20, y: e.target.getBoundingClientRect().top });
+                          }}
+                          onMouseLeave={() => setHoveredPattern(null)}
+                        >
+                          React & Node.js Expert
+                        </span>
+                        <svg 
+                          width="14" height="14" viewBox="0 0 24 24" fill="none" 
+                          style={{ marginLeft: 4, cursor: 'pointer' }}
+                          onMouseEnter={(e) => {
+                            setHoveredPattern('react');
+                            setTooltipPosition({ x: e.target.getBoundingClientRect().right + 20, y: e.target.getBoundingClientRect().top });
+                          }}
+                          onMouseLeave={() => setHoveredPattern(null)}
+                        >
+                          <circle cx="12" cy="12" r="10" stroke="#9ca3af" strokeWidth="1.5"/>
+                          <path d="M12 16v-4M12 8h.01" stroke="#9ca3af" strokeWidth="1.5" strokeLinecap="round"/>
+                        </svg>
+                      </div>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 12 }}>
+                        <div style={{ width: 20, height: 20, borderRadius: '50%', backgroundColor: '#10b981', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                          <svg width="12" height="12" viewBox="0 0 24 24" fill="#fff">
+                            <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                          </svg>
+                        </div>
+                        <span 
+                          style={{ fontSize: '0.9rem', color: darkMode ? '#d1d5db' : '#333', fontWeight: 500, fontFamily: 'Georgia, "Times New Roman", serif', cursor: 'pointer' }}
+                          onMouseEnter={(e) => {
+                            setHoveredPattern('community');
+                            setTooltipPosition({ x: e.target.getBoundingClientRect().right + 20, y: e.target.getBoundingClientRect().top });
+                          }}
+                          onMouseLeave={() => setHoveredPattern(null)}
+                        >
+                          Community Mentor
+                        </span>
+                        <svg 
+                          width="14" height="14" viewBox="0 0 24 24" fill="none" 
+                          style={{ marginLeft: 4, cursor: 'pointer' }}
+                          onMouseEnter={(e) => {
+                            setHoveredPattern('community');
+                            setTooltipPosition({ x: e.target.getBoundingClientRect().right + 20, y: e.target.getBoundingClientRect().top });
+                          }}
+                          onMouseLeave={() => setHoveredPattern(null)}
+                        >
+                          <circle cx="12" cy="12" r="10" stroke="#9ca3af" strokeWidth="1.5"/>
+                          <path d="M12 16v-4M12 8h.01" stroke="#9ca3af" strokeWidth="1.5" strokeLinecap="round"/>
+                        </svg>
+                      </div>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 12 }}>
+                        <div style={{ width: 20, height: 20, borderRadius: '50%', backgroundColor: '#10b981', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                          <svg width="12" height="12" viewBox="0 0 24 24" fill="#fff">
+                            <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                          </svg>
+                        </div>
+                        <span 
+                          style={{ fontSize: '0.9rem', color: darkMode ? '#d1d5db' : '#333', fontWeight: 500, fontFamily: 'Georgia, "Times New Roman", serif', cursor: 'pointer' }}
+                          onMouseEnter={(e) => {
+                            setHoveredPattern('performance');
+                            setTooltipPosition({ x: e.target.getBoundingClientRect().right + 20, y: e.target.getBoundingClientRect().top });
+                          }}
+                          onMouseLeave={() => setHoveredPattern(null)}
+                        >
+                          Performance Optimization Specialist
+                        </span>
+                        <svg 
+                          width="14" height="14" viewBox="0 0 24 24" fill="none" 
+                          style={{ marginLeft: 4, cursor: 'pointer' }}
+                          onMouseEnter={(e) => {
+                            setHoveredPattern('performance');
+                            setTooltipPosition({ x: e.target.getBoundingClientRect().top });
+                          }}
+                          onMouseLeave={() => setHoveredPattern(null)}
+                        >
+                          <circle cx="12" cy="12" r="10" stroke="#9ca3af" strokeWidth="1.5"/>
+                          <path d="M12 16v-4M12 8h.01" stroke="#9ca3af" strokeWidth="1.5" strokeLinecap="round"/>
+                        </svg>
+                      </div>
                     </div>
                   </div>
-                    <div style={{ fontSize: '0.9rem', color: darkMode ? '#bbb' : '#666', marginBottom: 20, marginLeft: 50, lineHeight: 1.5, fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif', fontWeight: 400 }}>
-                    Duff Gardens is a creative studio focused on playful, innovative digital products and experiences.
-                  </div>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 18, marginBottom: 12 }}>
-                      <div style={{ width: 32, height: 32, borderRadius: 8, background: '#b388ff', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff', fontWeight: 600, fontSize: 14 }}>IS</div>
-                    <div>
-                        <div style={{ fontWeight: 500, fontSize: '1rem', fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif', color: darkMode ? '#fff' : '#222' }}>insidesticker.com</div>
-                        <div style={{ fontSize: '0.9rem', color: '#888', fontWeight: 400, marginTop: 2, fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif' }}>Founder & Designer</div>
-                        <div style={{ fontSize: '0.85rem', color: '#aaa', marginTop: 2, fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif' }}>2016 - 2018</div>
+                  
+                  <div style={{ 
+                    opacity: profileAnimated.workExperience ? 1 : 0,
+                    transform: profileAnimated.workExperience ? 'translateY(0)' : 'translateY(-20px)',
+                    transition: 'opacity 0.5s ease-out, transform 0.5s ease-out'
+                  }}>
+                    <div style={{ fontWeight: 500, fontSize: '1.1rem', marginBottom: 16, marginTop: 24, fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif', letterSpacing: '-0.01em', color: darkMode ? '#fff' : '#111' }}>What can you say to them</div>
+                    <div style={{ 
+                      backgroundColor: darkMode ? '#1f2937' : '#f8fafc', 
+                      border: `1px solid ${darkMode ? '#374151' : '#e2e8f0'}`, 
+                      borderRadius: 12, 
+                      padding: '16px', 
+                      marginBottom: 28 
+                    }}>
+                      <div style={{ fontSize: '0.9rem', color: darkMode ? '#9ca3af' : '#64748b', marginBottom: 8, fontWeight: 500 }}>Based on similar conversations:</div>
+                      <div style={{ fontSize: '0.95rem', color: darkMode ? '#d1d5db' : '#334155', lineHeight: 1.5, fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif', fontWeight: 400 }}>
+                        "Hi Vinoth! I was impressed by your contributions to React and Node.js. Your work on developer experience optimization really caught my attention. I'd love to discuss potential collaboration opportunities or learn more about your approach to open source development. Would you be interested in connecting?"
+                      </div>
                     </div>
                   </div>
-                    <div style={{ fontSize: '0.9rem', color: darkMode ? '#bbb' : '#666', marginBottom: 24, marginLeft: 50, lineHeight: 1.5, fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif', fontWeight: 400 }}>
-                    insidesticker.com is a platform for custom, creative stickers and design resources.
+                  
+                  <div style={{ 
+                    opacity: profileAnimated.workExperience ? 1 : 0,
+                    transform: profileAnimated.workExperience ? 'translateY(0)' : 'translateY(-20px)',
+                    transition: 'opacity 0.5s ease-out, transform 0.5s ease-out'
+                  }}>
+                    <div style={{ fontWeight: 500, fontSize: '1.1rem', marginBottom: 16, marginTop: 24, fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif', letterSpacing: '-0.01em', color: darkMode ? '#fff' : '#111' }}>Timeline</div>
+                                         <div style={{ marginBottom: 24 }}>
+                       {/* Timeline Item 1 - Tweet */}
+                       <div style={{ display: 'flex', alignItems: 'flex-start', gap: 12, marginBottom: 16 }}>
+                         <div style={{ width: 28, height: 28, borderRadius: '50%', backgroundColor: '#1da1f2', display: 'flex', alignItems: 'center', justifyContent: 'center', marginTop: 2 }}>
+                           <svg width="14" height="14" viewBox="0 0 24 24" fill="#fff">
+                             <path d="M23 3a10.9 10.9 0 0 1-3.14 1.53 4.48 4.48 0 0 0-7.86 3v1A10.66 10.66 0 0 1 3 4s-4 9 5 13a11.64 11.64 0 0 1-7 2c9 5 20 0 20-11.5a4.5 4.5 0 0 0-.08-.83A7.72 7.72 0 0 0 23 3z"/>
+                           </svg>
+                         </div>
+                         <div style={{ flex: 1 }}>
+                           <div style={{ fontSize: '0.9rem', color: darkMode ? '#d1d5db' : '#333', marginBottom: 4, fontWeight: 500 }}>Vinoth tweeted</div>
+                           <div style={{ fontSize: '0.85rem', color: darkMode ? '#9ca3af' : '#666' }}>"Just merged a major performance optimization to React's concurrent features. The bundle size reduction is incredible! 🚀 #React #OpenSource #Performance"</div>
+                           <div style={{ fontSize: '0.8rem', color: darkMode ? '#6b7280' : '#888', marginTop: 4 }}>2 days ago</div>
+                         </div>
+                         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" style={{ marginTop: 2 }}>
+                           <path d="M10 6L8.59 7.41L13.17 12l-4.58 4.59L10 18l6-6z" stroke="#9ca3af" strokeWidth="1.5"/>
+                         </svg>
+                       </div>
+                       
+                       {/* Timeline Item 2 - Retweet */}
+                       <div style={{ display: 'flex', alignItems: 'flex-start', gap: 12, marginBottom: 16 }}>
+                         <div style={{ width: 28, height: 28, borderRadius: '50%', backgroundColor: '#17bf63', display: 'flex', alignItems: 'center', justifyContent: 'center', marginTop: 2 }}>
+                           <svg width="14" height="14" viewBox="0 0 24 24" fill="#fff">
+                             <path d="M23 4v6.67A4 4 0 0 1 17.67 15H15M1 20v-6.67A4 4 0 0 1 6.33 9H9"/>
+                           </svg>
+                         </div>
+                         <div style={{ flex: 1 }}>
+                           <div style={{ fontSize: '0.9rem', color: darkMode ? '#d1d5db' : '#333', marginBottom: 4, fontWeight: 500 }}>Vinoth retweeted @ReactTeam</div>
+                           <div style={{ fontSize: '0.85rem', color: darkMode ? '#9ca3af' : '#666' }}>"React 18.3 is now available with improved concurrent features and better developer experience. Check out the release notes!"</div>
+                           <div style={{ fontSize: '0.8rem', color: darkMode ? '#6b7280' : '#888', marginTop: 4 }}>3 days ago</div>
+                         </div>
+                         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" style={{ marginTop: 2 }}>
+                           <path d="M10 6L8.59 7.41L13.17 12l-4.58 4.59L10 18l6-6z" stroke="#9ca3af" strokeWidth="1.5"/>
+                         </svg>
+                       </div>
+                       
+                       {/* Timeline Item 3 - Like */}
+                       <div style={{ display: 'flex', alignItems: 'flex-start', gap: 12, marginBottom: 16 }}>
+                         <div style={{ width: 28, height: 28, borderRadius: '50%', backgroundColor: '#e0245e', display: 'flex', alignItems: 'center', justifyContent: 'center', marginTop: 2 }}>
+                           <svg width="14" height="14" viewBox="0 0 24 24" fill="#fff">
+                             <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
+                           </svg>
+                         </div>
+                         <div style={{ flex: 1 }}>
+                           <div style={{ fontSize: '0.9rem', color: darkMode ? '#d1d5db' : '#333', marginBottom: 4, fontWeight: 500 }}>Vinoth liked @NodeJS</div>
+                           <div style={{ fontSize: '0.85rem', color: darkMode ? '#9ca3af' : '#666' }}>"Node.js 20.10.0 is now available with security updates and performance improvements. Upgrade your applications!"</div>
+                           <div style={{ fontSize: '0.8rem', color: darkMode ? '#6b7280' : '#888', marginTop: 4 }}>1 week ago</div>
+                         </div>
+                         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" style={{ marginTop: 2 }}>
+                           <path d="M10 6L8.59 7.41L13.17 12l-4.58 4.59L10 18l6-6z" stroke="#9ca3af" strokeWidth="1.5"/>
+                         </svg>
+                       </div>
+                      
+                      {/* Show more button */}
+                      <div style={{ 
+                        border: '1px solid #8b5cf6', 
+                        borderRadius: 8, 
+                        padding: '8px 12px', 
+                        display: 'flex', 
+                        alignItems: 'center', 
+                        gap: 8, 
+                        cursor: 'pointer',
+                        transition: 'background-color 0.2s'
+                      }}
+                      onMouseEnter={(e) => e.target.style.backgroundColor = '#f3f4f6'}
+                      onMouseLeave={(e) => e.target.style.backgroundColor = 'transparent'}
+                      >
+                        <div style={{ width: 16, height: 16, borderRadius: '50%', backgroundColor: '#8b5cf6', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                          <svg width="8" height="8" viewBox="0 0 24 24" fill="#fff">
+                            <path d="M7 14l5-5 5 5"/>
+                          </svg>
+                        </div>
+                        <span style={{ fontSize: '0.85rem', color: '#8b5cf6', fontWeight: 500 }}>2 more interactions</span>
+                      </div>
+                    </div>
                   </div>
+                  
+                  <div style={{ 
+                    opacity: profileAnimated.workExperience ? 1 : 0,
+                    transform: profileAnimated.workExperience ? 'translateY(0)' : 'translateY(-20px)',
+                    transition: 'opacity 0.5s ease-out, transform 0.5s ease-out'
+                  }}>
+                    <div style={{ fontWeight: 500, fontSize: '1.1rem', marginBottom: 16, marginTop: 24, fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif', letterSpacing: '-0.01em', color: darkMode ? '#fff' : '#111' }}>Predicted Interests</div>
+                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, marginBottom: 24 }}>
+                      <div style={{ 
+                        backgroundColor: darkMode ? '#374151' : '#f3f4f6', 
+                        color: darkMode ? '#d1d5db' : '#374151',
+                        padding: '6px 12px', 
+                        borderRadius: 16, 
+                        fontSize: '0.85rem', 
+                        fontWeight: 500,
+                        cursor: 'pointer',
+                        transition: 'all 0.2s'
+                      }}
+                      onMouseEnter={(e) => e.target.style.backgroundColor = darkMode ? '#4b5563' : '#e5e7eb'}
+                      onMouseLeave={(e) => e.target.style.backgroundColor = darkMode ? '#374151' : '#f3f4f6'}
+                      >
+                        React
+                      </div>
+                      <div style={{ 
+                        backgroundColor: darkMode ? '#374151' : '#f3f4f6', 
+                        color: darkMode ? '#d1d5db' : '#374151',
+                        padding: '6px 12px', 
+                        borderRadius: 16, 
+                        fontSize: '0.85rem', 
+                        fontWeight: 500,
+                        cursor: 'pointer',
+                        transition: 'all 0.2s'
+                      }}
+                      onMouseEnter={(e) => e.target.style.backgroundColor = darkMode ? '#4b5563' : '#e5e7eb'}
+                      onMouseLeave={(e) => e.target.style.backgroundColor = darkMode ? '#374151' : '#f3f4f6'}
+                      >
+                        Node.js
+                      </div>
+                      <div style={{ 
+                        backgroundColor: darkMode ? '#374151' : '#f3f4f6', 
+                        color: darkMode ? '#d1d5db' : '#374151',
+                        padding: '6px 12px', 
+                        borderRadius: 16, 
+                        fontSize: '0.85rem', 
+                        fontWeight: 500,
+                        cursor: 'pointer',
+                        transition: 'all 0.2s'
+                      }}
+                      onMouseEnter={(e) => e.target.style.backgroundColor = darkMode ? '#4b5563' : '#e5e7eb'}
+                      onMouseLeave={(e) => e.target.style.backgroundColor = darkMode ? '#374151' : '#f3f4f6'}
+                      >
+                        Open Source
+                      </div>
+                      <div style={{ 
+                        backgroundColor: darkMode ? '#374151' : '#f3f4f6', 
+                        color: darkMode ? '#d1d5db' : '#374151',
+                        padding: '6px 12px', 
+                        borderRadius: 16, 
+                        fontSize: '0.85rem', 
+                        fontWeight: 500,
+                        cursor: 'pointer',
+                        transition: 'all 0.2s'
+                      }}
+                      onMouseEnter={(e) => e.target.style.backgroundColor = darkMode ? '#4b5563' : '#e5e7eb'}
+                      onMouseLeave={(e) => e.target.style.backgroundColor = darkMode ? '#374151' : '#f3f4f6'}
+                      >
+                        Performance
+                      </div>
+                      <div style={{ 
+                        backgroundColor: darkMode ? '#374151' : '#f3f4f6', 
+                        color: darkMode ? '#d1d5db' : '#374151',
+                        padding: '6px 12px', 
+                        borderRadius: 16, 
+                        fontSize: '0.85rem', 
+                        fontWeight: 500,
+                        cursor: 'pointer',
+                        transition: 'all 0.2s'
+                      }}
+                      onMouseEnter={(e) => e.target.style.backgroundColor = darkMode ? '#4b5563' : '#e5e7eb'}
+                      onMouseLeave={(e) => e.target.style.backgroundColor = darkMode ? '#374151' : '#f3f4f6'}
+                      >
+                        Architecture
+                      </div>
+                      <div style={{ 
+                        backgroundColor: darkMode ? '#374151' : '#f3f4f6', 
+                        color: darkMode ? '#d1d5db' : '#374151',
+                        padding: '6px 12px', 
+                        borderRadius: 16, 
+                        fontSize: '0.85rem', 
+                        fontWeight: 500,
+                        cursor: 'pointer',
+                        transition: 'all 0.2s'
+                      }}
+                      onMouseEnter={(e) => e.target.style.backgroundColor = darkMode ? '#4b5563' : '#e5e7eb'}
+                      onMouseLeave={(e) => e.target.style.backgroundColor = darkMode ? '#374151' : '#f3f4f6'}
+                      >
+                        Mentorship
+                      </div>
+                    </div>
                 </div>
                   <div style={{ 
                     opacity: profileAnimated.contact ? 1 : 0,
@@ -957,72 +1330,7 @@ function SearchResults({ darkMode, isSidebarCollapsed, onSignUpClick, user, isAu
         }
         style={{ position: 'fixed', left: 80, right: 0, bottom: 40, display: 'flex', justifyContent: 'center', zIndex: 100 }}
       >
-        <div className="input-box" style={{ minWidth: 300, maxWidth: 700, width: '100%', margin: 0, padding: 0, boxShadow: '0 2px 8px var(--input-box-shadow)', border: '1.5px solid var(--input-border)', borderRadius: 14, background: 'var(--input-bg)', display: 'flex', flexDirection: 'column', gap: 0, minHeight: selectedFiles.length > 0 ? 120 : 38, paddingTop: selectedFiles.length > 0 ? 18 : 0 }}>
-          {/* File preview inside follow-up search bar, above textarea */}
-          {selectedFiles.length > 0 && (
-            <div style={{
-              display: 'flex',
-              flexDirection: 'row',
-              alignItems: 'center',
-              gap: 12,
-              margin: '0 0 10px 0',
-              padding: '8px 16px 8px 8px',
-              background: '#f8f8f8',
-              borderRadius: 14,
-              boxShadow: '0 1px 4px var(--file-box-shadow)',
-              maxWidth: 300,
-              minWidth: 220,
-              position: 'relative',
-            }}>
-              <div style={{
-                width: 38,
-                height: 38,
-                background: 'var(--file-bg)',
-                borderRadius: 10,
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                marginRight: 8,
-              }}>
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none"><rect x="5" y="3" width="14" height="18" rx="3" fill="#2196f3"/><path d="M7 7h10M7 11h10M7 15h6" stroke="#fff" strokeWidth="1.5" strokeLinecap="round"/></svg>
-              </div>
-              <div style={{ flex: 1, minWidth: 0 }}>
-                <div style={{ fontWeight: 500, fontSize: '1.05rem', color: 'var(--text)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', maxWidth: 120 }}>{selectedFiles[0].name}</div>
-                <div style={{ color: 'var(--file-label)', fontSize: '0.95rem', marginTop: 2 }}>File</div>
-              </div>
-              <button
-                onClick={() => handleRemoveFile(0)}
-                style={{
-                  background: 'none',
-                  border: 'none',
-                  borderRadius: '50%',
-                  width: 24,
-                  height: 24,
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  cursor: 'pointer',
-                  position: 'absolute',
-                  top: 6,
-                  right: 6,
-                  fontSize: 16,
-                  color: 'var(--text)',
-                  zIndex: 2,
-                }}
-                title="Remove file"
-              >
-                <svg width="16" height="16" viewBox="0 0 20 20" fill="none"><path d="M6 6l8 8M14 6l-8 8" stroke="var(--text)" strokeWidth="2.2" strokeLinecap="round"/></svg>
-              </button>
-            </div>
-          )}
-          {/* Hidden file input */}
-          <input
-            type="file"
-            ref={fileInputRef}
-            style={{ display: 'none' }}
-            onChange={handleFileChange}
-            multiple
-          />
+        <div className="input-box" style={{ minWidth: 300, maxWidth: 700, width: '100%', margin: 0, padding: 0, boxShadow: '0 2px 8px var(--input-box-shadow)', border: '1.5px solid var(--input-border)', borderRadius: 14, background: 'var(--input-bg)', display: 'flex', flexDirection: 'column', gap: 0, minHeight: 38 }}>
           <textarea
             ref={followupRef}
             className="search-input"
@@ -1050,21 +1358,7 @@ function SearchResults({ darkMode, isSidebarCollapsed, onSignUpClick, user, isAu
             rows="1"
           />
           <div style={{ display: 'flex', alignItems: 'center', marginTop: 0, paddingTop: 4, marginBottom: 10 }}>
-            <button className="input-action-btn" title="Add" style={{ marginLeft: 12, background: '#f3f3f3', color: '#222' }} onClick={handleFileInputClick}>
-              <span style={{fontWeight: 400, fontSize: '1.05rem', color: '#222'}}>+</span>
-            </button>
-            <button 
-              className={`input-action-btn ${isMicActive ? 'mic-button-active' : ''}`} 
-              title="Mic"
-              onClick={handleFollowupMicClick}
-              style={{ marginLeft: 12, background: isMicActive ? '#fff' : '#f3f3f3', color: isMicActive ? '#fff' : '#222', border: '1px solid #e0e0e0' }}
-            >
-              <svg width="18" height="18" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <rect x="7" y="4" width="6" height="10" rx="3" fill={isMicActive ? '#fff' : '#222'}/>
-                <rect x="9" y="15" width="2" height="3" rx="1" fill={isMicActive ? '#fff' : '#222'}/>
-                <path d="M5 10V11C5 14 9 14 9 14H11C11 14 15 14 15 11V10" stroke={isMicActive ? '#fff' : '#222'} strokeWidth="1.2" strokeLinecap="round"/>
-              </svg>
-            </button>
+            <NetworkDot enabled={networkOnly} onToggle={setNetworkOnly} />
             <div style={{ flex: 1 }} />
             <button 
               className={`input-action-btn ${followupValue.trim() ? 'input-action-btn-active' : ''}`} 

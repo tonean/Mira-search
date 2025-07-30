@@ -2,6 +2,37 @@ import React, { useEffect, useRef, useState } from "react";
 import "./App.css";
 import { useNavigate } from 'react-router-dom';
 
+// Network Dot Component
+function NetworkDot({ enabled = false, onToggle }) {
+  return (
+    <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginLeft: 8 }}>
+      <button
+        onClick={() => onToggle(!enabled)}
+        style={{
+          width: 12,
+          height: 12,
+          borderRadius: '50%',
+          background: enabled ? '#4CAF50' : '#f44336',
+          border: 'none',
+          cursor: 'pointer',
+          boxShadow: enabled ? '0 0 8px rgba(76, 175, 80, 0.6)' : '0 0 8px rgba(244, 67, 54, 0.6)',
+          transition: 'background 0.2s ease',
+        }}
+        title={enabled ? "Network only (enabled)" : "Network only (disabled)"}
+      />
+      <span style={{ 
+        color: '#999', 
+        fontSize: '0.85rem',
+        fontWeight: 400,
+        letterSpacing: 0.05,
+        fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif'
+      }}>
+        Network only
+      </span>
+    </div>
+  );
+}
+
 // Typing animation component
 const greetings = [
   "Hello,",
@@ -166,18 +197,15 @@ export default function MainContent({ darkMode }) {
   const [showGlow, setShowGlow] = useState(false);
   const [fadeGlow, setFadeGlow] = useState(false);
   const [inputValue, setInputValue] = useState("");
-  const [isMicActive, setIsMicActive] = useState(false);
   const [isModelDropdownOpen, setIsModelDropdownOpen] = useState(false);
   const [hasUserTyped, setHasUserTyped] = useState(false);
   const [showRecommendations, setShowRecommendations] = useState(false);
+  const [networkOnly, setNetworkOnly] = useState(false);
   const typingTimeout = useRef();
   const fadeTimeout = useRef();
   const dropdownRef = useRef();
   const navigate = useNavigate();
-  // Add file input ref for main search bar
-  const fileInputRef = useRef();
-  // State for selected files
-  const [selectedFiles, setSelectedFiles] = useState([]);
+
   const suggestionRef = useRef();
   
   const categorySuggestions = {
@@ -290,9 +318,7 @@ export default function MainContent({ darkMode }) {
     }, 1200);
   };
 
-  const handleMicClick = () => {
-    setIsMicActive(!isMicActive);
-  };
+
 
   const handleModelDropdownToggle = () => {
     setIsModelDropdownOpen(!isModelDropdownOpen);
@@ -333,22 +359,7 @@ export default function MainContent({ darkMode }) {
     }
   };
 
-  // File input handler for main search bar
-  const handleFileInputClick = () => {
-    if (fileInputRef.current) {
-      fileInputRef.current.value = null; // reset so same file can be picked again
-      fileInputRef.current.click();
-    }
-  };
-  const handleFileChange = (e) => {
-    const files = Array.from(e.target.files);
-    if (files && files.length > 0) {
-      setSelectedFiles(files);
-    }
-  };
-  const handleRemoveFile = (index) => {
-    setSelectedFiles(prev => prev.filter((_, i) => i !== index));
-  };
+
 
   return (
     <div className="main-content-center" style={{ justifyContent: 'flex-start', marginTop: '48px' }}>
@@ -358,72 +369,7 @@ export default function MainContent({ darkMode }) {
           <span style={{ fontWeight: 400, color: "var(--text-muted)" }}>Who are you looking for today?</span>
         </div>
         <div className={showGlow ? `input-box-effect input-box-effect-glow${fadeGlow ? ' hide' : ''}` : undefined}>
-          <div className="input-box" onClick={() => document.querySelector('.search-input').focus()} style={{ minWidth: "300px", width: "auto", minHeight: selectedFiles.length > 0 ? 120 : undefined, paddingTop: selectedFiles.length > 0 ? 18 : undefined, background: 'var(--input-bg)', border: '1.5px solid var(--input-border)', boxShadow: '0 2px 8px var(--input-box-shadow)' }}>
-            {/* File preview inside search bar, above textarea */}
-            {selectedFiles.length > 0 && (
-              <div style={{
-                display: 'flex',
-                flexDirection: 'row',
-                alignItems: 'center',
-                gap: 12,
-                margin: '0 0 10px 0',
-                padding: '8px 16px 8px 8px',
-                background: darkMode ? 'var(--file-bg)' : '#f8f8f8',
-                borderRadius: 14,
-                boxShadow: '0 1px 4px var(--file-box-shadow)',
-                maxWidth: 300,
-                minWidth: 220,
-                position: 'relative',
-              }}>
-                <div style={{
-                  width: 38,
-                  height: 38,
-                  background: 'var(--file-bg)',
-                  borderRadius: 10,
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  marginRight: 8,
-                }}>
-                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none"><rect x="5" y="3" width="14" height="18" rx="3" fill="#2196f3"/><path d="M7 7h10M7 11h10M7 15h6" stroke="#fff" strokeWidth="1.5" strokeLinecap="round"/></svg>
-                </div>
-                <div style={{ flex: 1, minWidth: 0 }}>
-                  <div style={{ fontWeight: 500, fontSize: '1.05rem', color: 'var(--text)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', maxWidth: 120 }}>{selectedFiles[0].name}</div>
-                  <div style={{ color: 'var(--file-label)', fontSize: '0.95rem', marginTop: 2 }}>File</div>
-                </div>
-                <button
-                  onClick={() => handleRemoveFile(0)}
-                  style={{
-                    background: 'none',
-                    border: 'none',
-                    borderRadius: '50%',
-                    width: 24,
-                    height: 24,
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    cursor: 'pointer',
-                    position: 'absolute',
-                    top: 6,
-                    right: 6,
-                    fontSize: 16,
-                    color: 'var(--text)',
-                    zIndex: 2,
-                  }}
-                  title="Remove file"
-                >
-                  <svg width="16" height="16" viewBox="0 0 20 20" fill="none"><path d="M6 6l8 8M14 6l-8 8" stroke="var(--text)" strokeWidth="2.2" strokeLinecap="round"/></svg>
-                </button>
-              </div>
-            )}
-            {/* Hidden file input for main search bar */}
-            <input
-              type="file"
-              ref={fileInputRef}
-              style={{ display: 'none' }}
-              onChange={handleFileChange}
-              multiple
-            />
+          <div className="input-box" onClick={() => document.querySelector('.search-input').focus()} style={{ minWidth: "300px", width: "auto", background: 'var(--input-bg)', border: '1.5px solid var(--input-border)', boxShadow: '0 2px 8px var(--input-box-shadow)' }}>
             <textarea
               className="search-input"
               placeholder="Describe who you're looking for..."
@@ -445,20 +391,7 @@ export default function MainContent({ darkMode }) {
               rows="1"
             />
             <div style={{ display: "flex", alignItems: "center", marginTop: 0, paddingTop: 12, marginBottom: -16 }}>
-              <button className="input-action-btn" title="Add" onClick={handleFileInputClick}>
-                <span style={{fontWeight: 400, fontSize: '1.05rem', color: '#888'}}>+</span>
-              </button>
-              <button 
-                className={`input-action-btn ${isMicActive ? 'mic-button-active' : ''}`} 
-                title="Mic"
-                onClick={handleMicClick}
-              >
-                <svg width="18" height="18" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
-                  <rect x="7" y="4" width="6" height="10" rx="3" fill={isMicActive ? "#fff" : "#888"}/>
-                  <rect x="9" y="15" width="2" height="3" rx="1" fill={isMicActive ? "#fff" : "#888"}/>
-                  <path d="M5 10V11C5 14 9 14 9 14H11C11 14 15 14 15 11V10" stroke={isMicActive ? "#fff" : "#888"} strokeWidth="1.2" strokeLinecap="round"/>
-                </svg>
-              </button>
+              <NetworkDot enabled={networkOnly} onToggle={setNetworkOnly} />
               <div style={{ flex: 1 }} />
               <div ref={dropdownRef}>
                 <ModelDropdown 
