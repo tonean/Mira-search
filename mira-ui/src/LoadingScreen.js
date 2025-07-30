@@ -224,7 +224,7 @@ const LoadingScreen = ({ onOpenMira }) => {
               key={gradientKey}
               className={`gradient-text ${gradientActive ? 'active' : ''} ${gradientPaused ? 'paused' : ''}`}
             >
-              Find your peeps
+              Find your internet peeps
             </span>
           </div>
         </div>
