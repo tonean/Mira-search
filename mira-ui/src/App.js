@@ -1528,7 +1528,27 @@ function App() {
   }, []);
 
   if (showLoadingScreen) {
-    return <LoadingScreen onOpenMira={handleOpenMira} />;
+    return (
+      <Router>
+        <Routes>
+          <Route path="/" element={<LoadingScreen onOpenMira={handleOpenMira} />} />
+          <Route path="/app/*" element={<AppWithRouter
+            isSidebarCollapsed={isSidebarCollapsed}
+            onToggleSidebar={handleToggleSidebar}
+            showSignIn={showSignIn}
+            setShowSignIn={setShowSignIn}
+            darkMode={darkMode}
+            toggleDarkMode={toggleDarkMode}
+            chatHistory={chatHistory}
+            onAddChat={handleAddChat}
+            onDeleteChat={handleDeleteChat}
+            setChatHistory={setChatHistory}
+            clearChatHistory={clearChatHistory}
+            restoreChatHistory={restoreChatHistory}
+          />} />
+        </Routes>
+      </Router>
+    );
   }
 
   return (
