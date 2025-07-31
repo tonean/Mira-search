@@ -3,9 +3,39 @@ import "./App.css";
 import { useNavigate } from 'react-router-dom';
 
 // Network Dot Component
-function NetworkDot({ enabled = false, onToggle }) {
+function NetworkDot({ enabled = false, onToggle, darkMode = false }) {
+  const [showTooltip, setShowTooltip] = useState(false);
+  const [tooltipPosition, setTooltipPosition] = useState({ x: 0, y: 0 });
+  const containerRef = useRef(null);
+
+  const handleMouseEnter = (e) => {
+    if (containerRef.current) {
+      const rect = containerRef.current.getBoundingClientRect();
+      setTooltipPosition({
+        x: rect.left + rect.width / 2,
+        y: rect.bottom + 8
+      });
+    }
+    setShowTooltip(true);
+  };
+
+  const handleMouseLeave = () => {
+    setShowTooltip(false);
+  };
+
   return (
-    <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginLeft: 8 }}>
+    <div 
+      ref={containerRef}
+      style={{ 
+        display: 'flex', 
+        alignItems: 'center', 
+        gap: 6, 
+        marginLeft: 8,
+        position: 'relative'
+      }}
+      onMouseEnter={handleMouseEnter}
+      onMouseLeave={handleMouseLeave}
+    >
       <button
         onClick={() => onToggle(!enabled)}
         style={{
@@ -18,7 +48,6 @@ function NetworkDot({ enabled = false, onToggle }) {
           boxShadow: enabled ? '0 0 8px rgba(76, 175, 80, 0.6)' : '0 0 8px rgba(244, 67, 54, 0.6)',
           transition: 'background 0.2s ease',
         }}
-        title={enabled ? "Network only (enabled)" : "Network only (disabled)"}
       />
       <span style={{ 
         color: '#999', 
@@ -29,6 +58,35 @@ function NetworkDot({ enabled = false, onToggle }) {
       }}>
         Network only
       </span>
+      
+      {/* Tooltip */}
+      {showTooltip && (
+        <div
+          style={{
+            position: 'fixed',
+            left: tooltipPosition.x,
+            top: tooltipPosition.y,
+            transform: 'translateX(-50%)',
+            backgroundColor: darkMode ? '#2a2a2a' : '#fff',
+            color: darkMode ? '#f5f5f5' : '#222',
+            padding: '8px 12px',
+            borderRadius: '6px',
+            fontSize: '0.8rem',
+            fontWeight: 400,
+            boxShadow: darkMode 
+              ? '0 4px 12px rgba(0, 0, 0, 0.4), 0 0 0 1px #444' 
+              : '0 4px 12px rgba(0, 0, 0, 0.15), 0 0 0 1px #e0e0e0',
+            border: `1px solid ${darkMode ? '#444' : '#e0e0e0'}`,
+            zIndex: 10000,
+            whiteSpace: 'nowrap',
+            fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif',
+            pointerEvents: 'none',
+            animation: 'fadeIn 0.2s ease-out'
+          }}
+        >
+          Click to search only within your network
+        </div>
+      )}
     </div>
   );
 }
@@ -391,7 +449,7 @@ export default function MainContent({ darkMode }) {
               rows="1"
             />
             <div style={{ display: "flex", alignItems: "center", marginTop: 0, paddingTop: 12, marginBottom: -16 }}>
-              <NetworkDot enabled={networkOnly} onToggle={setNetworkOnly} />
+              <NetworkDot enabled={networkOnly} onToggle={setNetworkOnly} darkMode={darkMode} />
               <div style={{ flex: 1 }} />
               <div ref={dropdownRef}>
                 <ModelDropdown 

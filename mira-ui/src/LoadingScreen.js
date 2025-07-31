@@ -21,6 +21,7 @@ const LoadingScreen = ({ onOpenMira }) => {
   const [integrationCardsVisible, setIntegrationCardsVisible] = useState(false);
   const [quoteVisible, setQuoteVisible] = useState(false);
   const [currentPage, setCurrentPage] = useState('home');
+  const [shakeLaunchTeam, setShakeLaunchTeam] = useState(false);
 
   const handleOpenMira = () => {
     if (onOpenMira) {
@@ -33,6 +34,22 @@ const LoadingScreen = ({ onOpenMira }) => {
   const handlePageChange = (page) => {
     setCurrentPage(page);
   };
+
+  // Shake animation for launch team text
+  useEffect(() => {
+    const startShakeAnimation = () => {
+      setShakeLaunchTeam(true);
+      setTimeout(() => setShakeLaunchTeam(false), 500);
+    };
+
+    // Start shaking immediately when component mounts
+    startShakeAnimation();
+
+    // Set up interval to shake every 4 seconds
+    const shakeInterval = setInterval(startShakeAnimation, 4000);
+
+    return () => clearInterval(shakeInterval);
+  }, []);
 
   // Intersection Observer for scroll-triggered animations
   useEffect(() => {
@@ -193,6 +210,20 @@ const LoadingScreen = ({ onOpenMira }) => {
 
   return (
     <div className="loading-screen">
+      {/* Add CSS for shake animation */}
+      <style>
+        {`
+          @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            10%, 30%, 50%, 70%, 90% { transform: translateX(-4px); }
+            20%, 40%, 60%, 80% { transform: translateX(4px); }
+          }
+          .shake-animation {
+            animation: shake 0.5s ease-in-out;
+          }
+        `}
+      </style>
+      
       {/* Navigation Bar */}
       <nav className={`nav-bar ${showNavBar ? 'fade-in' : ''}`} style={{ justifyContent: 'center' }}>
         <div className="nav-links" style={{ justifyContent: 'center', width: '100%', display: 'flex' }}>
@@ -239,7 +270,7 @@ const LoadingScreen = ({ onOpenMira }) => {
               Open Mira
             </button>
           </div>
-          <div className={`launch-team-text ${showButton ? 'fade-in' : ''}`} onClick={() => handlePageChange('mission')} style={{ cursor: 'pointer' }}>
+          <div className={`launch-team-text ${showButton ? 'fade-in' : ''} ${shakeLaunchTeam ? 'shake-animation' : ''}`} onClick={() => handlePageChange('mission')} style={{ cursor: 'pointer' }}>
             For Jason Calacanis and the Launch Team →
           </div>
         </div>
