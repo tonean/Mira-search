@@ -140,6 +140,7 @@ function SearchResults({ darkMode, isSidebarCollapsed, onSignUpClick, user, isAu
     workExperience: false,
     contact: false
   });
+  const [showMoreTimeline, setShowMoreTimeline] = useState(false);
   const [connectButtonRef, setConnectButtonRef] = useState(null);
   const [dropdownPosition, setDropdownPosition] = useState({ top: 0, right: 0 });
   const [hoveredPattern, setHoveredPattern] = useState(null);
@@ -750,13 +751,6 @@ function SearchResults({ darkMode, isSidebarCollapsed, onSignUpClick, user, isAu
                       <button 
                         ref={setConnectButtonRef}
                         onClick={(e) => {
-                          if (!showConnectDropdown) {
-                            const rect = e.target.getBoundingClientRect();
-                            setDropdownPosition({
-                              top: rect.bottom + 8,
-                              right: window.innerWidth - rect.right
-                            });
-                          }
                           setShowConnectDropdown(!showConnectDropdown);
                         }}
                         style={{
@@ -764,7 +758,7 @@ function SearchResults({ darkMode, isSidebarCollapsed, onSignUpClick, user, isAu
                           alignItems: 'center',
                           gap: 8,
                           padding: '8px 16px',
-                          backgroundColor: '#fff',
+                          backgroundColor: 'transparent',
                           border: '1px solid #e0e0e0',
                           borderRadius: 20,
                           fontSize: '0.9rem',
@@ -772,15 +766,14 @@ function SearchResults({ darkMode, isSidebarCollapsed, onSignUpClick, user, isAu
                           color: '#333',
                           cursor: 'pointer',
                           fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif',
-                          transition: 'all 0.2s ease',
-                          boxShadow: '0 1px 3px rgba(0,0,0,0.1)'
+                          transition: 'all 0.2s ease'
                         }}
                         onMouseEnter={(e) => {
                           e.target.style.backgroundColor = '#f0f0f0';
                           e.target.style.transform = 'translateY(-1px)';
                         }}
                         onMouseLeave={(e) => {
-                          e.target.style.backgroundColor = '#fff';
+                          e.target.style.backgroundColor = 'transparent';
                           e.target.style.transform = 'translateY(0)';
                         }}
                       >
@@ -802,176 +795,19 @@ function SearchResults({ darkMode, isSidebarCollapsed, onSignUpClick, user, isAu
                           border: '1px solid #e0e0e0',
                           borderRadius: 12,
                           boxShadow: '0 4px 20px rgba(0,0,0,0.15)',
-                          padding: '8px 0',
+                          padding: '12px 16px',
                           minWidth: 200,
                           zIndex: 9999,
                           isolation: 'isolate'
                         }}>
-                          <div style={{ padding: '8px 16px', fontSize: '0.85rem', fontWeight: 500, color: '#666', fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif' }}>
-                            Connect via:
+                          <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="#1da1f2">
+                              <path d="M23 3a10.9 10.9 0 0 1-3.14 1.53 4.48 4.48 0 0 0-7.86 3v1A10.66 10.66 0 0 1 3 4s-4 9 5 13a11.64 11.64 0 0 1-7 2c9 5 20 0 20-11.5a4.5 4.5 0 0 0-.08-.83A7.72 7.72 0 0 0 23 3z"/>
+                            </svg>
+                            <span style={{ fontSize: '0.9rem', color: '#1da1f2', fontWeight: 500, fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif' }}>
+                              @vinoth_ragunathan
+                            </span>
                           </div>
-                          
-                          {/* Website */}
-                          <a href="#" style={{
-                            display: 'flex',
-                            alignItems: 'center',
-                            gap: 12,
-                            padding: '10px 16px',
-                            textDecoration: 'none',
-                            color: '#333',
-                            fontSize: '0.9rem',
-                            fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif',
-                            transition: 'background-color 0.2s'
-                          }}
-                          onMouseEnter={(e) => e.target.style.backgroundColor = '#f8f9fa'}
-                          onMouseLeave={(e) => e.target.style.backgroundColor = 'transparent'}
-                          >
-                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
-                              <circle cx="12" cy="12" r="10" stroke="#666" strokeWidth="1.5"/>
-                              <path d="M8 12h8M12 8c2.5 0 4 1.5 4 4s-1.5 4-4 4M12 16c-2.5 0-4-1.5-4-4s1.5-4 4-4" stroke="#666" strokeWidth="1.5"/>
-                            </svg>
-                            vinothragunathan.com
-                          </a>
-                          
-                          {/* LinkedIn */}
-                          <a href="#" style={{
-                            display: 'flex',
-                            alignItems: 'center',
-                            gap: 12,
-                            padding: '10px 16px',
-                            textDecoration: 'none',
-                            color: '#333',
-                            fontSize: '0.9rem',
-                            fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif',
-                            transition: 'background-color 0.2s'
-                          }}
-                          onMouseEnter={(e) => e.target.style.backgroundColor = '#f8f9fa'}
-                          onMouseLeave={(e) => e.target.style.backgroundColor = 'transparent'}
-                          >
-                            <svg width="16" height="16" viewBox="0 0 24 24" fill="#0077B5">
-                              <path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a2.062 2.062 0 01-2.063-2.065 2.064 2.064 0 112.063 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/>
-                            </svg>
-                            LinkedIn
-                          </a>
-                          
-                          {/* Twitter */}
-                          <a href="#" style={{
-                            display: 'flex',
-                            alignItems: 'center',
-                            gap: 12,
-                            padding: '10px 16px',
-                            textDecoration: 'none',
-                            color: '#333',
-                            fontSize: '0.9rem',
-                            fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif',
-                            transition: 'background-color 0.2s'
-                          }}
-                          onMouseEnter={(e) => e.target.style.backgroundColor = '#f8f9fa'}
-                          onMouseLeave={(e) => e.target.style.backgroundColor = 'transparent'}
-                          >
-                            <svg width="16" height="16" viewBox="0 0 24 24" fill="#000">
-                              <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
-                            </svg>
-                            Twitter
-                          </a>
-                          
-                          {/* AngelList */}
-                          <a href="#" style={{
-                            display: 'flex',
-                            alignItems: 'center',
-                            gap: 12,
-                            padding: '10px 16px',
-                            textDecoration: 'none',
-                            color: '#333',
-                            fontSize: '0.9rem',
-                            fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif',
-                            transition: 'background-color 0.2s'
-                          }}
-                          onMouseEnter={(e) => e.target.style.backgroundColor = '#f8f9fa'}
-                          onMouseLeave={(e) => e.target.style.backgroundColor = 'transparent'}
-                          >
-                            <svg width="16" height="16" viewBox="0 0 24 24" fill="#000">
-                              <path d="M8.5 21L12 3l3.5 18L12 18z"/>
-                              <circle cx="6" cy="8" r="2" fill="#000"/>
-                              <circle cx="18" cy="8" r="2" fill="#000"/>
-                            </svg>
-                            AngelList
-                          </a>
-                          
-                          {/* Crunchbase */}
-                          <a href="#" style={{
-                            display: 'flex',
-                            alignItems: 'center',
-                            gap: 12,
-                            padding: '10px 16px',
-                            textDecoration: 'none',
-                            color: '#333',
-                            fontSize: '0.9rem',
-                            fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif',
-                            transition: 'background-color 0.2s'
-                          }}
-                          onMouseEnter={(e) => e.target.style.backgroundColor = '#f8f9fa'}
-                          onMouseLeave={(e) => e.target.style.backgroundColor = 'transparent'}
-                          >
-                            <div style={{
-                              width: 16,
-                              height: 16,
-                              backgroundColor: '#0288d1',
-                              borderRadius: 2,
-                              display: 'flex',
-                              alignItems: 'center',
-                              justifyContent: 'center',
-                              fontSize: '10px',
-                              fontWeight: 'bold',
-                              color: '#fff'
-                            }}>
-                              cb
-                            </div>
-                            Crunchbase
-                          </a>
-                          
-                          {/* Medium */}
-                          <a href="#" style={{
-                            display: 'flex',
-                            alignItems: 'center',
-                            gap: 12,
-                            padding: '10px 16px',
-                            textDecoration: 'none',
-                            color: '#333',
-                            fontSize: '0.9rem',
-                            fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif',
-                            transition: 'background-color 0.2s'
-                          }}
-                          onMouseEnter={(e) => e.target.style.backgroundColor = '#f8f9fa'}
-                          onMouseLeave={(e) => e.target.style.backgroundColor = 'transparent'}
-                          >
-                            <svg width="16" height="16" viewBox="0 0 24 24" fill="#000">
-                              <circle cx="7" cy="12" r="5"/>
-                              <circle cx="18" cy="12" r="3"/>
-                            </svg>
-                            Medium
-                          </a>
-                          
-                          {/* Substack */}
-                          <a href="#" style={{
-                            display: 'flex',
-                            alignItems: 'center',
-                            gap: 12,
-                            padding: '10px 16px',
-                            textDecoration: 'none',
-                            color: '#333',
-                            fontSize: '0.9rem',
-                            fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif',
-                            transition: 'background-color 0.2s'
-                          }}
-                          onMouseEnter={(e) => e.target.style.backgroundColor = '#f8f9fa'}
-                          onMouseLeave={(e) => e.target.style.backgroundColor = 'transparent'}
-                          >
-                            <svg width="16" height="16" viewBox="0 0 24 24" fill="#FF6719">
-                              <path d="M22.539 8.242H1.46V5.406h21.08v2.836zM1.46 10.812V24L12 18.11 22.54 24V10.812H1.46zM22.54 0H1.46v2.836h21.08V0z"/>
-                            </svg>
-                            Substack
-                          </a>
                         </div>
                       )}
                     </div>
@@ -1051,13 +887,10 @@ function SearchResults({ darkMode, isSidebarCollapsed, onSignUpClick, user, isAu
                                         <div style={{ fontWeight: 500, fontSize: '1.1rem', marginBottom: 16, marginTop: 24, fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif', letterSpacing: '-0.01em', color: darkMode ? '#fff' : '#111' }}>Why we think you're a good match</div>
                     <div style={{ marginBottom: 28 }}>
                       <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 12 }}>
-                        <div style={{ width: 20, height: 20, borderRadius: '50%', backgroundColor: '#10b981', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                          <svg width="12" height="12" viewBox="0 0 24 24" fill="#fff">
-                            <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                          </svg>
-                    </div>
-                                                <span 
-                          style={{ fontSize: '0.9rem', color: darkMode ? '#d1d5db' : '#333', fontWeight: 500, fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif', cursor: 'pointer' }}
+                        <div style={{ width: 8, height: 8, borderRadius: '50%', backgroundColor: '#000', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                        </div>
+                        <span 
+                          style={{ fontSize: '0.9rem', color: darkMode ? '#9ca3af' : '#666', fontWeight: 500, fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif', cursor: 'pointer' }}
                           onMouseEnter={(e) => {
                             setHoveredPattern('opensource');
                             setTooltipPosition({ x: 350, y: 300 });
@@ -1080,13 +913,10 @@ function SearchResults({ darkMode, isSidebarCollapsed, onSignUpClick, user, isAu
                         </svg>
                       </div>
                       <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 12 }}>
-                        <div style={{ width: 20, height: 20, borderRadius: '50%', backgroundColor: '#10b981', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                          <svg width="12" height="12" viewBox="0 0 24 24" fill="#fff">
-                            <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                          </svg>
+                        <div style={{ width: 8, height: 8, borderRadius: '50%', backgroundColor: '#000', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                         </div>
                         <span 
-                          style={{ fontSize: '0.9rem', color: darkMode ? '#d1d5db' : '#333', fontWeight: 500, fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif', cursor: 'pointer' }}
+                          style={{ fontSize: '0.9rem', color: darkMode ? '#9ca3af' : '#666', fontWeight: 500, fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif', cursor: 'pointer' }}
                           onMouseEnter={(e) => {
                             setHoveredPattern('react');
                             setTooltipPosition({ x: 350, y: 300 });
@@ -1109,13 +939,10 @@ function SearchResults({ darkMode, isSidebarCollapsed, onSignUpClick, user, isAu
                         </svg>
                       </div>
                       <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 12 }}>
-                        <div style={{ width: 20, height: 20, borderRadius: '50%', backgroundColor: '#10b981', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                          <svg width="12" height="12" viewBox="0 0 24 24" fill="#fff">
-                            <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                          </svg>
+                        <div style={{ width: 8, height: 8, borderRadius: '50%', backgroundColor: '#000', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                         </div>
                         <span 
-                          style={{ fontSize: '0.9rem', color: darkMode ? '#d1d5db' : '#333', fontWeight: 500, fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif', cursor: 'pointer' }}
+                          style={{ fontSize: '0.9rem', color: darkMode ? '#9ca3af' : '#666', fontWeight: 500, fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif', cursor: 'pointer' }}
                           onMouseEnter={(e) => {
                             setHoveredPattern('community');
                             setTooltipPosition({ x: 350, y: 300 });
@@ -1138,13 +965,10 @@ function SearchResults({ darkMode, isSidebarCollapsed, onSignUpClick, user, isAu
                         </svg>
                       </div>
                       <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 12 }}>
-                        <div style={{ width: 20, height: 20, borderRadius: '50%', backgroundColor: '#10b981', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                          <svg width="12" height="12" viewBox="0 0 24 24" fill="#fff">
-                            <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                          </svg>
+                        <div style={{ width: 8, height: 8, borderRadius: '50%', backgroundColor: '#000', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                         </div>
                         <span 
-                          style={{ fontSize: '0.9rem', color: darkMode ? '#d1d5db' : '#333', fontWeight: 500, fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif', cursor: 'pointer' }}
+                          style={{ fontSize: '0.9rem', color: darkMode ? '#9ca3af' : '#666', fontWeight: 500, fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif', cursor: 'pointer' }}
                           onMouseEnter={(e) => {
                             setHoveredPattern('performance');
                             setTooltipPosition({ x: 350, y: 300 });
@@ -1198,9 +1022,9 @@ function SearchResults({ darkMode, isSidebarCollapsed, onSignUpClick, user, isAu
                                          <div style={{ marginBottom: 24 }}>
                        {/* Timeline Item 1 - Tweet */}
                        <div style={{ display: 'flex', alignItems: 'flex-start', gap: 12, marginBottom: 16 }}>
-                         <div style={{ width: 28, height: 28, borderRadius: '50%', backgroundColor: '#1da1f2', display: 'flex', alignItems: 'center', justifyContent: 'center', marginTop: 2 }}>
-                           <svg width="14" height="14" viewBox="0 0 24 24" fill="#fff">
-                             <path d="M23 3a10.9 10.9 0 0 1-3.14 1.53 4.48 4.48 0 0 0-7.86 3v1A10.66 10.66 0 0 1 3 4s-4 9 5 13a11.64 11.64 0 0 1-7 2c9 5 20 0 20-11.5a4.5 4.5 0 0 0-.08-.83A7.72 7.72 0 0 0 23 3z"/>
+                         <div style={{ width: 32, height: 32, borderRadius: '8px', backgroundColor: darkMode ? '#374151' : '#f3f4f6', display: 'flex', alignItems: 'center', justifyContent: 'center', marginTop: 2 }}>
+                           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                             <path d="M23 3a10.9 10.9 0 0 1-3.14 1.53 4.48 4.48 0 0 0-7.86 3v1A10.66 10.66 0 0 1 3 4s-4 9 5 13a11.64 11.64 0 0 1-7 2c9 5 20 0 20-11.5a4.5 4.5 0 0 0-.08-.83A7.72 7.72 0 0 0 23 3z" stroke={darkMode ? '#9ca3af' : '#6b7280'} strokeWidth="1.5" fill="none"/>
                            </svg>
                          </div>
                          <div style={{ flex: 1 }}>
@@ -1215,9 +1039,9 @@ function SearchResults({ darkMode, isSidebarCollapsed, onSignUpClick, user, isAu
                        
                        {/* Timeline Item 2 - Retweet */}
                        <div style={{ display: 'flex', alignItems: 'flex-start', gap: 12, marginBottom: 16 }}>
-                         <div style={{ width: 28, height: 28, borderRadius: '50%', backgroundColor: '#17bf63', display: 'flex', alignItems: 'center', justifyContent: 'center', marginTop: 2 }}>
-                           <svg width="14" height="14" viewBox="0 0 24 24" fill="#fff">
-                             <path d="M23 4v6.67A4 4 0 0 1 17.67 15H15M1 20v-6.67A4 4 0 0 1 6.33 9H9"/>
+                         <div style={{ width: 32, height: 32, borderRadius: '8px', backgroundColor: darkMode ? '#374151' : '#f3f4f6', display: 'flex', alignItems: 'center', justifyContent: 'center', marginTop: 2 }}>
+                           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                             <path d="M23 4v6.67A4 4 0 0 1 17.67 15H15M1 20v-6.67A4 4 0 0 1 6.33 9H9" stroke={darkMode ? '#9ca3af' : '#6b7280'} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
                            </svg>
                          </div>
                          <div style={{ flex: 1 }}>
@@ -1232,9 +1056,9 @@ function SearchResults({ darkMode, isSidebarCollapsed, onSignUpClick, user, isAu
                        
                        {/* Timeline Item 3 - Like */}
                        <div style={{ display: 'flex', alignItems: 'flex-start', gap: 12, marginBottom: 16 }}>
-                         <div style={{ width: 28, height: 28, borderRadius: '50%', backgroundColor: '#e0245e', display: 'flex', alignItems: 'center', justifyContent: 'center', marginTop: 2 }}>
-                           <svg width="14" height="14" viewBox="0 0 24 24" fill="#fff">
-                             <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
+                         <div style={{ width: 32, height: 32, borderRadius: '8px', backgroundColor: darkMode ? '#374151' : '#f3f4f6', display: 'flex', alignItems: 'center', justifyContent: 'center', marginTop: 2 }}>
+                           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                             <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" stroke={darkMode ? '#9ca3af' : '#6b7280'} strokeWidth="1.5" fill="none"/>
                            </svg>
                          </div>
                          <div style={{ flex: 1 }}>
@@ -1248,26 +1072,69 @@ function SearchResults({ darkMode, isSidebarCollapsed, onSignUpClick, user, isAu
                        </div>
                       
                       {/* Show more button */}
-                      <div style={{ 
-                        border: '1px solid #8b5cf6', 
-                        borderRadius: 8, 
-                        padding: '8px 12px', 
-                        display: 'flex', 
-                        alignItems: 'center', 
-                        gap: 8, 
-                        cursor: 'pointer',
-                        transition: 'background-color 0.2s'
-                      }}
-                      onMouseEnter={(e) => e.target.style.backgroundColor = '#f3f4f6'}
-                      onMouseLeave={(e) => e.target.style.backgroundColor = 'transparent'}
+                      <div 
+                        style={{ 
+                          border: '1px solid #8b5cf6', 
+                          borderRadius: 8, 
+                          padding: '8px 12px', 
+                          display: 'flex', 
+                          alignItems: 'center', 
+                          gap: 8, 
+                          cursor: 'pointer',
+                          transition: 'background-color 0.2s'
+                        }}
+                        onMouseEnter={(e) => e.target.style.backgroundColor = '#f3f4f6'}
+                        onMouseLeave={(e) => e.target.style.backgroundColor = 'transparent'}
+                        onClick={() => setShowMoreTimeline(!showMoreTimeline)}
                       >
                         <div style={{ width: 16, height: 16, borderRadius: '50%', backgroundColor: '#8b5cf6', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                          <svg width="8" height="8" viewBox="0 0 24 24" fill="#fff">
+                          <svg width="8" height="8" viewBox="0 0 24 24" fill="#fff" style={{ transform: showMoreTimeline ? 'rotate(180deg)' : 'rotate(0deg)', transition: 'transform 0.2s' }}>
                             <path d="M7 14l5-5 5 5"/>
                           </svg>
                         </div>
-                        <span style={{ fontSize: '0.85rem', color: '#8b5cf6', fontWeight: 500 }}>2 more interactions</span>
+                        <span style={{ fontSize: '0.85rem', color: '#8b5cf6', fontWeight: 500 }}>
+                          {showMoreTimeline ? 'Show less' : '2 more interactions'}
+                        </span>
                       </div>
+
+                      {/* Additional timeline items */}
+                      {showMoreTimeline && (
+                        <>
+                          {/* Timeline Item 4 - Comment */}
+                          <div style={{ display: 'flex', alignItems: 'flex-start', gap: 12, marginBottom: 16, marginTop: 16 }}>
+                            <div style={{ width: 32, height: 32, borderRadius: '8px', backgroundColor: darkMode ? '#374151' : '#f3f4f6', display: 'flex', alignItems: 'center', justifyContent: 'center', marginTop: 2 }}>
+                              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" stroke={darkMode ? '#9ca3af' : '#6b7280'} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                              </svg>
+                            </div>
+                            <div style={{ flex: 1 }}>
+                              <div style={{ fontSize: '0.9rem', color: darkMode ? '#d1d5db' : '#333', marginBottom: 4, fontWeight: 500 }}>Vinoth commented on @ReactTeam</div>
+                              <div style={{ fontSize: '0.85rem', color: darkMode ? '#9ca3af' : '#666' }}>"This is exactly what the React ecosystem needed. The performance improvements are game-changing for large applications. Great work team! 🎉"</div>
+                              <div style={{ fontSize: '0.8rem', color: darkMode ? '#6b7280' : '#888', marginTop: 4 }}>1 week ago</div>
+                            </div>
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" style={{ marginTop: 2 }}>
+                              <path d="M10 6L8.59 7.41L13.17 12l-4.58 4.59L10 18l6-6z" stroke="#9ca3af" strokeWidth="1.5"/>
+                            </svg>
+                          </div>
+
+                          {/* Timeline Item 5 - Share */}
+                          <div style={{ display: 'flex', alignItems: 'flex-start', gap: 12, marginBottom: 16 }}>
+                            <div style={{ width: 32, height: 32, borderRadius: '8px', backgroundColor: darkMode ? '#374151' : '#f3f4f6', display: 'flex', alignItems: 'center', justifyContent: 'center', marginTop: 2 }}>
+                              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8M16 6l-4-4-4 4M12 2v13" stroke={darkMode ? '#9ca3af' : '#6b7280'} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                              </svg>
+                            </div>
+                            <div style={{ flex: 1 }}>
+                              <div style={{ fontSize: '0.9rem', color: darkMode ? '#d1d5db' : '#333', marginBottom: 4, fontWeight: 500 }}>Vinoth shared @NodeJS</div>
+                              <div style={{ fontSize: '0.85rem', color: darkMode ? '#9ca3af' : '#666' }}>"Important security update for all Node.js users. Make sure to upgrade to 20.10.0 to patch the vulnerabilities."</div>
+                              <div style={{ fontSize: '0.8rem', color: darkMode ? '#6b7280' : '#888', marginTop: 4 }}>2 weeks ago</div>
+                            </div>
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" style={{ marginTop: 2 }}>
+                              <path d="M10 6L8.59 7.41L13.17 12l-4.58 4.59L10 18l6-6z" stroke="#9ca3af" strokeWidth="1.5"/>
+                            </svg>
+                          </div>
+                        </>
+                      )}
                     </div>
                   </div>
                   
@@ -1279,105 +1146,104 @@ function SearchResults({ darkMode, isSidebarCollapsed, onSignUpClick, user, isAu
                     <div style={{ fontWeight: 500, fontSize: '1.1rem', marginBottom: 16, marginTop: 24, fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif', letterSpacing: '-0.01em', color: darkMode ? '#fff' : '#111' }}>Predicted Interests</div>
                     <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, marginBottom: 24 }}>
                       <div style={{ 
-                        backgroundColor: darkMode ? '#374151' : '#f3f4f6', 
+                        backgroundColor: 'transparent', 
                         color: darkMode ? '#d1d5db' : '#374151',
                         padding: '6px 12px', 
                         borderRadius: 16, 
                         fontSize: '0.85rem', 
                         fontWeight: 500,
                         cursor: 'pointer',
-                        transition: 'all 0.2s'
+                        transition: 'all 0.2s',
+                        border: `1px solid ${darkMode ? '#4b5563' : '#d1d5db'}`
                       }}
-                      onMouseEnter={(e) => e.target.style.backgroundColor = darkMode ? '#4b5563' : '#e5e7eb'}
-                      onMouseLeave={(e) => e.target.style.backgroundColor = darkMode ? '#374151' : '#f3f4f6'}
+                      onMouseEnter={(e) => e.target.style.backgroundColor = darkMode ? '#374151' : '#f9fafb'}
+                      onMouseLeave={(e) => e.target.style.backgroundColor = 'transparent'}
                       >
                         React
                       </div>
                       <div style={{ 
-                        backgroundColor: darkMode ? '#374151' : '#f3f4f6', 
+                        backgroundColor: 'transparent', 
                         color: darkMode ? '#d1d5db' : '#374151',
                         padding: '6px 12px', 
                         borderRadius: 16, 
                         fontSize: '0.85rem', 
                         fontWeight: 500,
                         cursor: 'pointer',
-                        transition: 'all 0.2s'
+                        transition: 'all 0.2s',
+                        border: `1px solid ${darkMode ? '#4b5563' : '#d1d5db'}`
                       }}
-                      onMouseEnter={(e) => e.target.style.backgroundColor = darkMode ? '#4b5563' : '#e5e7eb'}
-                      onMouseLeave={(e) => e.target.style.backgroundColor = darkMode ? '#374151' : '#f3f4f6'}
+                      onMouseEnter={(e) => e.target.style.backgroundColor = darkMode ? '#374151' : '#f9fafb'}
+                      onMouseLeave={(e) => e.target.style.backgroundColor = 'transparent'}
                       >
                         Node.js
                       </div>
                       <div style={{ 
-                        backgroundColor: darkMode ? '#374151' : '#f3f4f6', 
+                        backgroundColor: 'transparent', 
                         color: darkMode ? '#d1d5db' : '#374151',
                         padding: '6px 12px', 
                         borderRadius: 16, 
                         fontSize: '0.85rem', 
                         fontWeight: 500,
                         cursor: 'pointer',
-                        transition: 'all 0.2s'
+                        transition: 'all 0.2s',
+                        border: `1px solid ${darkMode ? '#4b5563' : '#d1d5db'}`
                       }}
-                      onMouseEnter={(e) => e.target.style.backgroundColor = darkMode ? '#4b5563' : '#e5e7eb'}
-                      onMouseLeave={(e) => e.target.style.backgroundColor = darkMode ? '#374151' : '#f3f4f6'}
+                      onMouseEnter={(e) => e.target.style.backgroundColor = darkMode ? '#374151' : '#f9fafb'}
+                      onMouseLeave={(e) => e.target.style.backgroundColor = 'transparent'}
                       >
                         Open Source
                       </div>
                       <div style={{ 
-                        backgroundColor: darkMode ? '#374151' : '#f3f4f6', 
+                        backgroundColor: 'transparent', 
                         color: darkMode ? '#d1d5db' : '#374151',
                         padding: '6px 12px', 
                         borderRadius: 16, 
                         fontSize: '0.85rem', 
                         fontWeight: 500,
                         cursor: 'pointer',
-                        transition: 'all 0.2s'
+                        transition: 'all 0.2s',
+                        border: `1px solid ${darkMode ? '#4b5563' : '#d1d5db'}`
                       }}
-                      onMouseEnter={(e) => e.target.style.backgroundColor = darkMode ? '#4b5563' : '#e5e7eb'}
-                      onMouseLeave={(e) => e.target.style.backgroundColor = darkMode ? '#374151' : '#f3f4f6'}
+                      onMouseEnter={(e) => e.target.style.backgroundColor = darkMode ? '#374151' : '#f9fafb'}
+                      onMouseLeave={(e) => e.target.style.backgroundColor = 'transparent'}
                       >
                         Performance
                       </div>
                       <div style={{ 
-                        backgroundColor: darkMode ? '#374151' : '#f3f4f6', 
+                        backgroundColor: 'transparent', 
                         color: darkMode ? '#d1d5db' : '#374151',
                         padding: '6px 12px', 
                         borderRadius: 16, 
                         fontSize: '0.85rem', 
                         fontWeight: 500,
                         cursor: 'pointer',
-                        transition: 'all 0.2s'
+                        transition: 'all 0.2s',
+                        border: `1px solid ${darkMode ? '#4b5563' : '#d1d5db'}`
                       }}
-                      onMouseEnter={(e) => e.target.style.backgroundColor = darkMode ? '#4b5563' : '#e5e7eb'}
-                      onMouseLeave={(e) => e.target.style.backgroundColor = darkMode ? '#374151' : '#f3f4f6'}
+                      onMouseEnter={(e) => e.target.style.backgroundColor = darkMode ? '#374151' : '#f9fafb'}
+                      onMouseLeave={(e) => e.target.style.backgroundColor = 'transparent'}
                       >
                         Architecture
                       </div>
                       <div style={{ 
-                        backgroundColor: darkMode ? '#374151' : '#f3f4f6', 
+                        backgroundColor: 'transparent', 
                         color: darkMode ? '#d1d5db' : '#374151',
                         padding: '6px 12px', 
                         borderRadius: 16, 
                         fontSize: '0.85rem', 
                         fontWeight: 500,
                         cursor: 'pointer',
-                        transition: 'all 0.2s'
+                        transition: 'all 0.2s',
+                        border: `1px solid ${darkMode ? '#4b5563' : '#d1d5db'}`
                       }}
-                      onMouseEnter={(e) => e.target.style.backgroundColor = darkMode ? '#4b5563' : '#e5e7eb'}
-                      onMouseLeave={(e) => e.target.style.backgroundColor = darkMode ? '#374151' : '#f3f4f6'}
+                      onMouseEnter={(e) => e.target.style.backgroundColor = darkMode ? '#374151' : '#f9fafb'}
+                      onMouseLeave={(e) => e.target.style.backgroundColor = 'transparent'}
                       >
                         Mentorship
                       </div>
                     </div>
                 </div>
-                  <div style={{ 
-                    opacity: profileAnimated.contact ? 1 : 0,
-                    transform: profileAnimated.contact ? 'translateY(0)' : 'translateY(-20px)',
-                    transition: 'opacity 0.5s ease-out, transform 0.5s ease-out'
-                  }}>
-                    <div style={{ fontWeight: 500, fontSize: '1.1rem', marginBottom: 12, marginTop: 20, fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif', letterSpacing: '-0.01em', color: darkMode ? '#fff' : '#111' }}>Contact</div>
-                    <div style={{ fontSize: '0.95rem', color: darkMode ? '#bbb' : '#666', fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif', fontWeight: 400 }}>vinoth@duffgardens.com</div>
-              </div>
+
       </div>
               </div>
             )}
