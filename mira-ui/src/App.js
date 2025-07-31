@@ -145,6 +145,11 @@ function SearchResults({ darkMode, isSidebarCollapsed, onSignUpClick, user, isAu
   const [dropdownPosition, setDropdownPosition] = useState({ top: 0, right: 0 });
   const [hoveredPattern, setHoveredPattern] = useState(null);
   const [tooltipPosition, setTooltipPosition] = useState({ x: 0, y: 0 });
+  const [profileSlideUp, setProfileSlideUp] = useState(false);
+  const [lastScrollY, setLastScrollY] = useState(0);
+  const [followupSent, setFollowupSent] = useState(false);
+  const [sentMessage, setSentMessage] = useState("");
+  const [chatOpen, setChatOpen] = useState(false);
 
   // Effect to show sticky bar when question is out of view
   useEffect(() => {
@@ -152,10 +157,22 @@ function SearchResults({ darkMode, isSidebarCollapsed, onSignUpClick, user, isAu
       if (!questionRef.current) return;
       const rect = questionRef.current.getBoundingClientRect();
       setShowStickyBar(rect.bottom < 0);
+      
+      // Handle profile slide animation only when viewing a specific person profile
+      if (selectedPerson) {
+        const currentScrollY = window.scrollY;
+        if (profileSlideUp && currentScrollY < lastScrollY && currentScrollY < 50) {
+          // Scrolling up and near the top - reveal profile with smooth transition
+          setProfileSlideUp(false);
+          setFollowupSent(false);
+          setSentMessage("");
+        }
+        setLastScrollY(currentScrollY);
+      }
     };
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
-  }, []);
+  }, [profileSlideUp, lastScrollY, selectedPerson]);
 
   useEffect(() => {
     if (editing && editTextRef.current) {
@@ -262,6 +279,15 @@ function SearchResults({ darkMode, isSidebarCollapsed, onSignUpClick, user, isAu
     }
   }, [selectedPerson]);
 
+  // Reset slide states when navigating away from a profile
+  useEffect(() => {
+    if (!selectedPerson) {
+      setProfileSlideUp(false);
+      setFollowupSent(false);
+      setSentMessage("");
+    }
+  }, [selectedPerson]);
+
   // Close dropdown when clicking outside
   useEffect(() => {
     const handleClickOutside = (event) => {
@@ -297,12 +323,41 @@ function SearchResults({ darkMode, isSidebarCollapsed, onSignUpClick, user, isAu
     const textarea = e.target;
     textarea.style.height = 'auto';
     textarea.style.height = textarea.scrollHeight + 'px';
+    
+    // Only handle profile slide animation when viewing a specific person profile
+    if (selectedPerson) {
+      // Reset sent state when user starts typing again
+      if (followupSent) {
+        setFollowupSent(false);
+        setSentMessage("");
+      }
+      
+      // Slide profile back down when input is completely cleared
+      if (e.target.value.length === 0 && profileSlideUp) {
+        setProfileSlideUp(false);
+        setFollowupSent(false);
+        setSentMessage("");
+      }
+    }
   };
 
   const handleFollowupKeyDown = (e) => {
     if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault();
-      // Implement search or follow-up action here
+      if (followupValue.trim()) {
+        // Only trigger profile slide animation when viewing a specific person profile
+        if (selectedPerson) {
+          // Store the message before clearing the input
+          setSentMessage(followupValue.trim());
+          // Mark message as sent and trigger profile slide
+          setFollowupSent(true);
+          setProfileSlideUp(true);
+        }
+        // Clear the input after sending
+        setFollowupValue("");
+        // Here you would typically send the message to your backend
+        console.log('Sending follow-up:', followupValue);
+      }
     }
   };
 
@@ -480,7 +535,7 @@ function SearchResults({ darkMode, isSidebarCollapsed, onSignUpClick, user, isAu
                 style={{ background: 'var(--primary)', color: 'var(--primary-contrast)', border: 'none', borderRadius: 6, padding: '6px 10px', cursor: 'pointer', fontSize: '0.98rem', display: 'flex', alignItems: 'center', flexShrink: 0 }}
                 title="Confirm"
               >
-                <svg width="16" height="16" viewBox="0 0 20 20" fill="none"><path d="M5 10.5l4 4 6-7" stroke="#fff" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"/></svg>
+                <svg width="16" height="16" viewBox="0 0 20 20" fill="none"><path d="M5 13l5-5 5 5" stroke="#fff" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"/></svg>
               </button>
               <button
                 onClick={handleEditCancel}
@@ -711,16 +766,23 @@ function SearchResults({ darkMode, isSidebarCollapsed, onSignUpClick, user, isAu
             )}
             {selectedPerson && (
               <div style={{ position: 'relative', minHeight: 60 }}>
-                <button onClick={() => setSelectedPerson(null)} style={{ position: 'absolute', left: 80, top: -40, background: 'none', border: 'none', color: darkMode ? '#fff' : '#222', fontWeight: 500, fontSize: '0.98rem', cursor: 'pointer', padding: 0, display: 'flex', alignItems: 'center', gap: 6, zIndex: 10 }}>
+                <button onClick={() => setSelectedPerson(null)} style={{ position: 'absolute', left: 80, top: -40, background: 'none', border: 'none', color: darkMode ? '#fff' : '#222', fontWeight: 500, fontSize: '0.98rem', cursor: 'pointer', padding: 0, display: 'flex', alignItems: 'center', gap: 6, zIndex: 10, opacity: profileSlideUp ? 0 : 1, pointerEvents: profileSlideUp ? 'none' : 'auto' }}>
                   <svg width="17" height="17" viewBox="0 0 20 20" fill="none"><path d="M13 16l-5-6 5-6" stroke={darkMode ? '#fff' : '#222'} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>
                   Back
                 </button>
+                
                 <div style={{ 
                   maxWidth: 700, 
                   margin: '0 auto 0 auto', 
                   color: darkMode ? '#fff' : '#232427', 
                   padding: '0 8px', 
-                  paddingBottom: 200
+                  paddingBottom: 200,
+                  transform: profileSlideUp ? 'translateY(-100vh)' : 'translateY(0)',
+                  transition: 'transform 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94)',
+                  position: 'relative',
+                  zIndex: profileSlideUp ? 1 : 10,
+                  height: profileSlideUp ? '0' : 'auto',
+                  overflow: profileSlideUp ? 'hidden' : 'visible'
                 }}>
                   <div style={{ 
                     display: 'flex', 
@@ -747,7 +809,39 @@ function SearchResults({ darkMode, isSidebarCollapsed, onSignUpClick, user, isAu
                         </div>
                     </div>
                   </div>
-                    <div style={{ position: 'relative' }} className="connect-dropdown-container">
+                    
+                    {/* Open Chat Button */}
+                    <button
+                      style={{
+                        position: 'absolute',
+                        left: 310, // moved left from 520
+                        top: 20,
+                        background: 'none',
+                        border: 'none',
+                        color: darkMode ? '#fff' : '#222',
+                        fontWeight: 500,
+                        fontSize: '0.98rem',
+                        cursor: 'pointer',
+                        padding: 0,
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: 6,
+                        zIndex: 1001,
+                        opacity: profileSlideUp ? 0 : 1,
+                        pointerEvents: profileSlideUp ? 'none' : 'auto',
+                        transition: 'opacity 0.3s ease'
+                      }}
+                      onClick={() => {
+                        setChatOpen(true);
+                        setProfileSlideUp(true);
+                      }}
+                      title="Chat with this user profile" // hover tooltip
+                    >
+                      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#6b7280" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round" strokeDasharray="2,2">
+                        <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+                      </svg>
+                    </button>
+                  <div style={{ position: 'relative' }} className="connect-dropdown-container">
                       <button 
                         ref={setConnectButtonRef}
                         onClick={(e) => {
@@ -807,7 +901,7 @@ function SearchResults({ darkMode, isSidebarCollapsed, onSignUpClick, user, isAu
                             <span style={{ fontSize: '0.9rem', color: '#1da1f2', fontWeight: 500, fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif' }}>
                               @vinoth_ragunathan
                             </span>
-                          </div>
+                            </div>
                         </div>
                       )}
                     </div>
@@ -888,8 +982,8 @@ function SearchResults({ darkMode, isSidebarCollapsed, onSignUpClick, user, isAu
                     <div style={{ marginBottom: 28 }}>
                       <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 12 }}>
                         <div style={{ width: 8, height: 8, borderRadius: '50%', backgroundColor: '#000', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                        </div>
-                        <span 
+                    </div>
+                                                <span 
                           style={{ fontSize: '0.9rem', color: darkMode ? '#9ca3af' : '#666', fontWeight: 500, fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif', cursor: 'pointer' }}
                           onMouseEnter={(e) => {
                             setHoveredPattern('opensource');
@@ -1074,17 +1168,17 @@ function SearchResults({ darkMode, isSidebarCollapsed, onSignUpClick, user, isAu
                       {/* Show more button */}
                       <div 
                         style={{ 
-                          border: '1px solid #8b5cf6', 
-                          borderRadius: 8, 
-                          padding: '8px 12px', 
-                          display: 'flex', 
-                          alignItems: 'center', 
-                          gap: 8, 
-                          cursor: 'pointer',
-                          transition: 'background-color 0.2s'
-                        }}
-                        onMouseEnter={(e) => e.target.style.backgroundColor = '#f3f4f6'}
-                        onMouseLeave={(e) => e.target.style.backgroundColor = 'transparent'}
+                        border: '1px solid #8b5cf6', 
+                        borderRadius: 8, 
+                        padding: '8px 12px', 
+                        display: 'flex', 
+                        alignItems: 'center', 
+                        gap: 8, 
+                        cursor: 'pointer',
+                        transition: 'background-color 0.2s'
+                      }}
+                      onMouseEnter={(e) => e.target.style.backgroundColor = '#f3f4f6'}
+                      onMouseLeave={(e) => e.target.style.backgroundColor = 'transparent'}
                         onClick={() => setShowMoreTimeline(!showMoreTimeline)}
                       >
                         <div style={{ width: 16, height: 16, borderRadius: '50%', backgroundColor: '#8b5cf6', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
@@ -1247,6 +1341,92 @@ function SearchResults({ darkMode, isSidebarCollapsed, onSignUpClick, user, isAu
       </div>
               </div>
             )}
+            
+            {/* Back Button - always visible when chat is open OR when a message is sent */}
+            {(profileSlideUp && selectedPerson && (chatOpen || followupSent)) && (
+              <div style={{
+                position: 'fixed',
+                top: 60,
+                left: '30%', // moved right from 20%
+                zIndex: 1000,
+                maxWidth: 300,
+                width: 'auto',
+                padding: '0 20px'
+              }}>
+                <button
+                  style={{
+                    background: 'none',
+                    border: 'none',
+                    color: darkMode ? '#fff' : '#222',
+                    fontWeight: 500,
+                    fontSize: '0.98rem',
+                    cursor: 'pointer',
+                    padding: 0,
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 6,
+                    zIndex: 10
+                  }}
+                  onClick={() => {
+                    setChatOpen(false);
+                    setProfileSlideUp(false);
+                  }}
+                >
+                  <svg width="17" height="17" viewBox="0 0 20 20" fill="none"><path d="M13 16l-5-6 5-6" stroke={darkMode ? '#fff' : '#222'} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>
+                  Back
+                </button>
+              </div>
+            )}
+
+            {/* Chat Bubble - only shows when there's a sent message */}
+            {(profileSlideUp && selectedPerson && followupSent && sentMessage) && (
+              <div style={{
+                position: 'fixed',
+                top: 100,
+                left: '75%', // moved right from 70%
+                zIndex: 1000,
+                maxWidth: 400,
+                width: 'auto',
+                padding: '0 20px'
+              }}>
+                <div style={{
+                  backgroundColor: darkMode ? '#374151' : '#f3f4f6',
+                  color: darkMode ? '#d1d5db' : '#374151',
+                  padding: '12px 16px',
+                  borderRadius: '20px',
+                  fontSize: '0.95rem',
+                  fontWeight: 500,
+                  fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif',
+                  boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
+                  border: `1px solid ${darkMode ? '#4b5563' : '#e5e7eb'}`,
+                  display: 'inline-block',
+                  maxWidth: 'fit-content',
+                  wordWrap: 'break-word'
+                }}>
+                  {sentMessage}
+                </div>
+              </div>
+            )}
+            
+            {/* Placeholder for no chats - responsive positioning */}
+            {(profileSlideUp && selectedPerson && chatOpen && !followupSent) && (
+              <div style={{
+                position: 'fixed',
+                top: '50%',
+                left: '60%', // moved left from 70%
+                transform: 'translate(-50%, -50%)',
+                zIndex: 1000,
+                color: darkMode ? '#9ca3af' : '#6b7280',
+                fontSize: '1.08rem',
+                textAlign: 'center',
+                fontWeight: 500,
+                maxWidth: '300px',
+                wordWrap: 'break-word'
+              }}>
+                Chats with user profile will go here
+              </div>
+            )}
+            
       {/* Follow-up input fixed at the bottom, overlaying the answer text */}
       <div 
         className={
