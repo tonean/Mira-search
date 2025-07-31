@@ -1057,10 +1057,10 @@ function SearchResults({ darkMode, isSidebarCollapsed, onSignUpClick, user, isAu
                           </svg>
                     </div>
                                                 <span 
-                          style={{ fontSize: '0.9rem', color: darkMode ? '#d1d5db' : '#333', fontWeight: 500, fontFamily: 'Georgia, "Times New Roman", serif', cursor: 'pointer' }}
+                          style={{ fontSize: '0.9rem', color: darkMode ? '#d1d5db' : '#333', fontWeight: 500, fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif', cursor: 'pointer' }}
                           onMouseEnter={(e) => {
                             setHoveredPattern('opensource');
-                            setTooltipPosition({ x: e.target.getBoundingClientRect().right + 20, y: e.target.getBoundingClientRect().top });
+                            setTooltipPosition({ x: 350, y: 300 });
                           }}
                           onMouseLeave={() => setHoveredPattern(null)}
                         >
@@ -1071,7 +1071,7 @@ function SearchResults({ darkMode, isSidebarCollapsed, onSignUpClick, user, isAu
                           style={{ marginLeft: 4, cursor: 'pointer' }}
                           onMouseEnter={(e) => {
                             setHoveredPattern('opensource');
-                            setTooltipPosition({ x: e.target.getBoundingClientRect().right + 20, y: e.target.getBoundingClientRect().top });
+                            setTooltipPosition({ x: 350, y: 300 });
                           }}
                           onMouseLeave={() => setHoveredPattern(null)}
                         >
@@ -1086,10 +1086,10 @@ function SearchResults({ darkMode, isSidebarCollapsed, onSignUpClick, user, isAu
                           </svg>
                         </div>
                         <span 
-                          style={{ fontSize: '0.9rem', color: darkMode ? '#d1d5db' : '#333', fontWeight: 500, fontFamily: 'Georgia, "Times New Roman", serif', cursor: 'pointer' }}
+                          style={{ fontSize: '0.9rem', color: darkMode ? '#d1d5db' : '#333', fontWeight: 500, fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif', cursor: 'pointer' }}
                           onMouseEnter={(e) => {
                             setHoveredPattern('react');
-                            setTooltipPosition({ x: e.target.getBoundingClientRect().right + 20, y: e.target.getBoundingClientRect().top });
+                            setTooltipPosition({ x: 350, y: 300 });
                           }}
                           onMouseLeave={() => setHoveredPattern(null)}
                         >
@@ -1100,7 +1100,7 @@ function SearchResults({ darkMode, isSidebarCollapsed, onSignUpClick, user, isAu
                           style={{ marginLeft: 4, cursor: 'pointer' }}
                           onMouseEnter={(e) => {
                             setHoveredPattern('react');
-                            setTooltipPosition({ x: e.target.getBoundingClientRect().right + 20, y: e.target.getBoundingClientRect().top });
+                            setTooltipPosition({ x: 350, y: 300 });
                           }}
                           onMouseLeave={() => setHoveredPattern(null)}
                         >
@@ -1115,10 +1115,10 @@ function SearchResults({ darkMode, isSidebarCollapsed, onSignUpClick, user, isAu
                           </svg>
                         </div>
                         <span 
-                          style={{ fontSize: '0.9rem', color: darkMode ? '#d1d5db' : '#333', fontWeight: 500, fontFamily: 'Georgia, "Times New Roman", serif', cursor: 'pointer' }}
+                          style={{ fontSize: '0.9rem', color: darkMode ? '#d1d5db' : '#333', fontWeight: 500, fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif', cursor: 'pointer' }}
                           onMouseEnter={(e) => {
                             setHoveredPattern('community');
-                            setTooltipPosition({ x: e.target.getBoundingClientRect().right + 20, y: e.target.getBoundingClientRect().top });
+                            setTooltipPosition({ x: 350, y: 300 });
                           }}
                           onMouseLeave={() => setHoveredPattern(null)}
                         >
@@ -1129,7 +1129,7 @@ function SearchResults({ darkMode, isSidebarCollapsed, onSignUpClick, user, isAu
                           style={{ marginLeft: 4, cursor: 'pointer' }}
                           onMouseEnter={(e) => {
                             setHoveredPattern('community');
-                            setTooltipPosition({ x: e.target.getBoundingClientRect().right + 20, y: e.target.getBoundingClientRect().top });
+                            setTooltipPosition({ x: 350, y: 300 });
                           }}
                           onMouseLeave={() => setHoveredPattern(null)}
                         >
@@ -1144,10 +1144,10 @@ function SearchResults({ darkMode, isSidebarCollapsed, onSignUpClick, user, isAu
                           </svg>
                         </div>
                         <span 
-                          style={{ fontSize: '0.9rem', color: darkMode ? '#d1d5db' : '#333', fontWeight: 500, fontFamily: 'Georgia, "Times New Roman", serif', cursor: 'pointer' }}
+                          style={{ fontSize: '0.9rem', color: darkMode ? '#d1d5db' : '#333', fontWeight: 500, fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif', cursor: 'pointer' }}
                           onMouseEnter={(e) => {
                             setHoveredPattern('performance');
-                            setTooltipPosition({ x: e.target.getBoundingClientRect().right + 20, y: e.target.getBoundingClientRect().top });
+                            setTooltipPosition({ x: 350, y: 300 });
                           }}
                           onMouseLeave={() => setHoveredPattern(null)}
                         >
@@ -1158,7 +1158,7 @@ function SearchResults({ darkMode, isSidebarCollapsed, onSignUpClick, user, isAu
                           style={{ marginLeft: 4, cursor: 'pointer' }}
                           onMouseEnter={(e) => {
                             setHoveredPattern('performance');
-                            setTooltipPosition({ x: e.target.getBoundingClientRect().top });
+                            setTooltipPosition({ x: 350, y: 300 });
                           }}
                           onMouseLeave={() => setHoveredPattern(null)}
                         >
