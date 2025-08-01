@@ -1405,7 +1405,7 @@ function SearchResults({ darkMode, isSidebarCollapsed, onSignUpClick, user, isAu
                   }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: 28 }}>
                     <div style={{ width: 60, height: 60, borderRadius: '50%', overflow: 'hidden', background: selectedPerson.avatarBg, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 26, color: '#fff', fontWeight: 700 }}>
-                      <span style={{ fontSize: 26 }}>{selectedPerson.name[0]}</span>
+                      {selectedPerson.avatarIcon ? selectedPerson.avatarIcon : <span style={{ fontSize: 26 }}>{selectedPerson.name[0]}</span>}
                     </div>
                     <div>
                         <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
@@ -1418,6 +1418,36 @@ function SearchResults({ darkMode, isSidebarCollapsed, onSignUpClick, user, isAu
                               darkMode={darkMode}
                             />
                           )}
+                          {/* Dotted Chat Button - moved next to star button */}
+                          <button
+                            style={{
+                              background: 'none',
+                              border: 'none',
+                              color: darkMode ? '#fff' : '#222',
+                              fontWeight: 500,
+                              fontSize: '0.98rem',
+                              cursor: 'pointer',
+                              padding: 4,
+                              display: 'flex',
+                              alignItems: 'center',
+                              justifyContent: 'center',
+                              borderRadius: 4,
+                              opacity: profileSlideUp ? 0 : 1,
+                              pointerEvents: profileSlideUp ? 'none' : 'auto',
+                              transition: 'all 0.15s ease'
+                            }}
+                            onMouseEnter={(e) => e.target.style.background = darkMode ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.05)'}
+                            onMouseLeave={(e) => e.target.style.background = 'none'}
+                            onClick={() => {
+                              setChatOpen(true);
+                              setProfileSlideUp(true);
+                            }}
+                            title="Chat with this user profile"
+                          >
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke={darkMode ? '#bbb' : '#666'} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" strokeDasharray="2,2">
+                              <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+                            </svg>
+                          </button>
                         </div>
                         <div style={{ fontSize: '1rem', color: darkMode ? '#bbb' : '#666', fontWeight: 400, marginTop: 6, fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif' }}>Senior Software Engineer</div>
                         <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginTop: 4 }}>
@@ -1429,37 +1459,7 @@ function SearchResults({ darkMode, isSidebarCollapsed, onSignUpClick, user, isAu
                     </div>
                   </div>
                     
-                    {/* Open Chat Button */}
-                    <button
-                      style={{
-                        position: 'absolute',
-                        left: 310, // moved left from 520
-                        top: 20,
-                        background: 'none',
-                        border: 'none',
-                        color: darkMode ? '#fff' : '#222',
-                        fontWeight: 500,
-                        fontSize: '0.98rem',
-                        cursor: 'pointer',
-                        padding: 0,
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: 6,
-                        zIndex: 1001,
-                        opacity: profileSlideUp ? 0 : 1,
-                        pointerEvents: profileSlideUp ? 'none' : 'auto',
-                        transition: 'opacity 0.3s ease'
-                      }}
-                      onClick={() => {
-                        setChatOpen(true);
-                        setProfileSlideUp(true);
-                      }}
-                      title="Chat with this user profile" // hover tooltip
-                    >
-                      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#6b7280" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round" strokeDasharray="2,2">
-                        <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
-                      </svg>
-                    </button>
+
                   <div style={{ position: 'relative' }} className="connect-dropdown-container">
                       <button 
                         ref={setConnectButtonRef}
