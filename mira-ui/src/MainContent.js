@@ -251,7 +251,7 @@ function ModelDropdown({ isOpen, onToggle }) {
   );
 }
 
-export default function MainContent({ darkMode }) {
+export default function MainContent({ darkMode, isAuthenticated, onSignUpClick }) {
   const [showGlow, setShowGlow] = useState(false);
   const [fadeGlow, setFadeGlow] = useState(false);
   const [inputValue, setInputValue] = useState("");
@@ -353,6 +353,10 @@ export default function MainContent({ darkMode }) {
   }, [isModelDropdownOpen, hasUserTyped]);
   
   const handleInput = (e) => {
+    if (!isAuthenticated) {
+      onSignUpClick();
+      return;
+    }
     const value = e.target.value;
     setInputValue(value);
     setHasUserTyped(true);
@@ -383,6 +387,10 @@ export default function MainContent({ darkMode }) {
   };
 
   const handleCategoryClick = (category) => {
+    if (!isAuthenticated) {
+      onSignUpClick();
+      return;
+    }
     setInputValue(categoryPrefixes[category]);
     setHasUserTyped(true);
     setActiveCategory(category);
@@ -396,6 +404,10 @@ export default function MainContent({ darkMode }) {
   };
 
   const handleSuggestionClick = (text) => {
+    if (!isAuthenticated) {
+      onSignUpClick();
+      return;
+    }
     setInputValue(categoryPrefixes[activeCategory] + text);
     setActiveCategory(null);
     setHasUserTyped(true);
@@ -412,6 +424,13 @@ export default function MainContent({ darkMode }) {
     if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault();
       if (inputValue.trim()) {
+        // Check if user is authenticated
+        if (!isAuthenticated) {
+          // Show login modal for non-authenticated users
+          onSignUpClick();
+          return;
+        }
+        // Proceed with search for authenticated users
         navigate(`/search?q=${encodeURIComponent(inputValue.trim())}`);
       }
     }
@@ -427,10 +446,16 @@ export default function MainContent({ darkMode }) {
           <span style={{ fontWeight: 400, color: "var(--text-muted)" }}>Who are you looking for today?</span>
         </div>
         <div className={showGlow ? `input-box-effect input-box-effect-glow${fadeGlow ? ' hide' : ''}` : undefined}>
-          <div className="input-box" onClick={() => document.querySelector('.search-input').focus()} style={{ minWidth: "300px", width: "auto", background: 'var(--input-bg)', border: '1.5px solid var(--input-border)', boxShadow: '0 2px 8px var(--input-box-shadow)' }}>
+          <div className="input-box" onClick={() => {
+            if (!isAuthenticated) {
+              onSignUpClick();
+              return;
+            }
+            document.querySelector('.search-input').focus();
+          }} style={{ minWidth: "300px", width: "auto", background: 'var(--input-bg)', border: '1.5px solid var(--input-border)', boxShadow: '0 2px 8px var(--input-box-shadow)' }}>
             <textarea
               className="search-input"
-              placeholder="Describe who you're looking for..."
+              placeholder={isAuthenticated ? "Describe who you're looking for..." : "Sign in to start searching..."}
               value={inputValue}
               style={{
                 border: "none",
@@ -442,10 +467,17 @@ export default function MainContent({ darkMode }) {
                 resize: "none",
                 overflow: "hidden",
                 fontFamily: "inherit",
-                lineHeight: "1.4"
+                lineHeight: "1.4",
+                cursor: isAuthenticated ? "text" : "pointer"
               }}
               onInput={handleInput}
               onKeyDown={handleKeyDown}
+              onClick={() => {
+                if (!isAuthenticated) {
+                  onSignUpClick();
+                }
+              }}
+              readOnly={!isAuthenticated}
               rows="1"
             />
             <div style={{ display: "flex", alignItems: "center", marginTop: 0, paddingTop: 12, marginBottom: -16 }}>
@@ -484,6 +516,17 @@ export default function MainContent({ darkMode }) {
             </div>
           </div>
         </div>
+        {!isAuthenticated && (
+          <div style={{ 
+            textAlign: 'center', 
+            marginTop: '16px', 
+            fontSize: '0.9rem', 
+            color: 'var(--text-muted)',
+            opacity: 0.8
+          }}>
+            <span>Sign in to start searching and connecting with people</span>
+          </div>
+        )}
         <div ref={suggestionRef}>
           <div className={`suggestion-buttons${activeCategory ? ' transparent' : ''}`} style={{ marginBottom: 40, marginTop: 40, position: 'relative', zIndex: 2 }}>
             <button className="suggestion-btn" 
