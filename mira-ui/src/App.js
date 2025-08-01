@@ -3945,7 +3945,7 @@ function AppWithRouter({ isSidebarCollapsed, onToggleSidebar, showSignIn, setSho
           onLogout={handleLogout}
         />
         <Routes>
-          <Route path="/" element={<MainContent darkMode={darkMode} isAuthenticated={isAuthenticated} onSignUpClick={() => setShowSignUpModal(true)} />} />
+          <Route path="/" element={<MainContent darkMode={darkMode} isAuthenticated={isAuthenticated} onSignUpClick={() => setShowSignUpModal(true)} onLoginClick={() => setShowLoginModal(true)} />} />
                                       <Route path="/search" element={<SearchResultsWithHistory onAddChat={onAddChat} darkMode={darkMode} isSidebarCollapsed={isSidebarCollapsed} onSignUpClick={() => setShowSignUpModal(true)} onLoginClick={() => setShowLoginModal(true)} user={user} isAuthenticated={isAuthenticated} starredUsers={starredUsers} onToggleStarUser={onToggleStarUser} />} />
           <Route path="/connections" element={<ConnectionsPage isSidebarCollapsed={isSidebarCollapsed} onConnectionUpdate={handleConnectionUpdate} user={user} isAuthenticated={isAuthenticated} />} />
         </Routes>

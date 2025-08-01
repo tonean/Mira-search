@@ -251,7 +251,7 @@ function ModelDropdown({ isOpen, onToggle }) {
   );
 }
 
-export default function MainContent({ darkMode, isAuthenticated, onSignUpClick }) {
+export default function MainContent({ darkMode, isAuthenticated, onSignUpClick, onLoginClick }) {
   const [showGlow, setShowGlow] = useState(false);
   const [fadeGlow, setFadeGlow] = useState(false);
   const [inputValue, setInputValue] = useState("");
@@ -354,7 +354,7 @@ export default function MainContent({ darkMode, isAuthenticated, onSignUpClick }
   
   const handleInput = (e) => {
     if (!isAuthenticated) {
-      onSignUpClick();
+      onLoginClick();
       return;
     }
     const value = e.target.value;
@@ -388,7 +388,7 @@ export default function MainContent({ darkMode, isAuthenticated, onSignUpClick }
 
   const handleCategoryClick = (category) => {
     if (!isAuthenticated) {
-      onSignUpClick();
+      onLoginClick();
       return;
     }
     setInputValue(categoryPrefixes[category]);
@@ -405,7 +405,7 @@ export default function MainContent({ darkMode, isAuthenticated, onSignUpClick }
 
   const handleSuggestionClick = (text) => {
     if (!isAuthenticated) {
-      onSignUpClick();
+      onLoginClick();
       return;
     }
     setInputValue(categoryPrefixes[activeCategory] + text);
@@ -427,7 +427,7 @@ export default function MainContent({ darkMode, isAuthenticated, onSignUpClick }
         // Check if user is authenticated
         if (!isAuthenticated) {
           // Show login modal for non-authenticated users
-          onSignUpClick();
+          onLoginClick();
           return;
         }
         // Proceed with search for authenticated users
@@ -448,7 +448,7 @@ export default function MainContent({ darkMode, isAuthenticated, onSignUpClick }
         <div className={showGlow ? `input-box-effect input-box-effect-glow${fadeGlow ? ' hide' : ''}` : undefined}>
           <div className="input-box" onClick={() => {
             if (!isAuthenticated) {
-              onSignUpClick();
+              onLoginClick();
               return;
             }
             document.querySelector('.search-input').focus();
@@ -474,7 +474,7 @@ export default function MainContent({ darkMode, isAuthenticated, onSignUpClick }
               onKeyDown={handleKeyDown}
               onClick={() => {
                 if (!isAuthenticated) {
-                  onSignUpClick();
+                  onLoginClick();
                 }
               }}
               readOnly={!isAuthenticated}
