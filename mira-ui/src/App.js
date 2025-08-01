@@ -171,86 +171,224 @@ function SearchResults({ darkMode, isSidebarCollapsed, onSignUpClick, user, isAu
     return overview;
   };
 
+  // Function to generate pattern analysis for specific expertise areas
+  const generateExpertisePatternAnalysis = (expertiseArea) => {
+    const patterns = {
+      'Mathematics Education': {
+        title: 'Math Educators → EdTech Innovators',
+        description: 'Mathematics educators who create engaging content frequently transition into educational technology development and learning platform design.'
+      },
+      'Robotics Engineering': {
+        title: 'Robotics Engineers → System Integration Specialists',
+        description: 'Robotics engineers with motor control expertise often evolve into full-system integration roles, combining hardware and software expertise.'
+      },
+      'Motor Control': {
+        title: 'Motor Control Experts → Automation Leaders',
+        description: 'Motor control specialists frequently advance to lead industrial automation projects, bridging electrical engineering with manufacturing systems.'
+      },
+      'Industrial Automation': {
+        title: 'Automation Experts → IoT Architects',
+        description: 'Industrial automation specialists often expand into IoT system architecture, bridging traditional manufacturing with connected technologies.'
+      },
+      'Control Systems': {
+        title: 'Control Engineers → Smart Manufacturing Directors',
+        description: 'Control systems engineers typically progress into smart manufacturing leadership, driving Industry 4.0 transformations.'
+      },
+      'Mechanical Engineering': {
+        title: 'Mechanical Engineers → Product Innovation Leaders',
+        description: 'Mechanical engineers with custom manufacturing experience frequently become product innovation leaders, driving design-to-manufacturing excellence.'
+      },
+      'Custom Design': {
+        title: 'Custom Designers → Engineering Consultants',
+        description: 'Custom design specialists often become independent engineering consultants, solving unique challenges across multiple industries.'
+      },
+      'Computer Science': {
+        title: 'CS Students → Tech Entrepreneurs',
+        description: 'Computer science students with startup experience often become serial entrepreneurs, leveraging technical skills for business innovation.'
+      },
+      'Startup Development': {
+        title: 'Startup Developers → Innovation Strategists',
+        description: 'Startup developers frequently transition into innovation strategy roles, helping established companies adopt entrepreneurial approaches.'
+      },
+      'Wearable Technology': {
+        title: 'Wearable Engineers → Consumer Electronics Leaders',
+        description: 'Wearable technology engineers frequently advance to lead consumer electronics development, driving miniaturization and user experience innovation.'
+      },
+      'PCB Design': {
+        title: 'PCB Designers → Hardware Architecture Specialists',
+        description: 'PCB design experts often evolve into hardware architecture specialists, designing complex multi-board systems and embedded solutions.'
+      },
+      'Music Technology': {
+        title: 'Audio Engineers → Creative Technology Directors',
+        description: 'Music technology developers often become creative technology directors, bridging artistic vision with technical implementation.'
+      },
+      'Audio Processing': {
+        title: 'Audio Engineers → Digital Signal Processing Experts',
+        description: 'Audio processing specialists frequently expand into broader DSP applications, working on everything from telecommunications to medical devices.'
+      },
+      'Machining': {
+        title: 'Machinists → Manufacturing Innovation Consultants',
+        description: 'Skilled machinists often become manufacturing innovation consultants, optimizing production processes and solving complex fabrication challenges.'
+      },
+      'Reverse Engineering': {
+        title: 'Reverse Engineers → Product Security Specialists',
+        description: 'Reverse engineering experts frequently transition into product security roles, using their analytical skills to identify and prevent vulnerabilities.'
+      },
+      'Workshop Management': {
+        title: 'Workshop Owners → Manufacturing Entrepreneurs',
+        description: 'Successful workshop owners often scale their operations into manufacturing businesses, combining hands-on expertise with business acumen.'
+      },
+      'Educational Content': {
+        title: 'Content Creators → Learning Experience Designers',
+        description: 'Educational content creators often evolve into learning experience designers, creating comprehensive educational platforms and curricula.'
+      },
+      'Hardware Engineering': {
+        title: 'Hardware Engineers → IoT Solution Architects',
+        description: 'Hardware engineers increasingly move into IoT solution architecture, designing connected device ecosystems and edge computing systems.'
+      },
+      'Social Media Engagement': {
+        title: 'Social Media Professionals → Community Strategy Leaders',
+        description: 'Social media engagement specialists often advance to community strategy leadership, building and managing large-scale digital communities.'
+      }
+    };
+    
+    return patterns[expertiseArea] || {
+      title: 'Professionals → Industry Specialists',
+      description: 'Active professionals in their field often develop specialized expertise that positions them as industry thought leaders and consultants.'
+    };
+  };
+
+  // Function to generate AI-powered pattern analysis
+  const generatePatternAnalysis = (person) => {
+    if (!person) return { title: 'Professional Analysis', description: 'Analyzing professional patterns and career trajectories.' };
+    
+    const expertise = person.aiExpertiseAreas || [];
+    const interests = person.aiInterests || [];
+    const traits = person.aiPersonalityTraits || [];
+    
+    // Generate pattern analysis based on actual user data
+    if (expertise.includes('Robotics Engineering') || expertise.includes('Motor Control')) {
+      return {
+        title: 'Robotics Engineers → System Integration Specialists',
+        description: 'Robotics engineers with motor control expertise often evolve into full-system integration roles, combining hardware and software expertise.'
+      };
+    } else if (expertise.includes('Mathematics Education') || expertise.includes('Educational Content')) {
+      return {
+        title: 'Math Educators → EdTech Innovators',
+        description: 'Mathematics educators who create engaging content frequently transition into educational technology development and learning platform design.'
+      };
+    } else if (expertise.includes('Industrial Automation') || expertise.includes('Control Systems')) {
+      return {
+        title: 'Automation Experts → IoT Architects',
+        description: 'Industrial automation specialists often expand into IoT system architecture, bridging traditional manufacturing with connected technologies.'
+      };
+    } else if (expertise.includes('Mechanical Engineering') || expertise.includes('Custom Manufacturing')) {
+      return {
+        title: 'Mechanical Engineers → Product Innovation Leaders',
+        description: 'Mechanical engineers with custom manufacturing experience frequently become product innovation leaders, driving design-to-manufacturing excellence.'
+      };
+    } else if (expertise.includes('Computer Science') || expertise.includes('Startup Development')) {
+      return {
+        title: 'CS Students → Tech Entrepreneurs',
+        description: 'Computer science students with startup experience often become serial entrepreneurs, leveraging technical skills for business innovation.'
+      };
+    } else if (expertise.includes('Wearable Technology') || expertise.includes('PCB Design')) {
+      return {
+        title: 'Hardware Engineers → Consumer Electronics Leaders',
+        description: 'Wearable technology engineers frequently advance to lead consumer electronics development, driving miniaturization and user experience innovation.'
+      };
+    } else if (expertise.includes('Music Technology') || expertise.includes('Audio Processing')) {
+      return {
+        title: 'Audio Engineers → Creative Technology Directors',
+        description: 'Music technology developers often become creative technology directors, bridging artistic vision with technical implementation.'
+      };
+    } else if (expertise.includes('Machining') || expertise.includes('Reverse Engineering')) {
+      return {
+        title: 'Makers → Hardware Innovation Consultants',
+        description: 'Hands-on makers with reverse engineering skills frequently become hardware innovation consultants, solving complex manufacturing challenges.'
+      };
+    } else if (traits.includes('Workshop Owner') || traits.includes('Maker')) {
+      return {
+        title: 'Workshop Owners → Manufacturing Entrepreneurs',
+        description: 'Passionate workshop owners often scale their operations into manufacturing businesses, combining craft expertise with business acumen.'
+      };
+    } else {
+      return {
+        title: 'Professionals → Industry Specialists',
+        description: 'Active professionals in their field often develop specialized expertise that positions them as industry thought leaders and consultants.'
+      };
+    }
+  };
+
   // Function to generate personalized match reasons based on scraped data
   const generatePersonalizedMatchReasons = (person) => {
     if (!person) return [];
     
     const reasons = [];
-    const comprehensiveData = person.comprehensive_twitter_data;
-    const aiProfile = person.ai_profile || {};
+    const expertise = person.aiExpertiseAreas || [];
+    const achievements = person.aiKeyAchievements || [];
     const quotes = person.quotes || [];
     
-    // Reason 1: Network size (if comprehensive data available)
-    if (comprehensiveData && comprehensiveData.followers_count > 1000) {
-      reasons.push({
-        text: `Strong Network (${(comprehensiveData.followers_count/1000).toFixed(1)}K followers)`,
-        description: `Large professional network indicates influence and credibility in their field`
-      });
-    } else if (comprehensiveData && comprehensiveData.followers_count > 100) {
-      reasons.push({
-        text: `Growing Network (${comprehensiveData.followers_count} followers)`,
-        description: `Active community member with expanding professional connections`
+    // Use expertise areas as match reasons
+    if (expertise && expertise.length > 0) {
+      expertise.slice(0, 3).forEach(skill => {
+        reasons.push({
+          text: skill,
+          description: `Demonstrated expertise and knowledge in ${skill.toLowerCase()}`
+        });
       });
     }
     
-    // Reason 2: Activity level
-    if (quotes.length > 0) {
-      reasons.push({
-        text: `Active Social Media Presence`,
-        description: `Consistent online activity shows ongoing engagement and thought leadership`
+    // Add achievements as additional reasons
+    if (achievements && achievements.length > 0 && reasons.length < 4) {
+      achievements.slice(0, 4 - reasons.length).forEach(achievement => {
+        reasons.push({
+          text: achievement,
+          description: `Professional accomplishment showing proven capability`
+        });
       });
     }
     
-    // Reason 3: Content quality
-    if (quotes.length > 0) {
-      reasons.push({
-        text: `Content Creator`,
-        description: `Shares valuable insights and contributes to professional discussions`
-      });
+    // Fallback to generic reasons only if we have no other data
+    if (reasons.length === 0) {
+      if (quotes && quotes.length > 0) {
+        reasons.push({
+          text: `Active Social Media Presence`,
+          description: `Consistent online activity shows ongoing engagement and thought leadership`
+        });
+        reasons.push({
+          text: `Content Creator`,
+          description: `Shares valuable insights and contributes to professional discussions`
+        });
+      }
     }
     
-    // Reason 4: Verification (if comprehensive data available)
-    if (comprehensiveData && comprehensiveData.verified) {
-      reasons.push({
-        text: `Verified Professional`,
-        description: `Official verification confirms their professional status and credibility`
-      });
-    }
-    
-    // Reason 5: AI Profile insights
-    if (aiProfile.predictedInterests && aiProfile.predictedInterests.length > 0) {
-      const interests = aiProfile.predictedInterests.slice(0, 2).join(' and ');
+    // Add predicted interests if we still need more reasons
+    if (reasons.length < 4 && person.aiPredictedInterests && person.aiPredictedInterests.length > 0) {
+      const interests = person.aiPredictedInterests.slice(0, 2).join(' and ');
       reasons.push({
         text: `Expertise in ${interests}`,
         description: `Specialized knowledge in areas that align with your professional interests`
       });
     }
     
-    // Reason 6: Location match (if comprehensive data available)
-    if (comprehensiveData && comprehensiveData.location && user?.location) {
-      reasons.push({
-        text: `Location Match (${comprehensiveData.location})`,
-        description: `Geographic proximity can facilitate in-person networking opportunities`
-      });
-    }
-    
-    // Reason 7: Professional type
-    if (person.type) {
+    // Professional type (if available)
+    if (reasons.length < 4 && person.type) {
       reasons.push({
         text: `${person.type.charAt(0).toUpperCase() + person.type.slice(1)} Connection`,
         description: `Connected through ${person.type} relationship, indicating shared professional interests`
       });
     }
     
-    // Fill up to 3 reasons
+    // Only use generic fallback if we absolutely have no data
     while (reasons.length < 3) {
       reasons.push({
-        text: `Professional Background`,
-        description: `Based on their social media presence and network connections`
+        text: `Professional Connection`,
+        description: `Based on their social media presence and professional activity`
       });
     }
     
-    return reasons.slice(0, 3); // Return top 3 reasons
+    return reasons.slice(0, 4); // Return top 4 reasons
   };
   const [editing, setEditing] = useState(false);
   const [editValue, setEditValue] = useState(query);
@@ -1543,47 +1681,21 @@ function SearchResults({ darkMode, isSidebarCollapsed, onSignUpClick, user, isAu
                         fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif',
                         lineHeight: 1.4
                       }}>
-                        {hoveredPattern === 'opensource' && (
-                          <div>
-                            <div style={{ fontWeight: 600, marginBottom: 4, color: darkMode ? '#fbbf24' : '#d97706' }}>Pattern Analysis</div>
-                            <div>Open Source Contributors → React Enthusiasts</div>
-                            <div style={{ fontSize: '0.8rem', color: darkMode ? '#9ca3af' : '#6b7280', marginTop: 4 }}>
-                              Based on data from similar profiles, open source contributors often gravitate toward React ecosystem development.
-                            </div>
-                          </div>
-                        )}
-                        {hoveredPattern === 'react' && (
-                          <div>
-                            <div style={{ fontWeight: 600, marginBottom: 4, color: darkMode ? '#fbbf24' : '#d97706' }}>Pattern Analysis</div>
-                            <div>React Devs → Performance Optimization</div>
-                            <div style={{ fontSize: '0.8rem', color: darkMode ? '#9ca3af' : '#6b7280', marginTop: 4 }}>
-                              React developers frequently develop expertise in performance optimization as they scale applications.
-                            </div>
-                          </div>
-                        )}
-                        {hoveredPattern === 'community' && (
-                          <div>
-                            <div style={{ fontWeight: 600, marginBottom: 4, color: darkMode ? '#fbbf24' : '#d97706' }}>Pattern Analysis</div>
-                            <div>Node.js Users → Community Leaders</div>
-                            <div style={{ fontSize: '0.8rem', color: darkMode ? '#9ca3af' : '#6b7280', marginTop: 4 }}>
-                              Node.js developers often become community mentors due to the collaborative nature of the ecosystem.
-                            </div>
-                          </div>
-                        )}
                         {hoveredPattern === 'performance' && (
                           <div>
                             <div style={{ fontWeight: 600, marginBottom: 4, color: darkMode ? '#fbbf24' : '#d97706' }}>Pattern Analysis</div>
-                            <div>Performance Devs → System Architects</div>
+                            <div>{generatePatternAnalysis(selectedPerson).title}</div>
                             <div style={{ fontSize: '0.8rem', color: darkMode ? '#9ca3af' : '#6b7280', marginTop: 4 }}>
-                              Performance optimization specialists often evolve into system architecture roles as they gain experience.
+                              {generatePatternAnalysis(selectedPerson).description}
                             </div>
                           </div>
                         )}
                         {hoveredPattern && hoveredPattern.startsWith('reason') && (
                           <div>
-                            <div style={{ fontWeight: 600, marginBottom: 4, color: darkMode ? '#fbbf24' : '#d97706' }}>Match Analysis</div>
+                            <div style={{ fontWeight: 600, marginBottom: 4, color: darkMode ? '#fbbf24' : '#d97706' }}>Pattern Analysis</div>
+                            <div>{generateExpertisePatternAnalysis(generatePersonalizedMatchReasons(selectedPerson)[parseInt(hoveredPattern.replace('reason', ''))]?.text || '').title}</div>
                             <div style={{ fontSize: '0.8rem', color: darkMode ? '#9ca3af' : '#6b7280', marginTop: 4 }}>
-                              {generatePersonalizedMatchReasons(selectedPerson)[parseInt(hoveredPattern.replace('reason', ''))]?.description || 'Based on our analysis of their profile and network connections.'}
+                              {generateExpertisePatternAnalysis(generatePersonalizedMatchReasons(selectedPerson)[parseInt(hoveredPattern.replace('reason', ''))]?.text || '').description}
                             </div>
                           </div>
                         )}
@@ -1615,7 +1727,7 @@ function SearchResults({ darkMode, isSidebarCollapsed, onSignUpClick, user, isAu
                             style={{ fontSize: '0.9rem', color: darkMode ? '#9ca3af' : '#666', fontWeight: 500, fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif', cursor: 'pointer' }}
                             onMouseEnter={(e) => {
                               setHoveredPattern(`reason${index}`);
-                              setTooltipPosition({ x: 350, y: 300 });
+                              setTooltipPosition({ x: 350, y: 250 });
                             }}
                             onMouseLeave={() => setHoveredPattern(null)}
                           >
@@ -1626,7 +1738,7 @@ function SearchResults({ darkMode, isSidebarCollapsed, onSignUpClick, user, isAu
                             style={{ marginLeft: 4, cursor: 'pointer' }}
                             onMouseEnter={(e) => {
                               setHoveredPattern(`reason${index}`);
-                              setTooltipPosition({ x: 350, y: 300 });
+                              setTooltipPosition({ x: 350, y: 250 });
                             }}
                             onMouseLeave={() => setHoveredPattern(null)}
                           >
@@ -1642,18 +1754,23 @@ function SearchResults({ darkMode, isSidebarCollapsed, onSignUpClick, user, isAu
                           style={{ fontSize: '0.9rem', color: darkMode ? '#9ca3af' : '#666', fontWeight: 500, fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif', cursor: 'pointer' }}
                           onMouseEnter={(e) => {
                             setHoveredPattern('performance');
-                            setTooltipPosition({ x: 350, y: 300 });
+                            setTooltipPosition({ x: 350, y: 250 });
                           }}
                           onMouseLeave={() => setHoveredPattern(null)}
                         >
-                          Performance Optimization Specialist
+                          {selectedPerson.aiExpertiseAreas && selectedPerson.aiExpertiseAreas.length > 0 
+                            ? selectedPerson.aiExpertiseAreas[0] 
+                            : selectedPerson.aiPersonalityTraits && selectedPerson.aiPersonalityTraits.length > 0
+                            ? selectedPerson.aiPersonalityTraits[0]
+                            : 'Professional Specialist'
+                          }
                         </span>
                         <svg 
                           width="14" height="14" viewBox="0 0 24 24" fill="none" 
                           style={{ marginLeft: 4, cursor: 'pointer' }}
                           onMouseEnter={(e) => {
                             setHoveredPattern('performance');
-                            setTooltipPosition({ x: 350, y: 300 });
+                            setTooltipPosition({ x: 350, y: 250 });
                           }}
                           onMouseLeave={() => setHoveredPattern(null)}
                         >
