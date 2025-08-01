@@ -109,7 +109,7 @@ const SUPABASE_ANON_KEY = 'YOUR_SUPABASE_ANON_KEY';
 // Initialize Supabase client
 // const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-function SearchResults({ darkMode, isSidebarCollapsed, onSignUpClick, user, isAuthenticated, starredUsers = [], onToggleStarUser }) {
+function SearchResults({ darkMode, isSidebarCollapsed, onSignUpClick, onLoginClick, user, isAuthenticated, starredUsers = [], onToggleStarUser }) {
   const location = useLocation();
   const params = new URLSearchParams(location.search);
   const query = params.get('q') || '';
@@ -1640,7 +1640,7 @@ Format as a sophisticated taste analysis recommendation. Keep it brief and cultu
   };
   const handleFollowupInput = (e) => {
     if (!isAuthenticated) {
-      onSignUpClick();
+      onLoginClick();
       return;
     }
     setFollowupValue(e.target.value);
@@ -1679,7 +1679,7 @@ Format as a sophisticated taste analysis recommendation. Keep it brief and cultu
     if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault();
       if (!isAuthenticated) {
-        onSignUpClick();
+        onLoginClick();
         return;
       }
       handleFollowupSubmit();
@@ -1688,7 +1688,7 @@ Format as a sophisticated taste analysis recommendation. Keep it brief and cultu
 
   const handleFollowupSubmit = () => {
     if (!isAuthenticated) {
-      onSignUpClick();
+      onLoginClick();
       return;
     }
     if (followupValue.trim()) {
@@ -3187,7 +3187,7 @@ Format as a sophisticated taste analysis recommendation. Keep it brief and cultu
       >
         <div className="input-box" onClick={() => {
           if (!isAuthenticated) {
-            onSignUpClick();
+            onLoginClick();
             return;
           }
         }} style={{ minWidth: 300, maxWidth: 700, width: '100%', margin: 0, padding: 0, boxShadow: '0 2px 8px var(--input-box-shadow)', border: '1.5px solid var(--input-border)', borderRadius: 14, background: 'var(--input-bg)', display: 'flex', flexDirection: 'column', gap: 0, minHeight: 38 }}>
@@ -3218,7 +3218,7 @@ Format as a sophisticated taste analysis recommendation. Keep it brief and cultu
             onKeyDown={handleFollowupKeyDown}
             onClick={() => {
               if (!isAuthenticated) {
-                onSignUpClick();
+                onLoginClick();
               }
             }}
             readOnly={!isAuthenticated}
@@ -3946,7 +3946,7 @@ function AppWithRouter({ isSidebarCollapsed, onToggleSidebar, showSignIn, setSho
         />
         <Routes>
           <Route path="/" element={<MainContent darkMode={darkMode} isAuthenticated={isAuthenticated} onSignUpClick={() => setShowSignUpModal(true)} />} />
-                                      <Route path="/search" element={<SearchResultsWithHistory onAddChat={onAddChat} darkMode={darkMode} isSidebarCollapsed={isSidebarCollapsed} onSignUpClick={() => setShowSignUpModal(true)} user={user} isAuthenticated={isAuthenticated} starredUsers={starredUsers} onToggleStarUser={onToggleStarUser} />} />
+                                      <Route path="/search" element={<SearchResultsWithHistory onAddChat={onAddChat} darkMode={darkMode} isSidebarCollapsed={isSidebarCollapsed} onSignUpClick={() => setShowSignUpModal(true)} onLoginClick={() => setShowLoginModal(true)} user={user} isAuthenticated={isAuthenticated} starredUsers={starredUsers} onToggleStarUser={onToggleStarUser} />} />
           <Route path="/connections" element={<ConnectionsPage isSidebarCollapsed={isSidebarCollapsed} onConnectionUpdate={handleConnectionUpdate} user={user} isAuthenticated={isAuthenticated} />} />
         </Routes>
       </div>
@@ -4351,14 +4351,14 @@ function AppWithRouter({ isSidebarCollapsed, onToggleSidebar, showSignIn, setSho
 }
 
 // Wrap SearchResults to add to chat history
-function SearchResultsWithHistory({ onAddChat, darkMode, isSidebarCollapsed, onSignUpClick, user, isAuthenticated, starredUsers = [], onToggleStarUser }) {
+function SearchResultsWithHistory({ onAddChat, darkMode, isSidebarCollapsed, onSignUpClick, onLoginClick, user, isAuthenticated, starredUsers = [], onToggleStarUser }) {
   const location = useLocation();
   const params = new URLSearchParams(location.search);
   const query = params.get('q') || '';
   useEffect(() => {
     if (query) onAddChat(query);
   }, [query, onAddChat]);
-  return <SearchResults darkMode={darkMode} isSidebarCollapsed={isSidebarCollapsed} onSignUpClick={onSignUpClick} user={user} isAuthenticated={isAuthenticated} starredUsers={starredUsers} onToggleStarUser={onToggleStarUser} />;
+  return <SearchResults darkMode={darkMode} isSidebarCollapsed={isSidebarCollapsed} onSignUpClick={onSignUpClick} onLoginClick={onLoginClick} user={user} isAuthenticated={isAuthenticated} starredUsers={starredUsers} onToggleStarUser={onToggleStarUser} />;
 }
 
 function AccuracyDot({ score, person, darkMode, isActive, onHover, onLeave }) {
