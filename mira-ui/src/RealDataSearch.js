@@ -23,10 +23,10 @@ async function callGeminiAPI(prompt) {
     
     console.log('🔑 Using Gemini API key:', GEMINI_API_KEY.substring(0, 10) + '...');
     
-    // Add a small delay to prevent rate limiting
-    await new Promise(resolve => setTimeout(resolve, 100));
+    // Add a longer delay to prevent rate limiting
+    await new Promise(resolve => setTimeout(resolve, 2000));
     
-    const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-pro:generateContent?key=${GEMINI_API_KEY}`, {
+    const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${GEMINI_API_KEY}`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -41,7 +41,7 @@ async function callGeminiAPI(prompt) {
           temperature: 0.7,
           topK: 40,
           topP: 0.95,
-          maxOutputTokens: 1024, // Reduced to prevent rate limits
+          maxOutputTokens: 512, // Further reduced for Flash model
         }
       })
     });
@@ -55,6 +55,7 @@ async function callGeminiAPI(prompt) {
       // If it's a rate limit error, return null to use fallback
       if (response.status === 429) {
         console.log('⚠️ Rate limit hit, using fallback');
+        console.log('💡 Tip: Wait a few minutes before trying again, or consider upgrading your Gemini API plan');
       }
       return null;
     }
@@ -115,16 +116,27 @@ PEOPLE DATA:
 ${JSON.stringify(peopleData, null, 2)}
 
 TASK:
-1. Analyze each person's relevance to the search query by examining their quotes
-2. Only include people whose quotes actually demonstrate involvement or expertise in the search topic
-3. Rank people from most relevant to least relevant (1-10 scale)
-4. Generate 3-5 related keywords that match the query
-5. Provide a brief explanation of why the top matches are relevant
+1. Analyze each person's relevance to the search query by examining their quotes in detail
+2. STRICT RELEVANCE: Only include people whose quotes contain specific keywords, concepts, or clear evidence of expertise in the search topic
+3. Look for direct mentions, technical terms, project names, tools, frameworks, or domain-specific language
+4. Rank people from most relevant to least relevant (1-10 scale) based on quote quality and frequency of relevant content
+5. Generate exactly 3 professional keywords that capture the search intent
+6. Provide a concise explanation (max 15 words)
 
-IMPORTANT: Be strict about relevance. If someone's quotes don't clearly show involvement in the search topic, don't include them. For example:
-- For "AI and machine learning": Only include people who tweet about AI, ML, algorithms, data science, etc.
-- For "open source": Only include people who tweet about coding, GitHub, software development, etc.
-- For "business": Only include people who tweet about entrepreneurship, startups, companies, etc.
+RELEVANCE CRITERIA (flexible but meaningful):
+- For "AI/ML": Look for AI, machine learning, algorithms, data science, neural networks, automation, or tech innovation
+- For "open source": Look for GitHub, coding, programming, development, software, projects, or technical discussions
+- For "engineering": Look for technical work, building, development, systems, coding, or engineering discussions
+- For "business": Look for entrepreneurship, startups, business strategy, leadership, companies, or professional growth
+
+SCORING GUIDE:
+- 8-10: Multiple relevant quotes showing clear expertise or involvement
+- 6-7: Several quotes with good relevance to the search topic
+- 4-5: Some relevant content or related discussions
+- 2-3: Limited relevance but some connection to the topic
+- 0-1: No meaningful relevance
+
+Return people with scores 4 and above. Prioritize higher scores but include those with meaningful connections.
 
 KEYWORDS: Generate exactly 3 smart, contextual keywords that capture the essence of what the user is looking for. These should be professional, relevant terms that would appear as labels on profile cards. For example:
 - For "People involved in AI and machine learning": ["AI", "Machine Learning", "Algorithms"]
@@ -135,18 +147,20 @@ KEYWORDS: Generate exactly 3 smart, contextual keywords that capture the essence
 
 Avoid generic words like "People", "Involved", "Machine" (alone), "Learning" (alone). Focus on professional, domain-specific terms.
 
-OUTPUT FORMAT (JSON only):
+OUTPUT FORMAT (JSON only - no extra text before or after):
 {
   "ranked_people": [
     {
       "id": "person_id",
       "relevance_score": 9,
-      "explanation": "Why this person is relevant (be specific about their quotes)"
+      "explanation": "Why this person is relevant"
     }
   ],
   "keywords": ["keyword1", "keyword2", "keyword3"],
-  "overall_explanation": "Brief explanation of the search results"
+  "overall_explanation": "Brief explanation"
 }
+
+IMPORTANT: Return ONLY valid JSON. No markdown, no explanation, no extra text. Just the JSON object.
 
 Focus on people who are most relevant to the search query. Consider their quotes, type (follower/following/mentioned), and source (twitter/gmail).
 `;
@@ -205,14 +219,14 @@ Focus on people who are most relevant to the search query. Consider their quotes
         return bScore - aScore;
       });
       
-      // Check if we have strong enough connections
+      // Check if we have strong enough connections (balanced threshold for good matches)
       const strongConnections = rankedPeople.filter(person => {
         const score = calculateRelevanceScore(person, queryKeywords, aiTerms, techTerms, businessTerms);
-        return score >= 5; // Minimum score threshold for "strong" connection
+        return score >= 5; // Balanced threshold for "strong" connection
       });
       
-      // If not enough strong connections, provide helpful message
-      if (strongConnections.length < 3) {
+      // If not enough strong connections, provide helpful message (reduced threshold)
+      if (strongConnections.length < 2) {
         const suggestions = generateConnectionSuggestions(query);
         return {
           people: [],
@@ -270,10 +284,27 @@ Focus on people who are most relevant to the search query. Consider their quotes
         fallbackKeywords = ['Network', 'Connections', 'Activity'];
       }
       
+      // Generate contextual explanation for fallback
+      const generateFallbackExplanation = (query, peopleCount) => {
+        const queryLower = query.toLowerCase();
+        
+        if (queryLower.includes('open source') || queryLower.includes('github')) {
+          return `Discovered ${peopleCount} developers and open source contributors from your network.`;
+        } else if (queryLower.includes('ai') || queryLower.includes('machine learning')) {
+          return `Found ${peopleCount} AI and ML professionals with relevant technical expertise.`;
+        } else if (queryLower.includes('engineer') || queryLower.includes('tech')) {
+          return `Located ${peopleCount} engineers and technical professionals in your connections.`;
+        } else if (queryLower.includes('business') || queryLower.includes('startup')) {
+          return `Identified ${peopleCount} business professionals and entrepreneurs from your network.`;
+        } else {
+          return `Found ${peopleCount} relevant professionals matching your search criteria.`;
+        }
+      };
+
       return {
         people: fallbackPeople,
         keywords: fallbackKeywords,
-        explanation: `Found ${fallbackPeople.length} people in your network related to "${query}":`
+        explanation: generateFallbackExplanation(query, fallbackPeople.length)
       };
     }
     
@@ -282,20 +313,118 @@ Focus on people who are most relevant to the search query. Consider their quotes
     // Parse Gemini response
     let parsedResponse;
     try {
+      console.log('🔍 Raw Gemini response:', geminiResponse.substring(0, 500) + '...');
+      
       // Extract JSON from response (Gemini might add extra text)
       const jsonMatch = geminiResponse.match(/\{[\s\S]*\}/);
       if (jsonMatch) {
-        parsedResponse = JSON.parse(jsonMatch[0]);
+        let jsonString = jsonMatch[0];
+        
+        // Try to fix common JSON issues
+        // Remove any trailing commas before closing brackets/braces
+        jsonString = jsonString.replace(/,(\s*[}\]])/g, '$1');
+        
+        // Try to find the last complete JSON object if truncated
+        let lastCompleteJson = jsonString;
+        const openBraces = (jsonString.match(/\{/g) || []).length;
+        const closeBraces = (jsonString.match(/\}/g) || []).length;
+        
+        if (openBraces > closeBraces) {
+          // JSON might be truncated, try to find the last complete part
+          const lastCloseBrace = jsonString.lastIndexOf('}');
+          if (lastCloseBrace > 0) {
+            lastCompleteJson = jsonString.substring(0, lastCloseBrace + 1);
+          }
+        }
+        
+        console.log('🔧 Cleaned JSON:', lastCompleteJson.substring(0, 200) + '...');
+        parsedResponse = JSON.parse(lastCompleteJson);
       } else {
         throw new Error('No JSON found in response');
       }
     } catch (parseError) {
       console.error('Error parsing Gemini response:', parseError);
-      return {
-        people: people.slice(0, 10),
-        keywords: ['network', 'connections', 'people'],
-        explanation: 'Showing your network connections.'
-      };
+      console.log('🔍 Failed to parse response, using intelligent fallback');
+      
+      // Use the same intelligent fallback as when Gemini fails
+      const queryLower = query.toLowerCase();
+      const queryKeywords = queryLower.split(' ').filter(word => word.length > 2);
+      
+      // Define relevant terms for different search categories
+      const aiTerms = ['ai', 'artificial intelligence', 'machine learning', 'ml', 'neural', 'algorithm', 'data science', 'deep learning', 'nlp', 'computer vision', 'robotics', 'automation'];
+      const techTerms = ['engineering', 'developer', 'programming', 'code', 'software', 'tech', 'technology', 'open source', 'github', 'startup', 'innovation'];
+      const businessTerms = ['business', 'entrepreneur', 'founder', 'ceo', 'startup', 'company', 'product', 'market'];
+      
+      const relevantPeople = people.filter(person => {
+        if (person.quotes && person.quotes.length > 0) {
+          const quoteText = person.quotes.join(' ').toLowerCase();
+          
+          // Check for exact keyword matches
+          const keywordMatches = queryKeywords.filter(keyword => quoteText.includes(keyword)).length;
+          
+          // Check for category-specific terms
+          const hasAITerms = aiTerms.some(term => quoteText.includes(term));
+          const hasTechTerms = techTerms.some(term => quoteText.includes(term));
+          const hasBusinessTerms = businessTerms.some(term => quoteText.includes(term));
+          
+          // Determine if query is AI/ML related
+          const isAISearch = queryKeywords.some(keyword => 
+            aiTerms.some(aiTerm => aiTerm.includes(keyword) || keyword.includes(aiTerm))
+          );
+          
+          // Determine if query is tech related
+          const isTechSearch = queryKeywords.some(keyword => 
+            techTerms.some(techTerm => techTerm.includes(keyword) || keyword.includes(techTerm))
+          );
+          
+          // Return true if there are keyword matches OR if the search category matches the person's content
+          return keywordMatches > 0 || 
+                 (isAISearch && hasAITerms) || 
+                 (isTechSearch && hasTechTerms) ||
+                 (queryKeywords.some(k => k.includes('business')) && hasBusinessTerms);
+        }
+        return false;
+      });
+      
+      // Sort by relevance score
+      const rankedPeople = relevantPeople.sort((a, b) => {
+        const aScore = calculateRelevanceScore(a, queryKeywords, aiTerms, techTerms, businessTerms);
+        const bScore = calculateRelevanceScore(b, queryKeywords, aiTerms, techTerms, businessTerms);
+        return bScore - aScore;
+      });
+      
+      const fallbackPeople = rankedPeople.length > 0 ? rankedPeople.slice(0, 10) : people.slice(0, 10);
+      
+      // Generate smart keywords for open source query
+      let fallbackKeywords = ['Engineering', 'Open Source', 'Building'];
+      if (queryLower.includes('ai') || queryLower.includes('machine learning')) {
+        fallbackKeywords = ['AI', 'Machine Learning', 'Algorithms'];
+      } else if (queryLower.includes('business') || queryLower.includes('entrepreneur')) {
+        fallbackKeywords = ['Business', 'Leadership', 'Strategy'];
+      }
+      
+             // Generate contextual explanation for JSON parsing fallback
+       const generateParsingFallbackExplanation = (query, peopleCount) => {
+         const queryLower = query.toLowerCase();
+         
+         if (queryLower.includes('open source') || queryLower.includes('github')) {
+           return `Found ${peopleCount} open source developers and contributors in your network.`;
+         } else if (queryLower.includes('ai') || queryLower.includes('machine learning')) {
+           return `Discovered ${peopleCount} AI and ML professionals with technical expertise.`;
+         } else if (queryLower.includes('engineer') || queryLower.includes('tech')) {
+           return `Located ${peopleCount} engineers and technical professionals from your connections.`;
+         } else if (queryLower.includes('business') || queryLower.includes('startup')) {
+           return `Identified ${peopleCount} business leaders and entrepreneurs in your network.`;
+         } else {
+           return `Found ${peopleCount} relevant professionals matching your search.`;
+         }
+       };
+
+       return {
+         people: fallbackPeople,
+         keywords: fallbackKeywords,
+         explanation: generateParsingFallbackExplanation(query, fallbackPeople.length)
+       };
     }
 
     // Map ranked results back to full people data
@@ -311,11 +440,11 @@ Focus on people who are most relevant to the search query. Consider their quotes
       .filter(Boolean)
       .slice(0, 10); // Limit to top 10
 
-    // Check if we have strong enough connections (relevance score >= 7 for Gemini results)
-    const strongConnections = rankedPeople.filter(person => person.relevance_score >= 7);
+    // Check if we have strong enough connections (relevance score >= 4 for Gemini results)
+    const strongConnections = rankedPeople.filter(person => person.relevance_score >= 4);
     
-    // If not enough strong connections, provide helpful message
-    if (strongConnections.length < 3) {
+    // If not enough strong connections, provide helpful message (reduced threshold)
+    if (strongConnections.length < 2) {
       const suggestions = generateConnectionSuggestions(query);
       return {
         people: [],
@@ -325,10 +454,31 @@ Focus on people who are most relevant to the search query. Consider their quotes
       };
     }
 
+    // Generate a more specific explanation based on the query and results
+    const generateSmartExplanation = (query, peopleCount) => {
+      const queryLower = query.toLowerCase();
+      
+      if (queryLower.includes('ai') || queryLower.includes('machine learning') || queryLower.includes('artificial intelligence')) {
+        return `Found ${peopleCount} AI and ML professionals in your network with relevant expertise.`;
+      } else if (queryLower.includes('open source') || queryLower.includes('github') || queryLower.includes('developer')) {
+        return `Discovered ${peopleCount} open source contributors and developers from your connections.`;
+      } else if (queryLower.includes('engineer') || queryLower.includes('engineering') || queryLower.includes('tech')) {
+        return `Located ${peopleCount} engineers and technical professionals in your network.`;
+      } else if (queryLower.includes('business') || queryLower.includes('entrepreneur') || queryLower.includes('startup')) {
+        return `Identified ${peopleCount} business leaders and entrepreneurs from your connections.`;
+      } else if (queryLower.includes('design') || queryLower.includes('creative') || queryLower.includes('ui') || queryLower.includes('ux')) {
+        return `Found ${peopleCount} designers and creative professionals in your network.`;
+      } else if (queryLower.includes('research') || queryLower.includes('science') || queryLower.includes('academic')) {
+        return `Discovered ${peopleCount} researchers and academics with relevant expertise.`;
+      } else {
+        return `Found ${peopleCount} relevant professionals in your network for "${query.substring(0, 30)}${query.length > 30 ? '...' : ''}".`;
+      }
+    };
+
     return {
       people: rankedPeople,
       keywords: parsedResponse.keywords || ['network', 'connections', 'people'],
-      explanation: parsedResponse.overall_explanation || 'Showing relevant people from your network.'
+      explanation: parsedResponse.overall_explanation || generateSmartExplanation(query, rankedPeople.length)
     };
 
   } catch (error) {
@@ -383,26 +533,56 @@ function calculateRelevanceScore(person, queryKeywords, aiTerms, techTerms, busi
   const quoteText = person.quotes.join(' ').toLowerCase();
   let score = 0;
   
-  // Exact keyword matches (highest weight)
+  // Exact keyword matches (high weight but not too restrictive)
   const keywordMatches = queryKeywords.filter(keyword => quoteText.includes(keyword)).length;
-  score += keywordMatches * 10;
+  score += keywordMatches * 8;
   
-  // Category-specific term matches
+  // Partial keyword matches (if quote contains part of the keyword)
+  queryKeywords.forEach(keyword => {
+    if (keyword.length > 4) {
+      const partialKeyword = keyword.substring(0, Math.floor(keyword.length * 0.7));
+      if (quoteText.includes(partialKeyword)) {
+        score += 3;
+      }
+    }
+  });
+  
+  // Category-specific term matches (more generous)
   const aiMatches = aiTerms.filter(term => quoteText.includes(term)).length;
   const techMatches = techTerms.filter(term => quoteText.includes(term)).length;
   const businessMatches = businessTerms.filter(term => quoteText.includes(term)).length;
   
-  score += aiMatches * 5;
-  score += techMatches * 5;
-  score += businessMatches * 3;
+  score += aiMatches * 6;
+  score += techMatches * 6;
+  score += businessMatches * 4;
   
-  // Bonus for having more quotes (indicates more activity)
-  score += Math.min(person.quotes.length * 2, 10);
+  // Related terms bonus (look for synonyms and related concepts)
+  const relatedTerms = {
+    'engineer': ['developer', 'programmer', 'coder', 'software', 'technical'],
+    'open': ['github', 'code', 'project', 'repository', 'development'],
+    'source': ['github', 'code', 'project', 'repository', 'development'],
+    'ai': ['artificial', 'intelligence', 'machine', 'learning', 'algorithm', 'neural'],
+    'business': ['startup', 'company', 'entrepreneur', 'founder', 'leadership']
+  };
   
-  // Bonus for following status
-  if (person.following) score += 3;
+  queryKeywords.forEach(keyword => {
+    if (relatedTerms[keyword]) {
+      const relatedMatches = relatedTerms[keyword].filter(term => quoteText.includes(term)).length;
+      score += relatedMatches * 3;
+    }
+  });
   
-  return score;
+  // Bonus for having more quotes (indicates more activity and content)
+  score += Math.min(person.quotes.length * 1.5, 8);
+  
+  // Bonus for following status (they're in your network)
+  if (person.following) score += 2;
+  
+  // Bonus for longer quotes (more content to analyze)
+  const avgQuoteLength = person.quotes.reduce((sum, quote) => sum + quote.length, 0) / person.quotes.length;
+  if (avgQuoteLength > 100) score += 2;
+  
+  return Math.round(score);
 }
 
 // Convert Supabase data to the format expected by PeopleCardList
@@ -681,7 +861,7 @@ export function useRealDataSearch(query, userEmail = 'demo@mira.com') {
             noStrongConnections: false
           });
         });
-    }, 500); // 500ms debounce
+    }, 1500); // 1.5s debounce to reduce API calls
 
     return () => clearTimeout(timeoutId);
   }, [query, userEmail]);
