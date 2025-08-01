@@ -1,0 +1,7 @@
+{
+  "buildCommand": "cd mira-ui && npm install && npm run build",
+  "outputDirectory": "mira-ui/build",
+  "framework": "create-react-app",
+  "installCommand": "cd mira-ui && npm install",
+  "devCommand": "cd mira-ui && npm start"
+} 
