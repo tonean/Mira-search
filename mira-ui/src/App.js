@@ -1639,6 +1639,10 @@ Format as a sophisticated taste analysis recommendation. Keep it brief and cultu
     setEditValue(query);
   };
   const handleFollowupInput = (e) => {
+    if (!isAuthenticated) {
+      onSignUpClick();
+      return;
+    }
     setFollowupValue(e.target.value);
     // Auto-resize textarea
     const textarea = e.target;
@@ -1674,11 +1678,19 @@ Format as a sophisticated taste analysis recommendation. Keep it brief and cultu
   const handleFollowupKeyDown = (e) => {
     if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault();
+      if (!isAuthenticated) {
+        onSignUpClick();
+        return;
+      }
       handleFollowupSubmit();
     }
   };
 
   const handleFollowupSubmit = () => {
+    if (!isAuthenticated) {
+      onSignUpClick();
+      return;
+    }
     if (followupValue.trim()) {
       // Special case for Deedy connection question
       if (selectedPerson && 
@@ -3173,11 +3185,16 @@ Format as a sophisticated taste analysis recommendation. Keep it brief and cultu
         }
         style={{ position: 'fixed', left: 80, right: 0, bottom: 40, display: 'flex', justifyContent: 'center', zIndex: 100 }}
       >
-        <div className="input-box" style={{ minWidth: 300, maxWidth: 700, width: '100%', margin: 0, padding: 0, boxShadow: '0 2px 8px var(--input-box-shadow)', border: '1.5px solid var(--input-border)', borderRadius: 14, background: 'var(--input-bg)', display: 'flex', flexDirection: 'column', gap: 0, minHeight: 38 }}>
+        <div className="input-box" onClick={() => {
+          if (!isAuthenticated) {
+            onSignUpClick();
+            return;
+          }
+        }} style={{ minWidth: 300, maxWidth: 700, width: '100%', margin: 0, padding: 0, boxShadow: '0 2px 8px var(--input-box-shadow)', border: '1.5px solid var(--input-border)', borderRadius: 14, background: 'var(--input-bg)', display: 'flex', flexDirection: 'column', gap: 0, minHeight: 38 }}>
           <textarea
             ref={followupRef}
             className="search-input"
-            placeholder="Ask a follow-up..."
+            placeholder={isAuthenticated ? "Ask a follow-up..." : "Sign in to ask follow-up questions..."}
             value={followupValue}
             style={{
               border: 'none',
@@ -3195,9 +3212,16 @@ Format as a sophisticated taste analysis recommendation. Keep it brief and cultu
               minHeight: 38,
               boxSizing: 'border-box',
               color: '#222',
+              cursor: isAuthenticated ? 'text' : 'pointer'
             }}
             onInput={handleFollowupInput}
             onKeyDown={handleFollowupKeyDown}
+            onClick={() => {
+              if (!isAuthenticated) {
+                onSignUpClick();
+              }
+            }}
+            readOnly={!isAuthenticated}
             rows="1"
           />
           <div style={{ display: 'flex', alignItems: 'center', marginTop: 0, paddingTop: 4, marginBottom: 10 }}>
