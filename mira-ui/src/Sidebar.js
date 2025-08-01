@@ -3,7 +3,7 @@ import ReactDOM from "react-dom";
 import { useNavigate } from 'react-router-dom';
 import "./App.css";
 
-export default function Sidebar({ isCollapsed, onToggleCollapse, chatHistory = [], onNavigateChat, onDeleteChat, darkMode = false, connectedServices = [] }) {
+export default function Sidebar({ isCollapsed, onToggleCollapse, chatHistory = [], onNavigateChat, onDeleteChat, darkMode = false, connectedServices = [], starredUsers = [], onToggleStarUser }) {
   // --- State for chat logic (keep as before) ---
   const [hoveredIdx, setHoveredIdx] = useState(null);
   const [showDeleteIdx, setShowDeleteIdx] = useState(null);
@@ -42,6 +42,11 @@ export default function Sidebar({ isCollapsed, onToggleCollapse, chatHistory = [
   // --- New: Track which view is selected in the dropdown ---
   const [selectedView, setSelectedView] = useState('Regular View');
 
+  // --- New: Zoom level for Node View ---
+  const [zoomLevel, setZoomLevel] = useState(1.0);
+
+
+
   // --- Main Sidebar Card ---
   return (
     <div 
@@ -71,7 +76,7 @@ export default function Sidebar({ isCollapsed, onToggleCollapse, chatHistory = [
         <span style={{ fontSize: 22, color: darkMode ? 'var(--text)' : '#222', fontWeight: 700, marginRight: 6 }}>
           <svg width="22" height="22" viewBox="0 0 28 28" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="14" cy="14" r="12" stroke={darkMode ? 'var(--text)' : '#222'} strokeWidth="2.2" fill={darkMode ? 'var(--card-bg)' : '#fff'}/><circle cx="14" cy="14" r="5.5" stroke={darkMode ? 'var(--text)' : '#222'} strokeWidth="2.2" fill={darkMode ? 'var(--card-bg)' : '#fff'}/></svg>
         </span>
-        {/* Regular View dropdown right-aligned */}
+        {/* View Mode dropdown right-aligned */}
         <div style={{ marginLeft: 'auto', position: 'relative' }}>
           <button
             style={{ 
@@ -88,46 +93,138 @@ export default function Sidebar({ isCollapsed, onToggleCollapse, chatHistory = [
             }}
             onClick={() => setPlayDropdownOpen(v => !v)}
           >
-            <svg width="16" height="16" viewBox="0 0 20 20" fill="none"><rect x="3" y="3" width="14" height="14" rx="3" stroke={darkMode ? 'var(--text)' : '#222'} strokeWidth="1.5" fill={darkMode ? 'var(--card-bg)' : '#fff'}/><rect x="7.5" y="6.5" width="5" height="7" rx="1.5" fill={darkMode ? 'var(--text)' : '#222'}/></svg>
+            {selectedView === 'Regular View' ? (
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+                <path d="M3 3h18v18H3V3z" stroke={darkMode ? 'var(--text)' : '#222'} strokeWidth="2" fill="none"/>
+                <path d="M7 7h10v4H7V7z" fill={darkMode ? 'var(--text)' : '#222'}/>
+                <path d="M7 13h6v3H7v-3z" fill={darkMode ? 'var(--text)' : '#222'}/>
+              </svg>
+            ) : (
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+                <circle cx="12" cy="12" r="3" stroke={darkMode ? 'var(--text)' : '#222'} strokeWidth="2" fill="none"/>
+                <circle cx="6" cy="6" r="2" stroke={darkMode ? 'var(--text)' : '#222'} strokeWidth="2" fill="none"/>
+                <circle cx="18" cy="6" r="2" stroke={darkMode ? 'var(--text)' : '#222'} strokeWidth="2" fill="none"/>
+                <circle cx="6" cy="18" r="2" stroke={darkMode ? 'var(--text)' : '#222'} strokeWidth="2" fill="none"/>
+                <circle cx="18" cy="18" r="2" stroke={darkMode ? 'var(--text)' : '#222'} strokeWidth="2" fill="none"/>
+                <line x1="12" y1="9" x2="6" y2="6" stroke={darkMode ? 'var(--text)' : '#222'} strokeWidth="1.5"/>
+                <line x1="12" y1="9" x2="18" y2="6" stroke={darkMode ? 'var(--text)' : '#222'} strokeWidth="1.5"/>
+                <line x1="12" y1="15" x2="6" y2="18" stroke={darkMode ? 'var(--text)' : '#222'} strokeWidth="1.5"/>
+                <line x1="12" y1="15" x2="18" y2="18" stroke={darkMode ? 'var(--text)' : '#222'} strokeWidth="1.5"/>
+              </svg>
+            )}
             <span style={{ marginLeft: 5, marginRight: 2 }}>{selectedView}</span>
             <svg width="12" height="12" viewBox="0 0 20 20" fill="none"><path d="M7 8l3 3 3-3" stroke={darkMode ? 'var(--text)' : '#222'} strokeWidth="1.5" strokeLinecap="round"/></svg>
           </button>
-                      {playDropdownOpen && (
-              <div style={{ 
-                position: 'absolute', 
-                top: 28, 
-                left: 0, 
-                background: darkMode ? 'var(--card-bg)' : '#fff', 
-                border: `1px solid ${darkMode ? 'var(--card-border)' : '#ececec'}`, 
-                borderRadius: 7, 
-                boxShadow: darkMode ? '0 2px 8px #0004' : '0 2px 8px #0002', 
-                minWidth: 110, 
-                zIndex: 10, 
-                padding: 6 
-              }}>
-                <div style={{ 
-                  padding: 4, 
+          {playDropdownOpen && (
+            <div style={{ 
+              position: 'absolute', 
+              top: 28, 
+              left: 0, 
+              background: darkMode ? 'var(--card-bg)' : '#fff', 
+              border: `1px solid ${darkMode ? 'var(--card-border)' : '#ececec'}`, 
+              borderRadius: 12, 
+              boxShadow: darkMode ? '0 4px 16px #0004' : '0 4px 16px #0002', 
+              minWidth: 220, 
+              zIndex: 10, 
+              padding: 8 
+            }}>
+              {/* Regular View Option */}
+              <div 
+                style={{ 
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '12px',
+                  padding: '12px 16px', 
                   color: darkMode ? 'var(--text)' : '#222', 
-                  fontSize: '0.95rem', 
+                  fontSize: '0.85rem', 
                   cursor: 'pointer', 
-                  fontWeight: selectedView === 'Regular View' ? 600 : 400 
-                }} onClick={() => { setSelectedView('Regular View'); setPlayDropdownOpen(false); }}>Regular View</div>
-                <div style={{ 
-                  padding: 4, 
-                  color: darkMode ? 'var(--text)' : '#222', 
-                  fontSize: '0.95rem', 
-                  cursor: 'pointer', 
-                  fontWeight: selectedView === 'Node View' ? 600 : 400 
-                }} onClick={() => { setSelectedView('Node View'); setPlayDropdownOpen(false); }}>Node View</div>
-                <div style={{ 
-                  padding: 4, 
-                  color: darkMode ? 'var(--text)' : '#222', 
-                  fontSize: '0.95rem', 
-                  cursor: 'pointer', 
-                  fontWeight: selectedView === 'Tree View' ? 600 : 400 
-                }} onClick={() => { setSelectedView('Tree View'); setPlayDropdownOpen(false); }}>Tree View</div>
+                  fontWeight: selectedView === 'Regular View' ? 600 : 500,
+                  borderRadius: 8,
+                  background: selectedView === 'Regular View' ? (darkMode ? 'var(--input-action-active-bg)' : '#f5f5f5') : 'transparent',
+                  transition: 'background 0.15s ease'
+                }} 
+                onClick={() => { setSelectedView('Regular View'); setPlayDropdownOpen(false); }}
+                onMouseEnter={(e) => e.target.style.background = darkMode ? 'var(--input-action-active-bg)' : '#f5f5f5'}
+                onMouseLeave={(e) => e.target.style.background = selectedView === 'Regular View' ? (darkMode ? 'var(--input-action-active-bg)' : '#f5f5f5') : 'transparent'}
+              >
+                <div style={{
+                  width: 32,
+                  height: 32,
+                  borderRadius: 8,
+                  background: '#000',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  flexShrink: 0
+                }}>
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+                    <path d="M3 3h18v18H3V3z" stroke="#fff" strokeWidth="2" fill="none"/>
+                    <path d="M7 7h10v4H7V7z" fill="#fff"/>
+                    <path d="M7 13h6v3H7v-3z" fill="#fff"/>
+                  </svg>
+                </div>
+                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start' }}>
+                  <span style={{ fontWeight: selectedView === 'Regular View' ? 600 : 500, color: darkMode ? 'var(--text)' : '#222' }}>
+                    Regular View
+                  </span>
+                  <span style={{ fontSize: '0.75rem', color: darkMode ? 'var(--text-muted)' : '#888', marginTop: '2px', fontWeight: 400 }}>
+                    Standard interface
+                  </span>
+                </div>
               </div>
-            )}
+              
+              {/* Node View Option */}
+              <div 
+                style={{ 
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '12px',
+                  padding: '12px 16px', 
+                  color: darkMode ? 'var(--text)' : '#222', 
+                  fontSize: '0.85rem', 
+                  cursor: 'pointer', 
+                  fontWeight: selectedView === 'Node View' ? 600 : 500,
+                  borderRadius: 8,
+                  background: selectedView === 'Node View' ? (darkMode ? 'var(--input-action-active-bg)' : '#f5f5f5') : 'transparent',
+                  transition: 'background 0.15s ease'
+                }} 
+                onClick={() => { setSelectedView('Node View'); setPlayDropdownOpen(false); }}
+                onMouseEnter={(e) => e.target.style.background = darkMode ? 'var(--input-action-active-bg)' : '#f5f5f5'}
+                onMouseLeave={(e) => e.target.style.background = selectedView === 'Node View' ? (darkMode ? 'var(--input-action-active-bg)' : '#f5f5f5') : 'transparent'}
+              >
+                <div style={{
+                  width: 32,
+                  height: 32,
+                  borderRadius: 8,
+                  background: '#000',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  flexShrink: 0
+                }}>
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+                    <circle cx="12" cy="12" r="3" fill="#fff"/>
+                    <circle cx="6" cy="6" r="2" fill="#fff"/>
+                    <circle cx="18" cy="6" r="2" fill="#fff"/>
+                    <circle cx="6" cy="18" r="2" fill="#fff"/>
+                    <circle cx="18" cy="18" r="2" fill="#fff"/>
+                    <line x1="12" y1="9" x2="6" y2="6" stroke="#fff" strokeWidth="1.5"/>
+                    <line x1="12" y1="9" x2="18" y2="6" stroke="#fff" strokeWidth="1.5"/>
+                    <line x1="12" y1="15" x2="6" y2="18" stroke="#fff" strokeWidth="1.5"/>
+                    <line x1="12" y1="15" x2="18" y2="18" stroke="#fff" strokeWidth="1.5"/>
+                  </svg>
+                </div>
+                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start' }}>
+                  <span style={{ fontWeight: selectedView === 'Node View' ? 600 : 500, color: darkMode ? 'var(--text)' : '#222' }}>
+                    Node View
+                  </span>
+                  <span style={{ fontSize: '0.75rem', color: darkMode ? 'var(--text-muted)' : '#888', marginTop: '2px', fontWeight: 400 }}>
+                    Network visualization
+                  </span>
+                </div>
+              </div>
+            </div>
+          )}
         </div>
           </div>
 
@@ -440,137 +537,139 @@ export default function Sidebar({ isCollapsed, onToggleCollapse, chatHistory = [
         </div>
       )}
       {selectedView === 'Node View' && (
-        <div style={{ padding: '0 12px 0 12px', marginTop: 0 }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 4 }}>
-            <button
-              style={{ 
-                flex: 1, 
-                background: darkMode ? 'var(--primary)' : '#222', 
-                color: darkMode ? 'var(--primary-contrast)' : '#fff', 
-                border: 'none', 
-                borderRadius: 10, 
-                padding: '7px 0', 
-                fontWeight: 500, 
-                fontSize: '0.97rem', 
-                cursor: 'pointer', 
-                transition: 'background 0.15s' 
-              }}
-            >Node View</button>
-            <button
-              style={{ 
-                flex: 1, 
-                background: darkMode ? 'var(--input-action-active-bg)' : '#f5f5f5', 
-                color: darkMode ? 'var(--text)' : '#222', 
-                border: 'none', 
-                borderRadius: 10, 
-                padding: '7px 0', 
-                fontWeight: 500, 
-                fontSize: '0.97rem', 
-                cursor: 'pointer', 
-                transition: 'background 0.15s' 
-              }}
-            >Tree View</button>
-            <button style={{ 
-              background: darkMode ? 'var(--input-action-active-bg)' : '#f5f5f5', 
-              border: 'none', 
-              borderRadius: 9, 
-              width: 28, 
-              height: 28, 
-              display: 'flex', 
-              alignItems: 'center', 
-              justifyContent: 'center', 
-              marginLeft: 6, 
-              cursor: 'pointer', 
-              fontSize: 18, 
-              color: darkMode ? 'var(--text)' : '#222' 
-            }}>
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke={darkMode ? 'var(--text)' : '#222'} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-            </button>
-            <button style={{ 
-              background: darkMode ? 'var(--card-bg)' : '#fff', 
-              border: `1px solid ${darkMode ? 'var(--card-border)' : '#ececec'}`, 
-              borderRadius: 7, 
-              width: 22, 
-              height: 22, 
-              display: 'flex', 
-              alignItems: 'center', 
-              justifyContent: 'center', 
-              color: darkMode ? 'var(--text)' : '#222', 
-              fontSize: 14, 
-              marginBottom: 2, 
-              cursor: 'pointer' 
-            }}>+</button>
-            <button style={{ 
-              background: darkMode ? 'var(--card-bg)' : '#fff', 
-              border: `1px solid ${darkMode ? 'var(--card-border)' : '#ececec'}`, 
-              borderRadius: 7, 
-              width: 22, 
-              height: 22, 
-              display: 'flex', 
-              alignItems: 'center', 
-              justifyContent: 'center', 
-              color: darkMode ? 'var(--text)' : '#222', 
-              fontSize: 14, 
-              marginBottom: 2, 
-              cursor: 'pointer' 
-            }}>-</button>
-            <button style={{ 
-              background: darkMode ? 'var(--card-bg)' : '#fff', 
-              border: `1px solid ${darkMode ? 'var(--card-border)' : '#ececec'}`, 
-              borderRadius: 7, 
-              width: 22, 
-              height: 22, 
-              display: 'flex', 
-              alignItems: 'center', 
-              justifyContent: 'center', 
-              color: darkMode ? 'var(--text)' : '#222', 
-              fontSize: 12, 
-              cursor: 'pointer' 
-            }}>
-              <svg width="12" height="12" viewBox="0 0 20 20" fill="none"><path d="M4 10h12M10 4v12" stroke={darkMode ? 'var(--text)' : '#222'} strokeWidth="1.5" strokeLinecap="round"/></svg>
-            </button>
-            <button style={{ 
-              background: darkMode ? 'var(--card-bg)' : '#fff', 
-              border: `1px solid ${darkMode ? 'var(--card-border)' : '#ececec'}`, 
-              borderRadius: 7, 
-              width: 24, 
-              height: 24, 
-              display: 'flex', 
-              alignItems: 'center', 
-              justifyContent: 'center', 
-              color: darkMode ? 'var(--text)' : '#222', 
-              fontSize: 12, 
-              cursor: 'pointer', 
-              zIndex: 2 
-            }}>
-              <svg width="12" height="12" viewBox="0 0 20 20" fill="none"><path d="M4 4h4M4 4v4M16 16h-4M16 16v-4" stroke={darkMode ? 'var(--text)' : '#222'} strokeWidth="1.5" strokeLinecap="round"/></svg>
-            </button>
-          </div>
-          {/* Welcome card at the top */}
-          <div style={{ 
-            background: darkMode ? 'var(--card-bg)' : '#fff', 
-            border: `2px solid ${darkMode ? 'var(--card-border)' : '#ececec'}`, 
-            borderRadius: 10, 
-            padding: '10px 10px', 
-            fontSize: '1.05rem', 
-            fontWeight: 600, 
-            color: darkMode ? 'var(--text)' : '#222', 
-            boxShadow: darkMode ? '0 2px 8px #0003' : '0 2px 8px #0001', 
-            marginBottom: 4, 
-            marginTop: 0, 
-            textAlign: 'center' 
-          }}>
-            Welcome!
-          </div>
+        <div style={{ flex: 1, display: 'flex', flexDirection: 'column', padding: '0 12px' }}>
         </div>
       )}
 
-      {/* BOTTOM: grid area and controls, but only show controls in Node View */}
+      {/* BOTTOM: grid area for Node View */}
       <div style={{ marginTop: 'auto', width: '100%' }}>
         {selectedView === 'Node View' && (
-          <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'flex-start', minHeight: 80, position: 'relative', marginTop: 0, marginBottom: 0 }}>
-            <div style={{ position: 'absolute', inset: 0, display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gridTemplateRows: 'repeat(10, 1fr)', pointerEvents: 'none', zIndex: 0 }}>
-              {gridDots}
+          <div 
+            style={{ 
+              flex: 1, 
+              display: 'flex', 
+              flexDirection: 'column', 
+              alignItems: 'center', 
+              justifyContent: 'center', 
+              minHeight: 300, 
+              position: 'relative', 
+              overflow: 'hidden',
+              margin: '12px 12px 120px 12px',
+              borderRadius: 12,
+              background: '#f5f5f5',
+              cursor: 'grab'
+            }}
+            onWheel={(e) => {
+              e.preventDefault();
+              const delta = e.deltaY > 0 ? -0.1 : 0.1;
+              setZoomLevel(prev => Math.max(0.5, Math.min(3, prev + delta)));
+            }}
+          >
+            <div style={{ 
+              display: 'grid', 
+              gridTemplateColumns: 'repeat(7, 1fr)', 
+              gridTemplateRows: 'repeat(10, 1fr)', 
+              transform: `scale(${zoomLevel})`,
+              transition: 'transform 0.1s ease',
+              pointerEvents: 'none',
+              position: 'relative'
+            }}>
+              {gridDots.map((dot, index) => (
+                <div key={index} style={{ 
+                  width: 4, 
+                  height: 4, 
+                  borderRadius: '50%', 
+                  background: darkMode ? 'var(--text-muted)' : '#cfd2d6', 
+                  opacity: darkMode ? 0.4 : 0.6, 
+                  margin: 18,
+                  transition: 'all 0.1s ease'
+                }} />
+              ))}
+              
+              {/* Starred User Names */}
+              {starredUsers.map((user, index) => (
+                <div 
+                  key={user.name}
+                  style={{
+                    position: 'absolute',
+                    left: `${20 + (index * 60)}%`,
+                    top: `${30 + (index * 40)}%`,
+                    background: '#333',
+                    color: '#fff',
+                    padding: '6px 12px',
+                    borderRadius: 16,
+                    fontSize: '0.8rem',
+                    fontWeight: 500,
+                    whiteSpace: 'nowrap',
+                    boxShadow: '0 2px 8px rgba(0,0,0,0.2)',
+                    pointerEvents: 'auto',
+                    cursor: 'pointer',
+                    transition: 'all 0.2s ease',
+                    zIndex: 10
+                  }}
+                  onMouseEnter={(e) => {
+                    e.target.style.transform = 'scale(1.05)';
+                    e.target.style.background = '#444';
+                  }}
+                  onMouseLeave={(e) => {
+                    e.target.style.transform = 'scale(1)';
+                    e.target.style.background = '#333';
+                  }}
+                >
+                  {user.name}
+                </div>
+              ))}
+            </div>
+            
+            {/* Zoom Controls - Bottom Right */}
+            <div style={{ 
+              position: 'absolute', 
+              bottom: 64, 
+              right: 12, 
+              display: 'flex', 
+              flexDirection: 'column', 
+              gap: 6 
+            }}>
+              <button 
+                onClick={() => setZoomLevel(prev => Math.min(prev + 0.2, 3))}
+                style={{ 
+                  background: darkMode ? 'var(--card-bg)' : '#fff', 
+                  border: `1px solid ${darkMode ? 'var(--card-border)' : '#ddd'}`, 
+                  borderRadius: 6, 
+                  width: 28, 
+                  height: 28, 
+                  display: 'flex', 
+                  alignItems: 'center', 
+                  justifyContent: 'center', 
+                  color: darkMode ? 'var(--text)' : '#333', 
+                  fontSize: 14, 
+                  cursor: 'pointer',
+                  transition: 'all 0.15s ease',
+                  boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
+                }}
+                onMouseEnter={(e) => e.target.style.background = darkMode ? 'var(--input-action-active-bg)' : '#f0f0f0'}
+                onMouseLeave={(e) => e.target.style.background = darkMode ? 'var(--card-bg)' : '#fff'}
+              >+</button>
+              <button 
+                onClick={() => setZoomLevel(prev => Math.max(prev - 0.2, 0.5))}
+                style={{ 
+                  background: darkMode ? 'var(--card-bg)' : '#fff', 
+                  border: `1px solid ${darkMode ? 'var(--card-border)' : '#ddd'}`, 
+                  borderRadius: 6, 
+                  width: 28, 
+                  height: 28, 
+                  display: 'flex', 
+                  alignItems: 'center', 
+                  justifyContent: 'center', 
+                  color: darkMode ? 'var(--text)' : '#333', 
+                  fontSize: 14, 
+                  cursor: 'pointer',
+                  transition: 'all 0.15s ease',
+                  boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
+                }}
+                onMouseEnter={(e) => e.target.style.background = darkMode ? 'var(--input-action-active-bg)' : '#f0f0f0'}
+                onMouseLeave={(e) => e.target.style.background = darkMode ? 'var(--card-bg)' : '#fff'}
+              >−</button>
             </div>
           </div>
         )}
